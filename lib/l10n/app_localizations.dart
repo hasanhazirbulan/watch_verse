@@ -1,0 +1,2078 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_en.dart';
+import 'app_localizations_tr.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'l10n/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
+
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('tr'),
+  ];
+
+  /// App name shown on the login header
+  ///
+  /// In en, this message translates to:
+  /// **'WatchVerse'**
+  String get appTitle;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track the movies & shows you love'**
+  String get loginSubtitle;
+
+  /// No description provided for @emailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get emailHint;
+
+  /// No description provided for @emailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email'**
+  String get emailRequired;
+
+  /// No description provided for @emailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get emailInvalid;
+
+  /// No description provided for @passwordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordHint;
+
+  /// No description provided for @passwordRequiredLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your password'**
+  String get passwordRequiredLogin;
+
+  /// No description provided for @logIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Log In'**
+  String get logIn;
+
+  /// No description provided for @continueAsGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as guest'**
+  String get continueAsGuest;
+
+  /// No description provided for @noAccountPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account?'**
+  String get noAccountPrompt;
+
+  /// No description provided for @register.
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get register;
+
+  /// No description provided for @errorUserNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No user found for this email.'**
+  String get errorUserNotFound;
+
+  /// No description provided for @errorWrongPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect email or password.'**
+  String get errorWrongPassword;
+
+  /// No description provided for @errorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred.'**
+  String get errorGeneric;
+
+  /// No description provided for @errorSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not sign in: {error}'**
+  String errorSignIn(String error);
+
+  /// No description provided for @createAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get createAccountTitle;
+
+  /// No description provided for @createAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join WatchVerse to start tracking'**
+  String get createAccountSubtitle;
+
+  /// No description provided for @usernameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get usernameHint;
+
+  /// No description provided for @usernameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a username'**
+  String get usernameRequired;
+
+  /// No description provided for @confirmPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get confirmPasswordHint;
+
+  /// No description provided for @passwordRequiredRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a password'**
+  String get passwordRequiredRegister;
+
+  /// No description provided for @passwordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 6 characters'**
+  String get passwordTooShort;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @createAccountButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get createAccountButton;
+
+  /// No description provided for @alreadyHaveAccountPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account?'**
+  String get alreadyHaveAccountPrompt;
+
+  /// No description provided for @logInLowercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get logInLowercase;
+
+  /// No description provided for @errorWeakPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'The password is too weak.'**
+  String get errorWeakPassword;
+
+  /// No description provided for @errorEmailInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This email is already in use.'**
+  String get errorEmailInUse;
+
+  /// No description provided for @errorCreateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create account: {error}'**
+  String errorCreateAccount(String error);
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// No description provided for @selectAvatarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an Avatar'**
+  String get selectAvatarTitle;
+
+  /// No description provided for @editNameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Name'**
+  String get editNameTitle;
+
+  /// No description provided for @enterNewNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter new name'**
+  String get enterNewNameHint;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name: {name}'**
+  String nameLabel(String name);
+
+  /// No description provided for @noName.
+  ///
+  /// In en, this message translates to:
+  /// **'No Name'**
+  String get noName;
+
+  /// No description provided for @nameUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Name updated successfully!'**
+  String get nameUpdated;
+
+  /// No description provided for @failedFetchUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to fetch user data: {error}'**
+  String failedFetchUser(String error);
+
+  /// No description provided for @failedUpdateName.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update name: {error}'**
+  String failedUpdateName(String error);
+
+  /// No description provided for @profilePictureUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile picture updated!'**
+  String get profilePictureUpdated;
+
+  /// No description provided for @failedUpdateProfilePicture.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update profile picture: {error}'**
+  String failedUpdateProfilePicture(String error);
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @tvErrorLoadingShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load show.\n{error}'**
+  String tvErrorLoadingShow(String error);
+
+  /// No description provided for @tvOverviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get tvOverviewTitle;
+
+  /// No description provided for @tvSeasonsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Seasons'**
+  String get tvSeasonsTitle;
+
+  /// No description provided for @tvMoreLikeThisTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'More Like This'**
+  String get tvMoreLikeThisTitle;
+
+  /// No description provided for @tvAddToListTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to list'**
+  String get tvAddToListTooltip;
+
+  /// No description provided for @tvAddToMyShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to My Shows'**
+  String get tvAddToMyShows;
+
+  /// No description provided for @tvStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get tvStatusCompleted;
+
+  /// No description provided for @tvStatusWatching.
+  ///
+  /// In en, this message translates to:
+  /// **'Watching'**
+  String get tvStatusWatching;
+
+  /// No description provided for @tvInMyShows.
+  ///
+  /// In en, this message translates to:
+  /// **'In My Shows'**
+  String get tvInMyShows;
+
+  /// No description provided for @tvSeasonCountSingular.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Season'**
+  String tvSeasonCountSingular(String count);
+
+  /// No description provided for @tvSeasonCountPlural.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Seasons'**
+  String tvSeasonCountPlural(String count);
+
+  /// No description provided for @tvMarkPreviousTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark previous episodes?'**
+  String get tvMarkPreviousTitle;
+
+  /// No description provided for @tvMarkPreviousQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'You jumped ahead. Also mark the {episodesPhrase} as watched?'**
+  String tvMarkPreviousQuestion(String episodesPhrase);
+
+  /// No description provided for @tvEpisodeCountSingular.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} earlier episode'**
+  String tvEpisodeCountSingular(String count);
+
+  /// No description provided for @tvEpisodeCountPlural.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} earlier episodes'**
+  String tvEpisodeCountPlural(String count);
+
+  /// No description provided for @tvNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get tvNo;
+
+  /// No description provided for @tvYesMarkAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, mark all'**
+  String get tvYesMarkAll;
+
+  /// No description provided for @tvFinishedShow.
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 You finished {name}!'**
+  String tvFinishedShow(String name);
+
+  /// No description provided for @tvSeasonComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 Season {season} complete!'**
+  String tvSeasonComplete(String season);
+
+  /// No description provided for @tvRemoveShowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove show?'**
+  String get tvRemoveShowTitle;
+
+  /// No description provided for @tvRemoveShowContent.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes \"{name}\" and all watched-episode progress.'**
+  String tvRemoveShowContent(String name);
+
+  /// No description provided for @tvRemoveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get tvRemoveButton;
+
+  /// No description provided for @tvYourProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Your progress'**
+  String get tvYourProgress;
+
+  /// No description provided for @tvProgressFraction.
+  ///
+  /// In en, this message translates to:
+  /// **'{watched} / {total}'**
+  String tvProgressFraction(String watched, String total);
+
+  /// No description provided for @tvPercentWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% watched'**
+  String tvPercentWatched(String percent);
+
+  /// No description provided for @tvYourRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rating'**
+  String get tvYourRating;
+
+  /// No description provided for @tvUpNextLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'UP NEXT'**
+  String get tvUpNextLabel;
+
+  /// No description provided for @tvUpNextEpisodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'S{season} E{episode}  {name}'**
+  String tvUpNextEpisodeLabel(String season, String episode, String name);
+
+  /// No description provided for @tvSeasonNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Season {season}'**
+  String tvSeasonNumberLabel(String season);
+
+  /// No description provided for @tvSeasonFraction.
+  ///
+  /// In en, this message translates to:
+  /// **'{watched}/{total}'**
+  String tvSeasonFraction(String watched, String total);
+
+  /// No description provided for @tvUnmarkSeason.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmark season'**
+  String get tvUnmarkSeason;
+
+  /// No description provided for @tvMarkSeasonWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark season watched'**
+  String get tvMarkSeasonWatched;
+
+  /// No description provided for @tvEpisodeNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{number}. {name}'**
+  String tvEpisodeNumberLabel(String number, String name);
+
+  /// No description provided for @tvNotAired.
+  ///
+  /// In en, this message translates to:
+  /// **'Not aired'**
+  String get tvNotAired;
+
+  /// No description provided for @tvRuntimeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String tvRuntimeMinutes(String minutes);
+
+  /// No description provided for @profileUpdatePhotoError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update photo: {error}'**
+  String profileUpdatePhotoError(String error);
+
+  /// No description provided for @profileEditNameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit name'**
+  String get profileEditNameTitle;
+
+  /// No description provided for @profileYourNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get profileYourNameHint;
+
+  /// No description provided for @profileSignInPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to view your profile.'**
+  String get profileSignInPrompt;
+
+  /// No description provided for @profileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileTitle;
+
+  /// No description provided for @profileAddYourName.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your name'**
+  String get profileAddYourName;
+
+  /// No description provided for @profileFriendsActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends\' Activity'**
+  String get profileFriendsActivity;
+
+  /// No description provided for @profileSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get profileSettings;
+
+  /// No description provided for @profileBlockedUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked Users'**
+  String get profileBlockedUsers;
+
+  /// No description provided for @profileSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out'**
+  String get profileSignOut;
+
+  /// No description provided for @profileSignOutFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out failed: {error}'**
+  String profileSignOutFailed(String error);
+
+  /// No description provided for @profileFollowers.
+  ///
+  /// In en, this message translates to:
+  /// **'Followers'**
+  String get profileFollowers;
+
+  /// No description provided for @profileFollowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Following'**
+  String get profileFollowing;
+
+  /// No description provided for @profileFilms.
+  ///
+  /// In en, this message translates to:
+  /// **'Films'**
+  String get profileFilms;
+
+  /// No description provided for @profileShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows'**
+  String get profileShows;
+
+  /// No description provided for @profileEpisodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Episodes'**
+  String get profileEpisodes;
+
+  /// No description provided for @profileYourYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Your {year}'**
+  String profileYourYear(String year);
+
+  /// No description provided for @profileWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched'**
+  String get profileWatched;
+
+  /// No description provided for @profileFavoritesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get profileFavoritesTitle;
+
+  /// No description provided for @profileMoviesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Movies'**
+  String get profileMoviesTitle;
+
+  /// No description provided for @profileSeriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Series'**
+  String get profileSeriesTitle;
+
+  /// No description provided for @profileSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get profileSeeAll;
+
+  /// No description provided for @profileMovieLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Movie'**
+  String get profileMovieLabel;
+
+  /// No description provided for @profileSeasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Season {season}'**
+  String profileSeasonLabel(String season);
+
+  /// No description provided for @profileEpisodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'S{season} · E{episode}'**
+  String profileEpisodeLabel(String season, String episode);
+
+  /// No description provided for @followListEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody here yet.'**
+  String get followListEmptyMessage;
+
+  /// No description provided for @asyncErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong.\n{error}'**
+  String asyncErrorMessage(String error);
+
+  /// No description provided for @movieAddToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to list'**
+  String get movieAddToList;
+
+  /// No description provided for @movieTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Movie'**
+  String get movieTypeLabel;
+
+  /// No description provided for @movieOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get movieOverview;
+
+  /// No description provided for @movieMoreLikeThis.
+  ///
+  /// In en, this message translates to:
+  /// **'More Like This'**
+  String get movieMoreLikeThis;
+
+  /// No description provided for @movieToWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'To Watch'**
+  String get movieToWatch;
+
+  /// No description provided for @movieWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched'**
+  String get movieWatched;
+
+  /// No description provided for @movieYourRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rating'**
+  String get movieYourRating;
+
+  /// No description provided for @movieYourDiary.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Diary'**
+  String get movieYourDiary;
+
+  /// No description provided for @movieLogAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Log'**
+  String get movieLogAction;
+
+  /// No description provided for @movieLogAgainAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Log again'**
+  String get movieLogAgainAction;
+
+  /// No description provided for @movieDiaryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No entries yet. Log a watch to start your diary — you can record rewatches with their own dates.'**
+  String get movieDiaryEmpty;
+
+  /// No description provided for @movieLogSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{action} \"{title}\"'**
+  String movieLogSheetTitle(String action, String title);
+
+  /// No description provided for @movieRewatchAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewatch'**
+  String get movieRewatchAction;
+
+  /// No description provided for @movieWatchedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched on'**
+  String get movieWatchedOn;
+
+  /// No description provided for @movieDiaryNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Diary note'**
+  String get movieDiaryNote;
+
+  /// No description provided for @movieDiaryNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What did you think?'**
+  String get movieDiaryNoteHint;
+
+  /// No description provided for @movieSaveRewatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Save rewatch'**
+  String get movieSaveRewatch;
+
+  /// No description provided for @movieSaveToDiary.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to diary'**
+  String get movieSaveToDiary;
+
+  /// No description provided for @upNextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Up Next'**
+  String get upNextTitle;
+
+  /// No description provided for @upNextMyShowsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'My Shows'**
+  String get upNextMyShowsLabel;
+
+  /// No description provided for @upNextFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get upNextFilterAll;
+
+  /// No description provided for @upNextStatusWatching.
+  ///
+  /// In en, this message translates to:
+  /// **'Watching'**
+  String get upNextStatusWatching;
+
+  /// No description provided for @upNextStatusWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Watchlist'**
+  String get upNextStatusWatchlist;
+
+  /// No description provided for @upNextStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get upNextStatusCompleted;
+
+  /// No description provided for @upNextFilterFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get upNextFilterFavorites;
+
+  /// No description provided for @upNextEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet'**
+  String get upNextEmptyTitle;
+
+  /// No description provided for @upNextEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track a show and mark episodes watched — your next episode to watch will show up here.'**
+  String get upNextEmptySubtitle;
+
+  /// No description provided for @upNextNoShowsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No shows here'**
+  String get upNextNoShowsTitle;
+
+  /// No description provided for @upNextNoShowsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches \"{filter}\".'**
+  String upNextNoShowsSubtitle(String filter);
+
+  /// No description provided for @upNextEpisodeProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{watched} / {total} episodes'**
+  String upNextEpisodeProgress(int watched, int total);
+
+  /// No description provided for @upNextSeasonEpisode.
+  ///
+  /// In en, this message translates to:
+  /// **'S{season}  E{episode}'**
+  String upNextSeasonEpisode(int season, int episode);
+
+  /// No description provided for @upNextEpisodeFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode {number}'**
+  String upNextEpisodeFallbackName(int number);
+
+  /// No description provided for @upNextWatchedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{watched} / {total} watched'**
+  String upNextWatchedCount(int watched, int total);
+
+  /// No description provided for @upNextAllCaughtUpSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 All caught up on {name}!'**
+  String upNextAllCaughtUpSnackbar(String name);
+
+  /// No description provided for @upNextMarkWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched'**
+  String get upNextMarkWatched;
+
+  /// No description provided for @upNextAllCaughtUp.
+  ///
+  /// In en, this message translates to:
+  /// **'All caught up'**
+  String get upNextAllCaughtUp;
+
+  /// No description provided for @upNextNewEpisodeToday.
+  ///
+  /// In en, this message translates to:
+  /// **'New episode today'**
+  String get upNextNewEpisodeToday;
+
+  /// No description provided for @upNextNextEpisodeOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Next episode {date}'**
+  String upNextNextEpisodeOn(String date);
+
+  /// No description provided for @detailCastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cast'**
+  String get detailCastTitle;
+
+  /// No description provided for @detailWhereToWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to Watch'**
+  String get detailWhereToWatch;
+
+  /// No description provided for @detailReviewsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get detailReviewsTitle;
+
+  /// No description provided for @detailReviewsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'from the community'**
+  String get detailReviewsSubtitle;
+
+  /// No description provided for @detailShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get detailShowLess;
+
+  /// No description provided for @detailReadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Read more'**
+  String get detailReadMore;
+
+  /// No description provided for @detailCouldNotOpenTrailer.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the trailer.'**
+  String get detailCouldNotOpenTrailer;
+
+  /// No description provided for @detailWatchTrailer.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Trailer'**
+  String get detailWatchTrailer;
+
+  /// No description provided for @discoverLoadErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load titles'**
+  String get discoverLoadErrorTitle;
+
+  /// No description provided for @discoverLoadErrorSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and pull to refresh.'**
+  String get discoverLoadErrorSubtitle;
+
+  /// No description provided for @discoverEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here'**
+  String get discoverEmptyTitle;
+
+  /// No description provided for @discoverEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No {genre} titles found.'**
+  String discoverEmptySubtitle(String genre);
+
+  /// No description provided for @socialFollowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Following'**
+  String get socialFollowing;
+
+  /// No description provided for @socialFollow.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow'**
+  String get socialFollow;
+
+  /// No description provided for @socialDefaultUserName.
+  ///
+  /// In en, this message translates to:
+  /// **'WatchVerse user'**
+  String get socialDefaultUserName;
+
+  /// No description provided for @commentWCommentsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get commentWCommentsLabel;
+
+  /// No description provided for @commentWSpoilersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Spoilers may be inside'**
+  String get commentWSpoilersHint;
+
+  /// No description provided for @commentWDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commentWDelete;
+
+  /// No description provided for @commentWReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get commentWReport;
+
+  /// No description provided for @commentWBlockUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Block user'**
+  String get commentWBlockUser;
+
+  /// No description provided for @commentWLike.
+  ///
+  /// In en, this message translates to:
+  /// **'Like'**
+  String get commentWLike;
+
+  /// No description provided for @commentWReportedSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported. Thanks for flagging.'**
+  String get commentWReportedSnackbar;
+
+  /// No description provided for @commentWBlockedSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked. You won\'t see their content.'**
+  String get commentWBlockedSnackbar;
+
+  /// No description provided for @commentWJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get commentWJustNow;
+
+  /// No description provided for @commentWMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String commentWMinutesAgo(int minutes);
+
+  /// No description provided for @commentWHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h'**
+  String commentWHoursAgo(int hours);
+
+  /// No description provided for @commentWDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d'**
+  String commentWDaysAgo(int days);
+
+  /// No description provided for @commentWWeeksAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks}w'**
+  String commentWWeeksAgo(int weeks);
+
+  /// No description provided for @episodeSeasonEpisodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'S{season} · E{episode}'**
+  String episodeSeasonEpisodeLabel(int season, int episode);
+
+  /// No description provided for @episodeRuntimeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String episodeRuntimeMinutes(int minutes);
+
+  /// No description provided for @episodeRatingStars.
+  ///
+  /// In en, this message translates to:
+  /// **'★ {rating}'**
+  String episodeRatingStars(String rating);
+
+  /// No description provided for @episodeNotAiredYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not aired yet'**
+  String get episodeNotAiredYet;
+
+  /// No description provided for @episodeOverviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get episodeOverviewTitle;
+
+  /// No description provided for @episodeWatchedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched'**
+  String get episodeWatchedLabel;
+
+  /// No description provided for @episodeMarkAsWatchedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as watched'**
+  String get episodeMarkAsWatchedLabel;
+
+  /// No description provided for @episodeYourRatingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rating'**
+  String get episodeYourRatingTitle;
+
+  /// No description provided for @episodeYourNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your notes'**
+  String get episodeYourNotesTitle;
+
+  /// No description provided for @episodeNotesPrivateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Private — only you can see this.'**
+  String get episodeNotesPrivateHint;
+
+  /// No description provided for @episodeNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a comment about this episode…'**
+  String get episodeNoteHint;
+
+  /// No description provided for @episodeNoteSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Note saved'**
+  String get episodeNoteSaved;
+
+  /// No description provided for @episodeSaveNoteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save note'**
+  String get episodeSaveNoteButton;
+
+  /// No description provided for @commentsAddLinkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add GIF / image link'**
+  String get commentsAddLinkTitle;
+
+  /// No description provided for @commentsLinkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://…'**
+  String get commentsLinkHint;
+
+  /// No description provided for @commentsAddAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get commentsAddAction;
+
+  /// No description provided for @commentsUploadPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload photo'**
+  String get commentsUploadPhoto;
+
+  /// No description provided for @commentsSearchGifs.
+  ///
+  /// In en, this message translates to:
+  /// **'Search GIFs'**
+  String get commentsSearchGifs;
+
+  /// No description provided for @commentsAddGifByLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Add GIF / image by link'**
+  String get commentsAddGifByLink;
+
+  /// No description provided for @commentsCouldNotPost.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not post: {error}'**
+  String commentsCouldNotPost(String error);
+
+  /// No description provided for @commentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get commentsTitle;
+
+  /// No description provided for @commentsAddCommentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a comment…'**
+  String get commentsAddCommentHint;
+
+  /// No description provided for @commentsSignInHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to join the conversation.'**
+  String get commentsSignInHint;
+
+  /// No description provided for @commentsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet'**
+  String get commentsEmptyTitle;
+
+  /// No description provided for @commentsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Be the first to share what you thought.'**
+  String get commentsEmptySubtitle;
+
+  /// No description provided for @pubProfileFavoriteFilms.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite Films'**
+  String get pubProfileFavoriteFilms;
+
+  /// No description provided for @pubProfileWatchedMovies.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched Movies'**
+  String get pubProfileWatchedMovies;
+
+  /// No description provided for @pubProfileShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows'**
+  String get pubProfileShows;
+
+  /// No description provided for @pubProfileDefaultUserName.
+  ///
+  /// In en, this message translates to:
+  /// **'WatchVerse user'**
+  String get pubProfileDefaultUserName;
+
+  /// No description provided for @pubProfileMemberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'WatchVerse member'**
+  String get pubProfileMemberLabel;
+
+  /// No description provided for @pubProfileFilms.
+  ///
+  /// In en, this message translates to:
+  /// **'Films'**
+  String get pubProfileFilms;
+
+  /// No description provided for @pubProfileFollowers.
+  ///
+  /// In en, this message translates to:
+  /// **'Followers'**
+  String get pubProfileFollowers;
+
+  /// No description provided for @pubProfileFollowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Following'**
+  String get pubProfileFollowing;
+
+  /// No description provided for @pubProfileAddedToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to your list'**
+  String get pubProfileAddedToList;
+
+  /// No description provided for @searchFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Movies & TV'**
+  String get searchFilterAll;
+
+  /// No description provided for @searchFilterMovies.
+  ///
+  /// In en, this message translates to:
+  /// **'Movies'**
+  String get searchFilterMovies;
+
+  /// No description provided for @searchFilterTv.
+  ///
+  /// In en, this message translates to:
+  /// **'TV Shows'**
+  String get searchFilterTv;
+
+  /// No description provided for @searchFilterPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get searchFilterPeople;
+
+  /// No description provided for @searchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Search failed: {error}'**
+  String searchFailed(String error);
+
+  /// No description provided for @searchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchTitle;
+
+  /// No description provided for @searchHintPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'Search people by name…'**
+  String get searchHintPeople;
+
+  /// No description provided for @searchHintTitles.
+  ///
+  /// In en, this message translates to:
+  /// **'Search movies & TV shows…'**
+  String get searchHintTitles;
+
+  /// No description provided for @searchFindFriendsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find friends'**
+  String get searchFindFriendsTitle;
+
+  /// No description provided for @searchFindFriendsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search people by name and follow them to see what they watch.'**
+  String get searchFindFriendsSubtitle;
+
+  /// No description provided for @searchFindNextWatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find your next watch'**
+  String get searchFindNextWatchTitle;
+
+  /// No description provided for @searchFindNextWatchSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search across movies and TV shows.'**
+  String get searchFindNextWatchSubtitle;
+
+  /// No description provided for @searchNoOneFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No one found'**
+  String get searchNoOneFoundTitle;
+
+  /// No description provided for @searchNoUsersMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'No users matched \"{query}\".\nNames are case-sensitive for now.'**
+  String searchNoUsersMatched(String query);
+
+  /// No description provided for @searchNoResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get searchNoResultsTitle;
+
+  /// No description provided for @searchNothingMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matched \"{query}\".'**
+  String searchNothingMatched(String query);
+
+  /// No description provided for @homeAppTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'WatchVerse'**
+  String get homeAppTitle;
+
+  /// No description provided for @homeGuestLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Browsing as guest'**
+  String get homeGuestLabel;
+
+  /// No description provided for @homeMyLists.
+  ///
+  /// In en, this message translates to:
+  /// **'My Lists'**
+  String get homeMyLists;
+
+  /// No description provided for @homeFriendsActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends\' Activity'**
+  String get homeFriendsActivity;
+
+  /// No description provided for @homeWatchHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch History'**
+  String get homeWatchHistory;
+
+  /// No description provided for @homeSettingsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get homeSettingsLabel;
+
+  /// No description provided for @homeSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out'**
+  String get homeSignOut;
+
+  /// No description provided for @homeTabMovies.
+  ///
+  /// In en, this message translates to:
+  /// **'Movies'**
+  String get homeTabMovies;
+
+  /// No description provided for @homeTabTvShows.
+  ///
+  /// In en, this message translates to:
+  /// **'TV Shows'**
+  String get homeTabTvShows;
+
+  /// No description provided for @homeTrendingThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Trending This Week'**
+  String get homeTrendingThisWeek;
+
+  /// No description provided for @homeComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming Soon'**
+  String get homeComingSoon;
+
+  /// No description provided for @homePopular.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get homePopular;
+
+  /// No description provided for @homeTopRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Rated'**
+  String get homeTopRated;
+
+  /// No description provided for @homeAiringToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Airing Today'**
+  String get homeAiringToday;
+
+  /// No description provided for @homeOnTheAir.
+  ///
+  /// In en, this message translates to:
+  /// **'On The Air'**
+  String get homeOnTheAir;
+
+  /// No description provided for @homePopularShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular Shows'**
+  String get homePopularShows;
+
+  /// No description provided for @homeBecauseYouWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Because you watched {title}'**
+  String homeBecauseYouWatched(String title);
+
+  /// No description provided for @listDetailRenameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename list'**
+  String get listDetailRenameTitle;
+
+  /// No description provided for @listDetailDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete list?'**
+  String get listDetailDeleteTitle;
+
+  /// No description provided for @listDetailDeleteContent.
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently deletes the list.'**
+  String get listDetailDeleteContent;
+
+  /// No description provided for @listDetailDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get listDetailDeleteConfirm;
+
+  /// No description provided for @listDetailRenameMenuItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get listDetailRenameMenuItem;
+
+  /// No description provided for @listDetailDeleteMenuItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete list'**
+  String get listDetailDeleteMenuItem;
+
+  /// No description provided for @listDetailEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty list'**
+  String get listDetailEmptyTitle;
+
+  /// No description provided for @listDetailEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open any movie or show and tap \"Add to list\".'**
+  String get listDetailEmptySubtitle;
+
+  /// No description provided for @personKnownForTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Known For'**
+  String get personKnownForTitle;
+
+  /// No description provided for @personNoCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'No credits found.'**
+  String get personNoCredits;
+
+  /// No description provided for @personBiographyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Biography'**
+  String get personBiographyTitle;
+
+  /// No description provided for @personShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get personShowLess;
+
+  /// No description provided for @personReadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Read more'**
+  String get personReadMore;
+
+  /// No description provided for @listsNewListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New list'**
+  String get listsNewListTitle;
+
+  /// No description provided for @listsNewListHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Top 10 of all time'**
+  String get listsNewListHint;
+
+  /// No description provided for @listsCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get listsCreateAction;
+
+  /// No description provided for @listsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Lists'**
+  String get listsTitle;
+
+  /// No description provided for @listsSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to create lists'**
+  String get listsSignInTitle;
+
+  /// No description provided for @listsSignInSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Curate your own collections like \"Watch in 2026\".'**
+  String get listsSignInSubtitle;
+
+  /// No description provided for @listsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No lists yet'**
+  String get listsEmptyTitle;
+
+  /// No description provided for @listsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to create your first list.'**
+  String get listsEmptySubtitle;
+
+  /// No description provided for @listsUntitled.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled'**
+  String get listsUntitled;
+
+  /// No description provided for @listsTitleSingular.
+  ///
+  /// In en, this message translates to:
+  /// **'title'**
+  String get listsTitleSingular;
+
+  /// No description provided for @listsTitlePlural.
+  ///
+  /// In en, this message translates to:
+  /// **'titles'**
+  String get listsTitlePlural;
+
+  /// No description provided for @listsCardEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty — add titles from any movie or show.'**
+  String get listsCardEmptySubtitle;
+
+  /// No description provided for @mediaTypeTv.
+  ///
+  /// In en, this message translates to:
+  /// **'TV'**
+  String get mediaTypeTv;
+
+  /// No description provided for @mediaTypeMovie.
+  ///
+  /// In en, this message translates to:
+  /// **'Movie'**
+  String get mediaTypeMovie;
+
+  /// No description provided for @addToListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to list'**
+  String get addToListTitle;
+
+  /// No description provided for @addToListNewListButton.
+  ///
+  /// In en, this message translates to:
+  /// **'New list'**
+  String get addToListNewListButton;
+
+  /// No description provided for @addToListSignInMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to create lists.'**
+  String get addToListSignInMessage;
+
+  /// No description provided for @addToListEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No lists yet — tap \"New list\" to make one.'**
+  String get addToListEmptyMessage;
+
+  /// No description provided for @addToListUntitled.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled'**
+  String get addToListUntitled;
+
+  /// No description provided for @addToListTitleSingular.
+  ///
+  /// In en, this message translates to:
+  /// **'title'**
+  String get addToListTitleSingular;
+
+  /// No description provided for @addToListTitlePlural.
+  ///
+  /// In en, this message translates to:
+  /// **'titles'**
+  String get addToListTitlePlural;
+
+  /// No description provided for @addToListCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New list'**
+  String get addToListCreateTitle;
+
+  /// No description provided for @addToListCreateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Watch in 2026'**
+  String get addToListCreateHint;
+
+  /// No description provided for @addToListCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get addToListCreateAction;
+
+  /// No description provided for @historyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch History'**
+  String get historyTitle;
+
+  /// No description provided for @historyWatchedRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched · ★ {rating}'**
+  String historyWatchedRating(String rating);
+
+  /// No description provided for @historyWatchedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched'**
+  String get historyWatchedLabel;
+
+  /// No description provided for @historyFinishedSeason.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished Season {season} · {count} episodes'**
+  String historyFinishedSeason(int season, int count);
+
+  /// No description provided for @historyEpisodeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'S{season} E{episode}  {episodeName}'**
+  String historyEpisodeLine(int season, int episode, String episodeName);
+
+  /// No description provided for @historyEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No history yet'**
+  String get historyEmptyTitle;
+
+  /// No description provided for @historyEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Episodes you mark as watched will show up here.'**
+  String get historyEmptySubtitle;
+
+  /// No description provided for @historyAgoNow.
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get historyAgoNow;
+
+  /// No description provided for @historyAgoMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String historyAgoMinutes(int minutes);
+
+  /// No description provided for @historyAgoHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h'**
+  String historyAgoHours(int hours);
+
+  /// No description provided for @historyAgoDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d'**
+  String historyAgoDays(int days);
+
+  /// No description provided for @historyAgoWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks}w'**
+  String historyAgoWeeks(int weeks);
+
+  /// No description provided for @watchlistTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Movies'**
+  String get watchlistTitle;
+
+  /// No description provided for @watchlistCategoryToWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'To Watch'**
+  String get watchlistCategoryToWatch;
+
+  /// No description provided for @watchlistCategoryWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched'**
+  String get watchlistCategoryWatched;
+
+  /// No description provided for @watchlistCategoryFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get watchlistCategoryFavorites;
+
+  /// No description provided for @watchlistEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No movies in \"{category}\" yet.'**
+  String watchlistEmptyMessage(String category);
+
+  /// No description provided for @watchlistUntitled.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled'**
+  String get watchlistUntitled;
+
+  /// No description provided for @watchlistYourRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rating: {rating}'**
+  String watchlistYourRating(String rating);
+
+  /// No description provided for @watchlistReleaseDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Release: {date}'**
+  String watchlistReleaseDate(String date);
+
+  /// No description provided for @gifPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a GIF'**
+  String get gifPickerTitle;
+
+  /// No description provided for @gifSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search GIFs…'**
+  String get gifSearchHint;
+
+  /// No description provided for @gifPoweredBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Powered by GIPHY'**
+  String get gifPoweredBy;
+
+  /// No description provided for @gifLoadErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load GIFs'**
+  String get gifLoadErrorTitle;
+
+  /// No description provided for @gifLoadErrorSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get gifLoadErrorSubtitle;
+
+  /// No description provided for @gifEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No GIFs found'**
+  String get gifEmptyTitle;
+
+  /// No description provided for @gifEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search.'**
+  String get gifEmptySubtitle;
+
+  /// No description provided for @friendsActivityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends\' Activity'**
+  String get friendsActivityTitle;
+
+  /// No description provided for @friendsNoFriendsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No friends yet'**
+  String get friendsNoFriendsTitle;
+
+  /// No description provided for @friendsNoFriendsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow people from Find Friends to see what they watch.'**
+  String get friendsNoFriendsSubtitle;
+
+  /// No description provided for @friendsQuietTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet for now'**
+  String get friendsQuietTitle;
+
+  /// No description provided for @friendsQuietSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your friends have no recent activity.'**
+  String get friendsQuietSubtitle;
+
+  /// No description provided for @friendsSomeoneFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone'**
+  String get friendsSomeoneFallback;
+
+  /// No description provided for @friendsActionWatchedMovie.
+  ///
+  /// In en, this message translates to:
+  /// **'watched {title}'**
+  String friendsActionWatchedMovie(String title);
+
+  /// No description provided for @friendsActionFinishedSeason.
+  ///
+  /// In en, this message translates to:
+  /// **'finished Season {season} of {show}'**
+  String friendsActionFinishedSeason(int season, String show);
+
+  /// No description provided for @friendsActionWatchedEpisode.
+  ///
+  /// In en, this message translates to:
+  /// **'watched S{season} E{episode} of {show}'**
+  String friendsActionWatchedEpisode(int season, int episode, String show);
+
+  /// No description provided for @friendsAgoNow.
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get friendsAgoNow;
+
+  /// No description provided for @friendsAgoMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String friendsAgoMinutes(int minutes);
+
+  /// No description provided for @friendsAgoHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h'**
+  String friendsAgoHours(int hours);
+
+  /// No description provided for @friendsAgoDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d'**
+  String friendsAgoDays(int days);
+
+  /// No description provided for @friendsAgoWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks}w'**
+  String friendsAgoWeeks(int weeks);
+
+  /// No description provided for @blockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked Users'**
+  String get blockedTitle;
+
+  /// No description provided for @blockedDefaultUserName.
+  ///
+  /// In en, this message translates to:
+  /// **'WatchVerse user'**
+  String get blockedDefaultUserName;
+
+  /// No description provided for @blockedUnblockButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Unblock'**
+  String get blockedUnblockButton;
+
+  /// No description provided for @blockedEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No blocked users'**
+  String get blockedEmptyTitle;
+
+  /// No description provided for @blockedEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'People you block will appear here.'**
+  String get blockedEmptySubtitle;
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
+  }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['en', 'tr'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
+    case 'tr':
+      return AppLocalizationsTr();
+  }
+
+  throw FlutterError(
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
+}

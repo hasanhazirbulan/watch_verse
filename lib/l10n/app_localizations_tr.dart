@@ -1,0 +1,1131 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Turkish (`tr`).
+class AppLocalizationsTr extends AppLocalizations {
+  AppLocalizationsTr([String locale = 'tr']) : super(locale);
+
+  @override
+  String get appTitle => 'WatchVerse';
+
+  @override
+  String get loginSubtitle => 'Sevdiğin film ve dizileri takip et';
+
+  @override
+  String get emailHint => 'E-posta';
+
+  @override
+  String get emailRequired => 'Lütfen e-posta adresinizi girin';
+
+  @override
+  String get emailInvalid => 'Geçerli bir e-posta adresi girin';
+
+  @override
+  String get passwordHint => 'Şifre';
+
+  @override
+  String get passwordRequiredLogin => 'Lütfen şifrenizi girin';
+
+  @override
+  String get logIn => 'Giriş Yap';
+
+  @override
+  String get continueAsGuest => 'Misafir olarak devam et';
+
+  @override
+  String get noAccountPrompt => 'Hesabınız yok mu?';
+
+  @override
+  String get register => 'Kayıt Ol';
+
+  @override
+  String get errorUserNotFound => 'Bu e-posta için kullanıcı bulunamadı.';
+
+  @override
+  String get errorWrongPassword => 'E-posta veya şifre hatalı.';
+
+  @override
+  String get errorGeneric => 'Bir hata oluştu.';
+
+  @override
+  String errorSignIn(String error) {
+    return 'Giriş yapılamadı: $error';
+  }
+
+  @override
+  String get createAccountTitle => 'Hesap oluştur';
+
+  @override
+  String get createAccountSubtitle =>
+      'Takibe başlamak için WatchVerse\'e katıl';
+
+  @override
+  String get usernameHint => 'Kullanıcı adı';
+
+  @override
+  String get usernameRequired => 'Lütfen bir kullanıcı adı girin';
+
+  @override
+  String get confirmPasswordHint => 'Şifreyi onayla';
+
+  @override
+  String get passwordRequiredRegister => 'Lütfen bir şifre girin';
+
+  @override
+  String get passwordTooShort => 'En az 6 karakter olmalı';
+
+  @override
+  String get passwordsDoNotMatch => 'Şifreler eşleşmiyor';
+
+  @override
+  String get createAccountButton => 'Hesap Oluştur';
+
+  @override
+  String get alreadyHaveAccountPrompt => 'Zaten hesabınız var mı?';
+
+  @override
+  String get logInLowercase => 'Giriş yap';
+
+  @override
+  String get errorWeakPassword => 'Şifre çok zayıf.';
+
+  @override
+  String get errorEmailInUse => 'Bu e-posta zaten kullanımda.';
+
+  @override
+  String errorCreateAccount(String error) {
+    return 'Hesap oluşturulamadı: $error';
+  }
+
+  @override
+  String get settingsTitle => 'Ayarlar';
+
+  @override
+  String get selectAvatarTitle => 'Avatar Seç';
+
+  @override
+  String get editNameTitle => 'Adı Düzenle';
+
+  @override
+  String get enterNewNameHint => 'Yeni adı girin';
+
+  @override
+  String get cancel => 'İptal';
+
+  @override
+  String get save => 'Kaydet';
+
+  @override
+  String nameLabel(String name) {
+    return 'Ad: $name';
+  }
+
+  @override
+  String get noName => 'İsim Yok';
+
+  @override
+  String get nameUpdated => 'Ad başarıyla güncellendi!';
+
+  @override
+  String failedFetchUser(String error) {
+    return 'Kullanıcı verileri alınamadı: $error';
+  }
+
+  @override
+  String failedUpdateName(String error) {
+    return 'Ad güncellenemedi: $error';
+  }
+
+  @override
+  String get profilePictureUpdated => 'Profil fotoğrafı güncellendi!';
+
+  @override
+  String failedUpdateProfilePicture(String error) {
+    return 'Profil fotoğrafı güncellenemedi: $error';
+  }
+
+  @override
+  String get appearance => 'Görünüm';
+
+  @override
+  String get themeSystem => 'Sistem';
+
+  @override
+  String get themeLight => 'Açık';
+
+  @override
+  String get themeDark => 'Koyu';
+
+  @override
+  String tvErrorLoadingShow(String error) {
+    return 'Dizi yüklenemedi.\n$error';
+  }
+
+  @override
+  String get tvOverviewTitle => 'Genel Bakış';
+
+  @override
+  String get tvSeasonsTitle => 'Sezonlar';
+
+  @override
+  String get tvMoreLikeThisTitle => 'Bunlara Benzer';
+
+  @override
+  String get tvAddToListTooltip => 'Listeye ekle';
+
+  @override
+  String get tvAddToMyShows => 'Dizilerime Ekle';
+
+  @override
+  String get tvStatusCompleted => 'Tamamlandı';
+
+  @override
+  String get tvStatusWatching => 'İzleniyor';
+
+  @override
+  String get tvInMyShows => 'Dizilerimde';
+
+  @override
+  String tvSeasonCountSingular(String count) {
+    return '$count Sezon';
+  }
+
+  @override
+  String tvSeasonCountPlural(String count) {
+    return '$count Sezon';
+  }
+
+  @override
+  String get tvMarkPreviousTitle => 'Önceki bölümler işaretlensin mi?';
+
+  @override
+  String tvMarkPreviousQuestion(String episodesPhrase) {
+    return 'İleri atladınız. $episodesPhrase de izlendi olarak işaretlensin mi?';
+  }
+
+  @override
+  String tvEpisodeCountSingular(String count) {
+    return '$count önceki bölüm';
+  }
+
+  @override
+  String tvEpisodeCountPlural(String count) {
+    return '$count önceki bölüm';
+  }
+
+  @override
+  String get tvNo => 'Hayır';
+
+  @override
+  String get tvYesMarkAll => 'Evet, tümünü işaretle';
+
+  @override
+  String tvFinishedShow(String name) {
+    return '🎉 $name dizisini bitirdiniz!';
+  }
+
+  @override
+  String tvSeasonComplete(String season) {
+    return '🎉 $season. Sezon tamamlandı!';
+  }
+
+  @override
+  String get tvRemoveShowTitle => 'Dizi kaldırılsın mı?';
+
+  @override
+  String tvRemoveShowContent(String name) {
+    return 'Bu işlem \"$name\" dizisini ve tüm izlenen bölüm ilerlemesini kaldırır.';
+  }
+
+  @override
+  String get tvRemoveButton => 'Kaldır';
+
+  @override
+  String get tvYourProgress => 'İlerlemeniz';
+
+  @override
+  String tvProgressFraction(String watched, String total) {
+    return '$watched / $total';
+  }
+
+  @override
+  String tvPercentWatched(String percent) {
+    return '%$percent izlendi';
+  }
+
+  @override
+  String get tvYourRating => 'Puanınız';
+
+  @override
+  String get tvUpNextLabel => 'SIRADAKİ';
+
+  @override
+  String tvUpNextEpisodeLabel(String season, String episode, String name) {
+    return 'S$season B$episode  $name';
+  }
+
+  @override
+  String tvSeasonNumberLabel(String season) {
+    return 'Sezon $season';
+  }
+
+  @override
+  String tvSeasonFraction(String watched, String total) {
+    return '$watched/$total';
+  }
+
+  @override
+  String get tvUnmarkSeason => 'Sezon işaretini kaldır';
+
+  @override
+  String get tvMarkSeasonWatched => 'Sezonu izlendi olarak işaretle';
+
+  @override
+  String tvEpisodeNumberLabel(String number, String name) {
+    return '$number. $name';
+  }
+
+  @override
+  String get tvNotAired => 'Henüz yayınlanmadı';
+
+  @override
+  String tvRuntimeMinutes(String minutes) {
+    return '${minutes}dk';
+  }
+
+  @override
+  String profileUpdatePhotoError(String error) {
+    return 'Fotoğraf güncellenemedi: $error';
+  }
+
+  @override
+  String get profileEditNameTitle => 'Adı düzenle';
+
+  @override
+  String get profileYourNameHint => 'Adınız';
+
+  @override
+  String get profileSignInPrompt => 'Profilinizi görmek için giriş yapın.';
+
+  @override
+  String get profileTitle => 'Profil';
+
+  @override
+  String get profileAddYourName => 'Adınızı ekleyin';
+
+  @override
+  String get profileFriendsActivity => 'Arkadaş Etkinliği';
+
+  @override
+  String get profileSettings => 'Ayarlar';
+
+  @override
+  String get profileBlockedUsers => 'Engellenen Kullanıcılar';
+
+  @override
+  String get profileSignOut => 'Çıkış Yap';
+
+  @override
+  String profileSignOutFailed(String error) {
+    return 'Çıkış başarısız oldu: $error';
+  }
+
+  @override
+  String get profileFollowers => 'Takipçiler';
+
+  @override
+  String get profileFollowing => 'Takip Edilenler';
+
+  @override
+  String get profileFilms => 'Filmler';
+
+  @override
+  String get profileShows => 'Diziler';
+
+  @override
+  String get profileEpisodes => 'Bölümler';
+
+  @override
+  String profileYourYear(String year) {
+    return '$year Yılınız';
+  }
+
+  @override
+  String get profileWatched => 'İzlendi';
+
+  @override
+  String get profileFavoritesTitle => 'Favoriler';
+
+  @override
+  String get profileMoviesTitle => 'Filmler';
+
+  @override
+  String get profileSeriesTitle => 'Diziler';
+
+  @override
+  String get profileSeeAll => 'Tümünü gör';
+
+  @override
+  String get profileMovieLabel => 'Film';
+
+  @override
+  String profileSeasonLabel(String season) {
+    return 'Sezon $season';
+  }
+
+  @override
+  String profileEpisodeLabel(String season, String episode) {
+    return 'S$season · B$episode';
+  }
+
+  @override
+  String get followListEmptyMessage => 'Henüz kimse yok.';
+
+  @override
+  String asyncErrorMessage(String error) {
+    return 'Bir şeyler ters gitti.\n$error';
+  }
+
+  @override
+  String get movieAddToList => 'Listeye ekle';
+
+  @override
+  String get movieTypeLabel => 'Film';
+
+  @override
+  String get movieOverview => 'Özet';
+
+  @override
+  String get movieMoreLikeThis => 'Buna Benzer';
+
+  @override
+  String get movieToWatch => 'İzlenecek';
+
+  @override
+  String get movieWatched => 'İzlendi';
+
+  @override
+  String get movieYourRating => 'Puanınız';
+
+  @override
+  String get movieYourDiary => 'Günlüğünüz';
+
+  @override
+  String get movieLogAction => 'Kaydet';
+
+  @override
+  String get movieLogAgainAction => 'Tekrar kaydet';
+
+  @override
+  String get movieDiaryEmpty =>
+      'Henüz kayıt yok. Günlüğünüze başlamak için bir izleme kaydedin — tekrar izlemelerinizi kendi tarihleriyle kaydedebilirsiniz.';
+
+  @override
+  String movieLogSheetTitle(String action, String title) {
+    return '$action \"$title\"';
+  }
+
+  @override
+  String get movieRewatchAction => 'Tekrar izle';
+
+  @override
+  String get movieWatchedOn => 'İzlenme tarihi';
+
+  @override
+  String get movieDiaryNote => 'Günlük notu';
+
+  @override
+  String get movieDiaryNoteHint => 'Ne düşündünüz?';
+
+  @override
+  String get movieSaveRewatch => 'Tekrar izlemeyi kaydet';
+
+  @override
+  String get movieSaveToDiary => 'Günlüğe kaydet';
+
+  @override
+  String get upNextTitle => 'Sırada';
+
+  @override
+  String get upNextMyShowsLabel => 'Dizilerim';
+
+  @override
+  String get upNextFilterAll => 'Tümü';
+
+  @override
+  String get upNextStatusWatching => 'İzleniyor';
+
+  @override
+  String get upNextStatusWatchlist => 'İzleme Listesi';
+
+  @override
+  String get upNextStatusCompleted => 'Tamamlandı';
+
+  @override
+  String get upNextFilterFavorites => 'Favoriler';
+
+  @override
+  String get upNextEmptyTitle => 'Henüz bir şey yok';
+
+  @override
+  String get upNextEmptySubtitle =>
+      'Bir diziyi takip edin ve bölümleri izlendi olarak işaretleyin — bir sonraki izleyeceğiniz bölüm burada görünecek.';
+
+  @override
+  String get upNextNoShowsTitle => 'Burada dizi yok';
+
+  @override
+  String upNextNoShowsSubtitle(String filter) {
+    return '\"$filter\" ile eşleşen bir şey yok.';
+  }
+
+  @override
+  String upNextEpisodeProgress(int watched, int total) {
+    return '$watched / $total bölüm';
+  }
+
+  @override
+  String upNextSeasonEpisode(int season, int episode) {
+    return 'S$season  B$episode';
+  }
+
+  @override
+  String upNextEpisodeFallbackName(int number) {
+    return 'Bölüm $number';
+  }
+
+  @override
+  String upNextWatchedCount(int watched, int total) {
+    return '$watched / $total izlendi';
+  }
+
+  @override
+  String upNextAllCaughtUpSnackbar(String name) {
+    return '🎉 $name dizisinde güncelsiniz!';
+  }
+
+  @override
+  String get upNextMarkWatched => 'İzlendi';
+
+  @override
+  String get upNextAllCaughtUp => 'Güncelsiniz';
+
+  @override
+  String get upNextNewEpisodeToday => 'Bugün yeni bölüm';
+
+  @override
+  String upNextNextEpisodeOn(String date) {
+    return 'Sonraki bölüm $date';
+  }
+
+  @override
+  String get detailCastTitle => 'Oyuncular';
+
+  @override
+  String get detailWhereToWatch => 'Nereden İzlenir';
+
+  @override
+  String get detailReviewsTitle => 'Yorumlar';
+
+  @override
+  String get detailReviewsSubtitle => 'topluluktan';
+
+  @override
+  String get detailShowLess => 'Daha az göster';
+
+  @override
+  String get detailReadMore => 'Devamını oku';
+
+  @override
+  String get detailCouldNotOpenTrailer => 'Fragman açılamadı.';
+
+  @override
+  String get detailWatchTrailer => 'Fragmanı İzle';
+
+  @override
+  String get discoverLoadErrorTitle => 'Başlıklar yüklenemedi';
+
+  @override
+  String get discoverLoadErrorSubtitle =>
+      'Bağlantınızı kontrol edin ve yenilemek için aşağı çekin.';
+
+  @override
+  String get discoverEmptyTitle => 'Burada bir şey yok';
+
+  @override
+  String discoverEmptySubtitle(String genre) {
+    return '$genre türünde başlık bulunamadı.';
+  }
+
+  @override
+  String get socialFollowing => 'Takip Ediliyor';
+
+  @override
+  String get socialFollow => 'Takip Et';
+
+  @override
+  String get socialDefaultUserName => 'WatchVerse kullanıcısı';
+
+  @override
+  String get commentWCommentsLabel => 'Yorumlar';
+
+  @override
+  String get commentWSpoilersHint => 'İçerik spoiler barındırabilir';
+
+  @override
+  String get commentWDelete => 'Sil';
+
+  @override
+  String get commentWReport => 'Şikayet et';
+
+  @override
+  String get commentWBlockUser => 'Kullanıcıyı engelle';
+
+  @override
+  String get commentWLike => 'Beğen';
+
+  @override
+  String get commentWReportedSnackbar =>
+      'Bildirildi. Bildirdiğiniz için teşekkürler.';
+
+  @override
+  String get commentWBlockedSnackbar =>
+      'Engellendi. İçeriklerini artık görmeyeceksiniz.';
+
+  @override
+  String get commentWJustNow => 'şimdi';
+
+  @override
+  String commentWMinutesAgo(int minutes) {
+    return '${minutes}dk';
+  }
+
+  @override
+  String commentWHoursAgo(int hours) {
+    return '${hours}sa';
+  }
+
+  @override
+  String commentWDaysAgo(int days) {
+    return '${days}g';
+  }
+
+  @override
+  String commentWWeeksAgo(int weeks) {
+    return '${weeks}h';
+  }
+
+  @override
+  String episodeSeasonEpisodeLabel(int season, int episode) {
+    return 'S$season · B$episode';
+  }
+
+  @override
+  String episodeRuntimeMinutes(int minutes) {
+    return '$minutes dk';
+  }
+
+  @override
+  String episodeRatingStars(String rating) {
+    return '★ $rating';
+  }
+
+  @override
+  String get episodeNotAiredYet => 'Henüz yayınlanmadı';
+
+  @override
+  String get episodeOverviewTitle => 'Özet';
+
+  @override
+  String get episodeWatchedLabel => 'İzlendi';
+
+  @override
+  String get episodeMarkAsWatchedLabel => 'İzlendi olarak işaretle';
+
+  @override
+  String get episodeYourRatingTitle => 'Puanınız';
+
+  @override
+  String get episodeYourNotesTitle => 'Notlarınız';
+
+  @override
+  String get episodeNotesPrivateHint =>
+      'Gizli — bunu yalnızca siz görebilirsiniz.';
+
+  @override
+  String get episodeNoteHint => 'Bu bölüm hakkında bir not yazın…';
+
+  @override
+  String get episodeNoteSaved => 'Not kaydedildi';
+
+  @override
+  String get episodeSaveNoteButton => 'Notu kaydet';
+
+  @override
+  String get commentsAddLinkTitle => 'GIF / görsel bağlantısı ekle';
+
+  @override
+  String get commentsLinkHint => 'https://…';
+
+  @override
+  String get commentsAddAction => 'Ekle';
+
+  @override
+  String get commentsUploadPhoto => 'Fotoğraf yükle';
+
+  @override
+  String get commentsSearchGifs => 'GIF ara';
+
+  @override
+  String get commentsAddGifByLink => 'Bağlantıyla GIF / görsel ekle';
+
+  @override
+  String commentsCouldNotPost(String error) {
+    return 'Gönderilemedi: $error';
+  }
+
+  @override
+  String get commentsTitle => 'Yorumlar';
+
+  @override
+  String get commentsAddCommentHint => 'Yorum ekle…';
+
+  @override
+  String get commentsSignInHint => 'Sohbete katılmak için giriş yapın.';
+
+  @override
+  String get commentsEmptyTitle => 'Henüz yorum yok';
+
+  @override
+  String get commentsEmptySubtitle => 'Düşüncelerinizi paylaşan ilk kişi olun.';
+
+  @override
+  String get pubProfileFavoriteFilms => 'Favori Filmler';
+
+  @override
+  String get pubProfileWatchedMovies => 'İzlenen Filmler';
+
+  @override
+  String get pubProfileShows => 'Diziler';
+
+  @override
+  String get pubProfileDefaultUserName => 'WatchVerse kullanıcısı';
+
+  @override
+  String get pubProfileMemberLabel => 'WatchVerse üyesi';
+
+  @override
+  String get pubProfileFilms => 'Filmler';
+
+  @override
+  String get pubProfileFollowers => 'Takipçiler';
+
+  @override
+  String get pubProfileFollowing => 'Takip edilenler';
+
+  @override
+  String get pubProfileAddedToList => 'Listenize eklendi';
+
+  @override
+  String get searchFilterAll => 'Film ve Dizi';
+
+  @override
+  String get searchFilterMovies => 'Filmler';
+
+  @override
+  String get searchFilterTv => 'Diziler';
+
+  @override
+  String get searchFilterPeople => 'Kişiler';
+
+  @override
+  String searchFailed(String error) {
+    return 'Arama başarısız: $error';
+  }
+
+  @override
+  String get searchTitle => 'Ara';
+
+  @override
+  String get searchHintPeople => 'İsme göre kişi ara…';
+
+  @override
+  String get searchHintTitles => 'Film ve dizi ara…';
+
+  @override
+  String get searchFindFriendsTitle => 'Arkadaş bul';
+
+  @override
+  String get searchFindFriendsSubtitle =>
+      'İsimle kişi arayın ve ne izlediklerini görmek için takip edin.';
+
+  @override
+  String get searchFindNextWatchTitle => 'Bir sonraki izleyeceğinizi bulun';
+
+  @override
+  String get searchFindNextWatchSubtitle => 'Film ve dizilerde arama yapın.';
+
+  @override
+  String get searchNoOneFoundTitle => 'Kimse bulunamadı';
+
+  @override
+  String searchNoUsersMatched(String query) {
+    return '\"$query\" ile eşleşen kullanıcı yok.\nİsimler şimdilik büyük/küçük harfe duyarlıdır.';
+  }
+
+  @override
+  String get searchNoResultsTitle => 'Sonuç yok';
+
+  @override
+  String searchNothingMatched(String query) {
+    return '\"$query\" ile eşleşen bir şey yok.';
+  }
+
+  @override
+  String get homeAppTitle => 'WatchVerse';
+
+  @override
+  String get homeGuestLabel => 'Misafir olarak geziniyor';
+
+  @override
+  String get homeMyLists => 'Listelerim';
+
+  @override
+  String get homeFriendsActivity => 'Arkadaş Etkinliği';
+
+  @override
+  String get homeWatchHistory => 'İzleme Geçmişi';
+
+  @override
+  String get homeSettingsLabel => 'Ayarlar';
+
+  @override
+  String get homeSignOut => 'Çıkış Yap';
+
+  @override
+  String get homeTabMovies => 'Filmler';
+
+  @override
+  String get homeTabTvShows => 'Diziler';
+
+  @override
+  String get homeTrendingThisWeek => 'Bu Hafta Trend';
+
+  @override
+  String get homeComingSoon => 'Yakında';
+
+  @override
+  String get homePopular => 'Popüler';
+
+  @override
+  String get homeTopRated => 'En Çok Beğenilen';
+
+  @override
+  String get homeAiringToday => 'Bugün Yayınlanan';
+
+  @override
+  String get homeOnTheAir => 'Yayında';
+
+  @override
+  String get homePopularShows => 'Popüler Diziler';
+
+  @override
+  String homeBecauseYouWatched(String title) {
+    return '$title izlediğiniz için';
+  }
+
+  @override
+  String get listDetailRenameTitle => 'Listeyi yeniden adlandır';
+
+  @override
+  String get listDetailDeleteTitle => 'Liste silinsin mi?';
+
+  @override
+  String get listDetailDeleteContent => 'Bu, listeyi kalıcı olarak siler.';
+
+  @override
+  String get listDetailDeleteConfirm => 'Sil';
+
+  @override
+  String get listDetailRenameMenuItem => 'Yeniden adlandır';
+
+  @override
+  String get listDetailDeleteMenuItem => 'Listeyi sil';
+
+  @override
+  String get listDetailEmptyTitle => 'Boş liste';
+
+  @override
+  String get listDetailEmptySubtitle =>
+      'Herhangi bir film veya diziyi açın ve \"Listeye ekle\"ye dokunun.';
+
+  @override
+  String get personKnownForTitle => 'Bilinen Yapımlar';
+
+  @override
+  String get personNoCredits => 'Herhangi bir yapım bulunamadı.';
+
+  @override
+  String get personBiographyTitle => 'Biyografi';
+
+  @override
+  String get personShowLess => 'Daha az göster';
+
+  @override
+  String get personReadMore => 'Devamını oku';
+
+  @override
+  String get listsNewListTitle => 'Yeni liste';
+
+  @override
+  String get listsNewListHint => 'örn. Tüm zamanların en iyi 10\'u';
+
+  @override
+  String get listsCreateAction => 'Oluştur';
+
+  @override
+  String get listsTitle => 'Listelerim';
+
+  @override
+  String get listsSignInTitle => 'Liste oluşturmak için giriş yapın';
+
+  @override
+  String get listsSignInSubtitle =>
+      '\"2026\'da izle\" gibi kendi koleksiyonlarınızı oluşturun.';
+
+  @override
+  String get listsEmptyTitle => 'Henüz liste yok';
+
+  @override
+  String get listsEmptySubtitle =>
+      'İlk listenizi oluşturmak için +\'ya dokunun.';
+
+  @override
+  String get listsUntitled => 'Adsız';
+
+  @override
+  String get listsTitleSingular => 'başlık';
+
+  @override
+  String get listsTitlePlural => 'başlık';
+
+  @override
+  String get listsCardEmptySubtitle =>
+      'Boş — herhangi bir film veya diziden başlık ekleyin.';
+
+  @override
+  String get mediaTypeTv => 'Dizi';
+
+  @override
+  String get mediaTypeMovie => 'Film';
+
+  @override
+  String get addToListTitle => 'Listeye ekle';
+
+  @override
+  String get addToListNewListButton => 'Yeni liste';
+
+  @override
+  String get addToListSignInMessage => 'Liste oluşturmak için giriş yapın.';
+
+  @override
+  String get addToListEmptyMessage =>
+      'Henüz liste yok — bir tane oluşturmak için \"Yeni liste\"ye dokunun.';
+
+  @override
+  String get addToListUntitled => 'Adsız';
+
+  @override
+  String get addToListTitleSingular => 'başlık';
+
+  @override
+  String get addToListTitlePlural => 'başlık';
+
+  @override
+  String get addToListCreateTitle => 'Yeni liste';
+
+  @override
+  String get addToListCreateHint => 'örn. 2026\'da izle';
+
+  @override
+  String get addToListCreateAction => 'Oluştur';
+
+  @override
+  String get historyTitle => 'İzleme Geçmişi';
+
+  @override
+  String historyWatchedRating(String rating) {
+    return 'İzlendi · ★ $rating';
+  }
+
+  @override
+  String get historyWatchedLabel => 'İzlendi';
+
+  @override
+  String historyFinishedSeason(int season, int count) {
+    return '$season. Sezon tamamlandı · $count bölüm';
+  }
+
+  @override
+  String historyEpisodeLine(int season, int episode, String episodeName) {
+    return 'S$season B$episode  $episodeName';
+  }
+
+  @override
+  String get historyEmptyTitle => 'Henüz geçmiş yok';
+
+  @override
+  String get historyEmptySubtitle =>
+      'İzlendi olarak işaretlediğiniz bölümler burada görünür.';
+
+  @override
+  String get historyAgoNow => 'şimdi';
+
+  @override
+  String historyAgoMinutes(int minutes) {
+    return '${minutes}dk';
+  }
+
+  @override
+  String historyAgoHours(int hours) {
+    return '${hours}sa';
+  }
+
+  @override
+  String historyAgoDays(int days) {
+    return '${days}g';
+  }
+
+  @override
+  String historyAgoWeeks(int weeks) {
+    return '${weeks}h';
+  }
+
+  @override
+  String get watchlistTitle => 'Filmlerim';
+
+  @override
+  String get watchlistCategoryToWatch => 'İzlenecek';
+
+  @override
+  String get watchlistCategoryWatched => 'İzlendi';
+
+  @override
+  String get watchlistCategoryFavorites => 'Favoriler';
+
+  @override
+  String watchlistEmptyMessage(String category) {
+    return '\"$category\" içinde henüz film yok.';
+  }
+
+  @override
+  String get watchlistUntitled => 'Adsız';
+
+  @override
+  String watchlistYourRating(String rating) {
+    return 'Puanınız: $rating';
+  }
+
+  @override
+  String watchlistReleaseDate(String date) {
+    return 'Vizyon: $date';
+  }
+
+  @override
+  String get gifPickerTitle => 'GIF Seç';
+
+  @override
+  String get gifSearchHint => 'GIF ara…';
+
+  @override
+  String get gifPoweredBy => 'GIPHY tarafından desteklenmektedir';
+
+  @override
+  String get gifLoadErrorTitle => 'GIF\'ler yüklenemedi';
+
+  @override
+  String get gifLoadErrorSubtitle =>
+      'Bağlantınızı kontrol edip tekrar deneyin.';
+
+  @override
+  String get gifEmptyTitle => 'GIF bulunamadı';
+
+  @override
+  String get gifEmptySubtitle => 'Farklı bir arama deneyin.';
+
+  @override
+  String get friendsActivityTitle => 'Arkadaş Etkinliği';
+
+  @override
+  String get friendsNoFriendsTitle => 'Henüz arkadaş yok';
+
+  @override
+  String get friendsNoFriendsSubtitle =>
+      'Ne izlediklerini görmek için Arkadaş Bul\'dan kişileri takip edin.';
+
+  @override
+  String get friendsQuietTitle => 'Şimdilik sessiz';
+
+  @override
+  String get friendsQuietSubtitle =>
+      'Arkadaşlarınızın son zamanlarda etkinliği yok.';
+
+  @override
+  String get friendsSomeoneFallback => 'Biri';
+
+  @override
+  String friendsActionWatchedMovie(String title) {
+    return '$title izledi';
+  }
+
+  @override
+  String friendsActionFinishedSeason(int season, String show) {
+    return '$show dizisinin $season. sezonunu tamamladı';
+  }
+
+  @override
+  String friendsActionWatchedEpisode(int season, int episode, String show) {
+    return '$show dizisinin S$season B$episode bölümünü izledi';
+  }
+
+  @override
+  String get friendsAgoNow => 'şimdi';
+
+  @override
+  String friendsAgoMinutes(int minutes) {
+    return '${minutes}dk';
+  }
+
+  @override
+  String friendsAgoHours(int hours) {
+    return '${hours}sa';
+  }
+
+  @override
+  String friendsAgoDays(int days) {
+    return '${days}g';
+  }
+
+  @override
+  String friendsAgoWeeks(int weeks) {
+    return '${weeks}h';
+  }
+
+  @override
+  String get blockedTitle => 'Engellenen Kullanıcılar';
+
+  @override
+  String get blockedDefaultUserName => 'WatchVerse kullanıcısı';
+
+  @override
+  String get blockedUnblockButton => 'Engeli kaldır';
+
+  @override
+  String get blockedEmptyTitle => 'Engellenen kullanıcı yok';
+
+  @override
+  String get blockedEmptySubtitle => 'Engellediğiniz kişiler burada görünür.';
+}

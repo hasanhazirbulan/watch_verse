@@ -1,0 +1,843 @@
+{
+  "@@locale": "en",
+  "appTitle": "WatchVerse",
+  "@appTitle": {
+    "description": "App name shown on the login header"
+  },
+  "loginSubtitle": "Track the movies & shows you love",
+  "emailHint": "Email",
+  "emailRequired": "Please enter your email",
+  "emailInvalid": "Enter a valid email",
+  "passwordHint": "Password",
+  "passwordRequiredLogin": "Please enter your password",
+  "logIn": "Log In",
+  "continueAsGuest": "Continue as guest",
+  "noAccountPrompt": "Don't have an account?",
+  "register": "Register",
+  "errorUserNotFound": "No user found for this email.",
+  "errorWrongPassword": "Incorrect email or password.",
+  "errorGeneric": "An error occurred.",
+  "errorSignIn": "Could not sign in: {error}",
+  "@errorSignIn": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "createAccountTitle": "Create account",
+  "createAccountSubtitle": "Join WatchVerse to start tracking",
+  "usernameHint": "Username",
+  "usernameRequired": "Please enter a username",
+  "confirmPasswordHint": "Confirm password",
+  "passwordRequiredRegister": "Please enter a password",
+  "passwordTooShort": "At least 6 characters",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "createAccountButton": "Create Account",
+  "alreadyHaveAccountPrompt": "Already have an account?",
+  "logInLowercase": "Log in",
+  "errorWeakPassword": "The password is too weak.",
+  "errorEmailInUse": "This email is already in use.",
+  "errorCreateAccount": "Could not create account: {error}",
+  "@errorCreateAccount": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsTitle": "Settings",
+  "selectAvatarTitle": "Select an Avatar",
+  "editNameTitle": "Edit Name",
+  "enterNewNameHint": "Enter new name",
+  "cancel": "Cancel",
+  "save": "Save",
+  "nameLabel": "Name: {name}",
+  "@nameLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "noName": "No Name",
+  "nameUpdated": "Name updated successfully!",
+  "failedFetchUser": "Failed to fetch user data: {error}",
+  "@failedFetchUser": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedUpdateName": "Failed to update name: {error}",
+  "@failedUpdateName": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "profilePictureUpdated": "Profile picture updated!",
+  "failedUpdateProfilePicture": "Failed to update profile picture: {error}",
+  "@failedUpdateProfilePicture": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "appearance": "Appearance",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "tvErrorLoadingShow": "Could not load show.\n{error}",
+  "@tvErrorLoadingShow": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "tvOverviewTitle": "Overview",
+  "tvSeasonsTitle": "Seasons",
+  "tvMoreLikeThisTitle": "More Like This",
+  "tvAddToListTooltip": "Add to list",
+  "tvAddToMyShows": "Add to My Shows",
+  "tvStatusCompleted": "Completed",
+  "tvStatusWatching": "Watching",
+  "tvInMyShows": "In My Shows",
+  "tvSeasonCountSingular": "{count} Season",
+  "@tvSeasonCountSingular": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "tvSeasonCountPlural": "{count} Seasons",
+  "@tvSeasonCountPlural": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "tvMarkPreviousTitle": "Mark previous episodes?",
+  "tvMarkPreviousQuestion": "You jumped ahead. Also mark the {episodesPhrase} as watched?",
+  "@tvMarkPreviousQuestion": {
+    "placeholders": {
+      "episodesPhrase": {
+        "type": "String"
+      }
+    }
+  },
+  "tvEpisodeCountSingular": "{count} earlier episode",
+  "@tvEpisodeCountSingular": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "tvEpisodeCountPlural": "{count} earlier episodes",
+  "@tvEpisodeCountPlural": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "tvNo": "No",
+  "tvYesMarkAll": "Yes, mark all",
+  "tvFinishedShow": "🎉 You finished {name}!",
+  "@tvFinishedShow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tvSeasonComplete": "🎉 Season {season} complete!",
+  "@tvSeasonComplete": {
+    "placeholders": {
+      "season": {
+        "type": "String"
+      }
+    }
+  },
+  "tvRemoveShowTitle": "Remove show?",
+  "tvRemoveShowContent": "This removes \"{name}\" and all watched-episode progress.",
+  "@tvRemoveShowContent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tvRemoveButton": "Remove",
+  "tvYourProgress": "Your progress",
+  "tvProgressFraction": "{watched} / {total}",
+  "@tvProgressFraction": {
+    "placeholders": {
+      "watched": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "tvPercentWatched": "{percent}% watched",
+  "@tvPercentWatched": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "tvYourRating": "Your rating",
+  "tvUpNextLabel": "UP NEXT",
+  "tvUpNextEpisodeLabel": "S{season} E{episode}  {name}",
+  "@tvUpNextEpisodeLabel": {
+    "placeholders": {
+      "season": {
+        "type": "String"
+      },
+      "episode": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tvSeasonNumberLabel": "Season {season}",
+  "@tvSeasonNumberLabel": {
+    "placeholders": {
+      "season": {
+        "type": "String"
+      }
+    }
+  },
+  "tvSeasonFraction": "{watched}/{total}",
+  "@tvSeasonFraction": {
+    "placeholders": {
+      "watched": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "tvUnmarkSeason": "Unmark season",
+  "tvMarkSeasonWatched": "Mark season watched",
+  "tvEpisodeNumberLabel": "{number}. {name}",
+  "@tvEpisodeNumberLabel": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tvNotAired": "Not aired",
+  "tvRuntimeMinutes": "{minutes}m",
+  "@tvRuntimeMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "profileUpdatePhotoError": "Could not update photo: {error}",
+  "@profileUpdatePhotoError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "profileEditNameTitle": "Edit name",
+  "profileYourNameHint": "Your name",
+  "profileSignInPrompt": "Sign in to view your profile.",
+  "profileTitle": "Profile",
+  "profileAddYourName": "Add your name",
+  "profileFriendsActivity": "Friends' Activity",
+  "profileSettings": "Settings",
+  "profileBlockedUsers": "Blocked Users",
+  "profileSignOut": "Sign Out",
+  "profileSignOutFailed": "Sign out failed: {error}",
+  "@profileSignOutFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "profileFollowers": "Followers",
+  "profileFollowing": "Following",
+  "profileFilms": "Films",
+  "profileShows": "Shows",
+  "profileEpisodes": "Episodes",
+  "profileYourYear": "Your {year}",
+  "@profileYourYear": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "profileWatched": "Watched",
+  "profileFavoritesTitle": "Favorites",
+  "profileMoviesTitle": "Movies",
+  "profileSeriesTitle": "Series",
+  "profileSeeAll": "See all",
+  "profileMovieLabel": "Movie",
+  "profileSeasonLabel": "Season {season}",
+  "@profileSeasonLabel": {
+    "placeholders": {
+      "season": {
+        "type": "String"
+      }
+    }
+  },
+  "profileEpisodeLabel": "S{season} · E{episode}",
+  "@profileEpisodeLabel": {
+    "placeholders": {
+      "season": {
+        "type": "String"
+      },
+      "episode": {
+        "type": "String"
+      }
+    }
+  },
+  "followListEmptyMessage": "Nobody here yet.",
+  "asyncErrorMessage": "Something went wrong.\n{error}",
+  "@asyncErrorMessage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "movieAddToList": "Add to list",
+  "movieTypeLabel": "Movie",
+  "movieOverview": "Overview",
+  "movieMoreLikeThis": "More Like This",
+  "movieToWatch": "To Watch",
+  "movieWatched": "Watched",
+  "movieYourRating": "Your rating",
+  "movieYourDiary": "Your Diary",
+  "movieLogAction": "Log",
+  "movieLogAgainAction": "Log again",
+  "movieDiaryEmpty": "No entries yet. Log a watch to start your diary — you can record rewatches with their own dates.",
+  "movieLogSheetTitle": "{action} \"{title}\"",
+  "@movieLogSheetTitle": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "movieRewatchAction": "Rewatch",
+  "movieWatchedOn": "Watched on",
+  "movieDiaryNote": "Diary note",
+  "movieDiaryNoteHint": "What did you think?",
+  "movieSaveRewatch": "Save rewatch",
+  "movieSaveToDiary": "Save to diary",
+  "upNextTitle": "Up Next",
+  "upNextMyShowsLabel": "My Shows",
+  "upNextFilterAll": "All",
+  "upNextStatusWatching": "Watching",
+  "upNextStatusWatchlist": "Watchlist",
+  "upNextStatusCompleted": "Completed",
+  "upNextFilterFavorites": "Favorites",
+  "upNextEmptyTitle": "Nothing here yet",
+  "upNextEmptySubtitle": "Track a show and mark episodes watched — your next episode to watch will show up here.",
+  "upNextNoShowsTitle": "No shows here",
+  "upNextNoShowsSubtitle": "Nothing matches \"{filter}\".",
+  "@upNextNoShowsSubtitle": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "upNextEpisodeProgress": "{watched} / {total} episodes",
+  "@upNextEpisodeProgress": {
+    "placeholders": {
+      "watched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "upNextSeasonEpisode": "S{season}  E{episode}",
+  "@upNextSeasonEpisode": {
+    "placeholders": {
+      "season": {
+        "type": "int"
+      },
+      "episode": {
+        "type": "int"
+      }
+    }
+  },
+  "upNextEpisodeFallbackName": "Episode {number}",
+  "@upNextEpisodeFallbackName": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "upNextWatchedCount": "{watched} / {total} watched",
+  "@upNextWatchedCount": {
+    "placeholders": {
+      "watched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "upNextAllCaughtUpSnackbar": "🎉 All caught up on {name}!",
+  "@upNextAllCaughtUpSnackbar": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "upNextMarkWatched": "Watched",
+  "upNextAllCaughtUp": "All caught up",
+  "upNextNewEpisodeToday": "New episode today",
+  "upNextNextEpisodeOn": "Next episode {date}",
+  "@upNextNextEpisodeOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "detailCastTitle": "Cast",
+  "detailWhereToWatch": "Where to Watch",
+  "detailReviewsTitle": "Reviews",
+  "detailReviewsSubtitle": "from the community",
+  "detailShowLess": "Show less",
+  "detailReadMore": "Read more",
+  "detailCouldNotOpenTrailer": "Could not open the trailer.",
+  "detailWatchTrailer": "Watch Trailer",
+  "discoverLoadErrorTitle": "Couldn't load titles",
+  "discoverLoadErrorSubtitle": "Check your connection and pull to refresh.",
+  "discoverEmptyTitle": "Nothing here",
+  "discoverEmptySubtitle": "No {genre} titles found.",
+  "@discoverEmptySubtitle": {
+    "placeholders": {
+      "genre": {
+        "type": "String"
+      }
+    }
+  },
+  "socialFollowing": "Following",
+  "socialFollow": "Follow",
+  "socialDefaultUserName": "WatchVerse user",
+  "commentWCommentsLabel": "Comments",
+  "commentWSpoilersHint": "Spoilers may be inside",
+  "commentWDelete": "Delete",
+  "commentWReport": "Report",
+  "commentWBlockUser": "Block user",
+  "commentWLike": "Like",
+  "commentWReportedSnackbar": "Reported. Thanks for flagging.",
+  "commentWBlockedSnackbar": "Blocked. You won't see their content.",
+  "commentWJustNow": "now",
+  "commentWMinutesAgo": "{minutes}m",
+  "@commentWMinutesAgo": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "commentWHoursAgo": "{hours}h",
+  "@commentWHoursAgo": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "commentWDaysAgo": "{days}d",
+  "@commentWDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "commentWWeeksAgo": "{weeks}w",
+  "@commentWWeeksAgo": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "episodeSeasonEpisodeLabel": "S{season} · E{episode}",
+  "@episodeSeasonEpisodeLabel": {
+    "placeholders": {
+      "season": {
+        "type": "int"
+      },
+      "episode": {
+        "type": "int"
+      }
+    }
+  },
+  "episodeRuntimeMinutes": "{minutes} min",
+  "@episodeRuntimeMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "episodeRatingStars": "★ {rating}",
+  "@episodeRatingStars": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      }
+    }
+  },
+  "episodeNotAiredYet": "Not aired yet",
+  "episodeOverviewTitle": "Overview",
+  "episodeWatchedLabel": "Watched",
+  "episodeMarkAsWatchedLabel": "Mark as watched",
+  "episodeYourRatingTitle": "Your rating",
+  "episodeYourNotesTitle": "Your notes",
+  "episodeNotesPrivateHint": "Private — only you can see this.",
+  "episodeNoteHint": "Write a comment about this episode…",
+  "episodeNoteSaved": "Note saved",
+  "episodeSaveNoteButton": "Save note",
+  "commentsAddLinkTitle": "Add GIF / image link",
+  "commentsLinkHint": "https://…",
+  "commentsAddAction": "Add",
+  "commentsUploadPhoto": "Upload photo",
+  "commentsSearchGifs": "Search GIFs",
+  "commentsAddGifByLink": "Add GIF / image by link",
+  "commentsCouldNotPost": "Could not post: {error}",
+  "@commentsCouldNotPost": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "commentsTitle": "Comments",
+  "commentsAddCommentHint": "Add a comment…",
+  "commentsSignInHint": "Sign in to join the conversation.",
+  "commentsEmptyTitle": "No comments yet",
+  "commentsEmptySubtitle": "Be the first to share what you thought.",
+  "pubProfileFavoriteFilms": "Favorite Films",
+  "pubProfileWatchedMovies": "Watched Movies",
+  "pubProfileShows": "Shows",
+  "pubProfileDefaultUserName": "WatchVerse user",
+  "pubProfileMemberLabel": "WatchVerse member",
+  "pubProfileFilms": "Films",
+  "pubProfileFollowers": "Followers",
+  "pubProfileFollowing": "Following",
+  "pubProfileAddedToList": "Added to your list",
+  "searchFilterAll": "Movies & TV",
+  "searchFilterMovies": "Movies",
+  "searchFilterTv": "TV Shows",
+  "searchFilterPeople": "People",
+  "searchFailed": "Search failed: {error}",
+  "@searchFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "searchTitle": "Search",
+  "searchHintPeople": "Search people by name…",
+  "searchHintTitles": "Search movies & TV shows…",
+  "searchFindFriendsTitle": "Find friends",
+  "searchFindFriendsSubtitle": "Search people by name and follow them to see what they watch.",
+  "searchFindNextWatchTitle": "Find your next watch",
+  "searchFindNextWatchSubtitle": "Search across movies and TV shows.",
+  "searchNoOneFoundTitle": "No one found",
+  "searchNoUsersMatched": "No users matched \"{query}\".\nNames are case-sensitive for now.",
+  "@searchNoUsersMatched": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "searchNoResultsTitle": "No results",
+  "searchNothingMatched": "Nothing matched \"{query}\".",
+  "@searchNothingMatched": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "homeAppTitle": "WatchVerse",
+  "homeGuestLabel": "Browsing as guest",
+  "homeMyLists": "My Lists",
+  "homeFriendsActivity": "Friends' Activity",
+  "homeWatchHistory": "Watch History",
+  "homeSettingsLabel": "Settings",
+  "homeSignOut": "Sign Out",
+  "homeTabMovies": "Movies",
+  "homeTabTvShows": "TV Shows",
+  "homeTrendingThisWeek": "Trending This Week",
+  "homeComingSoon": "Coming Soon",
+  "homePopular": "Popular",
+  "homeTopRated": "Top Rated",
+  "homeAiringToday": "Airing Today",
+  "homeOnTheAir": "On The Air",
+  "homePopularShows": "Popular Shows",
+  "homeBecauseYouWatched": "Because you watched {title}",
+  "@homeBecauseYouWatched": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "listDetailRenameTitle": "Rename list",
+  "listDetailDeleteTitle": "Delete list?",
+  "listDetailDeleteContent": "This permanently deletes the list.",
+  "listDetailDeleteConfirm": "Delete",
+  "listDetailRenameMenuItem": "Rename",
+  "listDetailDeleteMenuItem": "Delete list",
+  "listDetailEmptyTitle": "Empty list",
+  "listDetailEmptySubtitle": "Open any movie or show and tap \"Add to list\".",
+  "personKnownForTitle": "Known For",
+  "personNoCredits": "No credits found.",
+  "personBiographyTitle": "Biography",
+  "personShowLess": "Show less",
+  "personReadMore": "Read more",
+  "listsNewListTitle": "New list",
+  "listsNewListHint": "e.g. Top 10 of all time",
+  "listsCreateAction": "Create",
+  "listsTitle": "My Lists",
+  "listsSignInTitle": "Sign in to create lists",
+  "listsSignInSubtitle": "Curate your own collections like \"Watch in 2026\".",
+  "listsEmptyTitle": "No lists yet",
+  "listsEmptySubtitle": "Tap + to create your first list.",
+  "listsUntitled": "Untitled",
+  "listsTitleSingular": "title",
+  "listsTitlePlural": "titles",
+  "listsCardEmptySubtitle": "Empty — add titles from any movie or show.",
+  "mediaTypeTv": "TV",
+  "mediaTypeMovie": "Movie",
+  "addToListTitle": "Add to list",
+  "addToListNewListButton": "New list",
+  "addToListSignInMessage": "Sign in to create lists.",
+  "addToListEmptyMessage": "No lists yet — tap \"New list\" to make one.",
+  "addToListUntitled": "Untitled",
+  "addToListTitleSingular": "title",
+  "addToListTitlePlural": "titles",
+  "addToListCreateTitle": "New list",
+  "addToListCreateHint": "e.g. Watch in 2026",
+  "addToListCreateAction": "Create",
+  "historyTitle": "Watch History",
+  "historyWatchedRating": "Watched · ★ {rating}",
+  "@historyWatchedRating": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      }
+    }
+  },
+  "historyWatchedLabel": "Watched",
+  "historyFinishedSeason": "Finished Season {season} · {count} episodes",
+  "@historyFinishedSeason": {
+    "placeholders": {
+      "season": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "historyEpisodeLine": "S{season} E{episode}  {episodeName}",
+  "@historyEpisodeLine": {
+    "placeholders": {
+      "season": {
+        "type": "int"
+      },
+      "episode": {
+        "type": "int"
+      },
+      "episodeName": {
+        "type": "String"
+      }
+    }
+  },
+  "historyEmptyTitle": "No history yet",
+  "historyEmptySubtitle": "Episodes you mark as watched will show up here.",
+  "historyAgoNow": "now",
+  "historyAgoMinutes": "{minutes}m",
+  "@historyAgoMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "historyAgoHours": "{hours}h",
+  "@historyAgoHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "historyAgoDays": "{days}d",
+  "@historyAgoDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "historyAgoWeeks": "{weeks}w",
+  "@historyAgoWeeks": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "watchlistTitle": "My Movies",
+  "watchlistCategoryToWatch": "To Watch",
+  "watchlistCategoryWatched": "Watched",
+  "watchlistCategoryFavorites": "Favorites",
+  "watchlistEmptyMessage": "No movies in \"{category}\" yet.",
+  "@watchlistEmptyMessage": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "watchlistUntitled": "Untitled",
+  "watchlistYourRating": "Your rating: {rating}",
+  "@watchlistYourRating": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      }
+    }
+  },
+  "watchlistReleaseDate": "Release: {date}",
+  "@watchlistReleaseDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "gifPickerTitle": "Pick a GIF",
+  "gifSearchHint": "Search GIFs…",
+  "gifPoweredBy": "Powered by GIPHY",
+  "gifLoadErrorTitle": "Couldn't load GIFs",
+  "gifLoadErrorSubtitle": "Check your connection and try again.",
+  "gifEmptyTitle": "No GIFs found",
+  "gifEmptySubtitle": "Try a different search.",
+  "friendsActivityTitle": "Friends' Activity",
+  "friendsNoFriendsTitle": "No friends yet",
+  "friendsNoFriendsSubtitle": "Follow people from Find Friends to see what they watch.",
+  "friendsQuietTitle": "Quiet for now",
+  "friendsQuietSubtitle": "Your friends have no recent activity.",
+  "friendsSomeoneFallback": "Someone",
+  "friendsActionWatchedMovie": "watched {title}",
+  "@friendsActionWatchedMovie": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "friendsActionFinishedSeason": "finished Season {season} of {show}",
+  "@friendsActionFinishedSeason": {
+    "placeholders": {
+      "season": {
+        "type": "int"
+      },
+      "show": {
+        "type": "String"
+      }
+    }
+  },
+  "friendsActionWatchedEpisode": "watched S{season} E{episode} of {show}",
+  "@friendsActionWatchedEpisode": {
+    "placeholders": {
+      "season": {
+        "type": "int"
+      },
+      "episode": {
+        "type": "int"
+      },
+      "show": {
+        "type": "String"
+      }
+    }
+  },
+  "friendsAgoNow": "now",
+  "friendsAgoMinutes": "{minutes}m",
+  "@friendsAgoMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "friendsAgoHours": "{hours}h",
+  "@friendsAgoHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "friendsAgoDays": "{days}d",
+  "@friendsAgoDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "friendsAgoWeeks": "{weeks}w",
+  "@friendsAgoWeeks": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "blockedTitle": "Blocked Users",
+  "blockedDefaultUserName": "WatchVerse user",
+  "blockedUnblockButton": "Unblock",
+  "blockedEmptyTitle": "No blocked users",
+  "blockedEmptySubtitle": "People you block will appear here."
+}

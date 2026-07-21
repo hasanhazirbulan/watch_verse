@@ -1,0 +1,105 @@
+rules_version = '2';
+
+// Draft security rules matching the current client-side data model (see
+// lib/services/*.dart). NOT DEPLOYED — this file only takes effect once you
+// run `firebase deploy --only firestore:rules`. Test it against the
+// Firestore emulator / Rules Playground before relying on it in production;
+// it has not been run against real traffic.
+//
+// General shape: everything under a user's own `users/{uid}` doc and its
+// subcollections is owner-write, and either owner-read or "any signed-in
+// user can read" depending on whether another screen in the app needs to
+// read it (public profiles, friends' activity, search).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // --------------------------------------------------------------- users --
+    match /users/{userId} {
+      // Public-ish profile: search, public profile screen, and friends'
+      // activity all read other users' docs.
+      allow read: if isSignedIn();
+      allow create: if isOwner(userId);
+
+      // SIMPLIFICATION: follow()/unfollow()/block() in SocialService write
+      // directly to the *target* user's `followers` array from the client
+      // (arrayUnion/arrayRemove), so this can't be a strict isOwner()-only
+      // rule. This allows any signed-in user to modify ONLY the `followers`
+      // field of any user doc — it does not verify the array only gained/
+      // lost the requester's own uid. A follower-count-manipulation attack
+      // is possible (low severity for this app) until follow/unfollow is
+      // moved behind a Cloud Function that writes with the Admin SDK
+      // (which bypasses these rules entirely). Tightening this is tracked
+      // in plan.md.
+      allow update: if isOwner(userId) ||
+        (isSignedIn() &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followers']));
+      allow delete: if false;
+
+      // Private per-user movie/show library. Read is opened up because
+      // SocialService.userWatchedMovies/userFavoriteMovies/userShows read
+      // another user's subcollection directly (public profile screen).
+      match /movies/{movieId} {
+        allow read: if isSignedIn();
+        allow write: if isOwner(userId);
+      }
+
+      match /shows/{showId} {
+        allow read: if isSignedIn();
+        allow write: if isOwner(userId);
+
+        // Per-episode watched flags and private notes — never read
+        // cross-user in the app, so owner-only both ways.
+        match /watched/{episodeKey} {
+          allow read, write: if isOwner(userId);
+        }
+        match /notes/{episodeKey} {
+          allow read, write: if isOwner(userId);
+        }
+      }
+
+      // Watch-history timeline. Read is public-to-signed-in because
+      // SocialService.friendsActivity() reads followed users' activity.
+      match /activity/{activityId} {
+        allow read: if isSignedIn();
+        allow write: if isOwner(userId);
+      }
+
+      // Diary entries and custom lists are private — never read cross-user.
+      match /diary/{entryId} {
+        allow read, write: if isOwner(userId);
+      }
+      match /lists/{listId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ------------------------------------------------------------ comments --
+    // Public UGC on titles (CommentService). Anyone signed in can read and
+    // post; only the author can delete; likes are the one field anyone
+    // signed in may toggle on someone else's comment.
+    match /comments/{commentId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update: if isSignedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']);
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // ------------------------------------------------------------- reports --
+    // Moderation reports (CommentService.report()). Write-only from the
+    // client; reviewing them is a moderator/admin-console job (the Admin
+    // SDK bypasses these rules), so there is no client-facing read case.
+    match /reports/{reportId} {
+      allow create: if isSignedIn() && request.resource.data.reportedBy == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+  }
+}

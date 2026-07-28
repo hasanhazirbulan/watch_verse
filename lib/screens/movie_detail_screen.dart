@@ -6,11 +6,13 @@ import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/models/model.dart';
 import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/movie_service.dart';
+import 'package:watch_verse/services/poll_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/widgets/add_to_list_sheet.dart';
 import 'package:watch_verse/widgets/comment_widgets.dart';
 import 'package:watch_verse/widgets/detail_sections.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/widgets/poll_widgets.dart';
 
 class MovieDetailsScreen extends StatefulWidget {
   final Movie movie;
@@ -59,9 +61,12 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
 
   /// Opens the log sheet. When [rewatch] is true the fields start empty so the
   /// user can record a fresh watch on a chosen date (adds a new diary entry).
+  /// The first time a movie is logged as watched, follows up with the
+  /// "how was it?" poll.
   Future<void> _openLogSheet(BuildContext context, Map<String, dynamic>? data,
-      {bool rewatch = false}) {
-    return showModalBottomSheet(
+      {bool rewatch = false}) async {
+    final wasWatched = data?['status'] == 'watched';
+    final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
@@ -77,6 +82,40 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
         initialNote: rewatch ? '' : (data?['note'] ?? '') as String,
         onSave: (rating, note, date) =>
             _movies.logWatch(movie, rating: rating, note: note, watchedOn: date),
+      ),
+    );
+    if (saved == true && !wasWatched && mounted) {
+      _showPoll(context);
+    }
+  }
+
+  void _showPoll(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      backgroundColor: context.colors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (ctx) => ConstrainedBox(
+        constraints:
+            BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          child: FutureBuilder<List<CastMember>>(
+            future: _cast,
+            builder: (context, snap) => FutureBuilder<List<WatchProvider>>(
+              future: _providers,
+              builder: (context, provSnap) => PollCard(
+                pollId: PollService.instance.moviePollId(movie.id),
+                cast: snap.data ?? const [],
+                providers: provSnap.data ?? const [],
+                isMovie: true,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -221,6 +260,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   _ratingSection(),
                   const SizedBox(height: 22),
                   _diarySection(),
+                  const SizedBox(height: 22),
+                  _pollSection(),
                   const SizedBox(height: 26),
                   FutureBuilder<List<MediaItem>>(
                     future: _recs,
@@ -282,14 +323,24 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                _favPill(context, favorite,
-                    () => _movies.setFavorite(movie, !favorite)),
+                _favPill(context, favorite, () => _toggleFavorite(favorite)),
               ],
             ),
           ],
         );
       },
     );
+  }
+
+  Future<void> _toggleFavorite(bool currentlyFavorite) async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    final applied = await _movies.setFavorite(movie, !currentlyFavorite);
+    if (!applied) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.movieFavoriteLimitReached)),
+      );
+    }
   }
 
   Widget _statusPill({
@@ -448,6 +499,29 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     );
   }
 
+  // "How was it?" poll — visible once the movie has been logged as watched,
+  // so users can answer/revisit it without waiting for the auto-popup.
+  Widget _pollSection() {
+    return StreamBuilder<Map<String, dynamic>?>(
+      stream: _movies.movieStream(movie.id),
+      builder: (context, snap) {
+        if (snap.data?['status'] != 'watched') return const SizedBox.shrink();
+        return FutureBuilder<List<CastMember>>(
+          future: _cast,
+          builder: (context, castSnap) => FutureBuilder<List<WatchProvider>>(
+            future: _providers,
+            builder: (context, provSnap) => PollCard(
+              pollId: PollService.instance.moviePollId(movie.id),
+              cast: castSnap.data ?? const [],
+              providers: provSnap.data ?? const [],
+              isMovie: true,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _diaryTile(BuildContext context, Map<String, dynamic> e) {
     final rating = ((e['rating'] ?? 0) as num).toDouble();
     final note = (e['note'] ?? '') as String;
@@ -581,7 +655,7 @@ class _DiarySheetState extends State<_DiarySheet> {
     final nav = Navigator.of(context);
     try {
       await widget.onSave(_rating, _noteCtrl.text.trim(), _date);
-      nav.pop();
+      nav.pop(true);
     } catch (_) {
       if (mounted) setState(() => _saving = false);
     }

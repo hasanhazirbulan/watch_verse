@@ -278,6 +278,60 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settingsTitle;
 
+  /// No description provided for @settingsAccountSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get settingsAccountSection;
+
+  /// No description provided for @settingsAppInfoSection.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAppInfoSection;
+
+  /// No description provided for @settingsAppVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String settingsAppVersion(String version);
+
+  /// No description provided for @settingsDeleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get settingsDeleteAccount;
+
+  /// No description provided for @settingsDeleteAccountConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your account?'**
+  String get settingsDeleteAccountConfirmTitle;
+
+  /// No description provided for @settingsDeleteAccountConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This can\'t be undone. Your account and sign-in will be permanently deleted.'**
+  String get settingsDeleteAccountConfirmBody;
+
+  /// No description provided for @settingsDeleteAccountAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get settingsDeleteAccountAction;
+
+  /// No description provided for @settingsDeleteAccountRequiresRecentLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'For your security, this requires a recent sign-in. Please sign out and sign back in, then try again.'**
+  String get settingsDeleteAccountRequiresRecentLogin;
+
+  /// No description provided for @settingsDeleteAccountError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete account: {error}'**
+  String settingsDeleteAccountError(String error);
+
   /// No description provided for @selectAvatarTitle.
   ///
   /// In en, this message translates to:
@@ -596,11 +650,23 @@ abstract class AppLocalizations {
   /// **'Edit name'**
   String get profileEditNameTitle;
 
+  /// No description provided for @profileEditProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get profileEditProfileTitle;
+
   /// No description provided for @profileYourNameHint.
   ///
   /// In en, this message translates to:
   /// **'Your name'**
   String get profileYourNameHint;
+
+  /// No description provided for @profileSaveNameError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save name: {error}'**
+  String profileSaveNameError(String error);
 
   /// No description provided for @profileSignInPrompt.
   ///
@@ -695,8 +761,14 @@ abstract class AppLocalizations {
   /// No description provided for @profileFavoritesTitle.
   ///
   /// In en, this message translates to:
-  /// **'Favorites'**
+  /// **'Top 3 Favorite Films'**
   String get profileFavoritesTitle;
+
+  /// No description provided for @profileFavoritesEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the ♥ on a movie\'s page to add it here'**
+  String get profileFavoritesEmptyHint;
 
   /// No description provided for @profileMoviesTitle.
   ///
@@ -853,6 +925,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save to diary'**
   String get movieSaveToDiary;
+
+  /// No description provided for @movieFavoriteLimitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'You can only pick 3 favorite films — remove one first.'**
+  String get movieFavoriteLimitReached;
+
+  /// No description provided for @pollSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How was it?'**
+  String get pollSectionTitle;
+
+  /// No description provided for @pollRatingQuestionMovie.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate this movie'**
+  String get pollRatingQuestionMovie;
+
+  /// No description provided for @pollRatingQuestionEpisode.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate this episode'**
+  String get pollRatingQuestionEpisode;
+
+  /// No description provided for @pollRatingBad.
+  ///
+  /// In en, this message translates to:
+  /// **'Bad'**
+  String get pollRatingBad;
+
+  /// No description provided for @pollRatingOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get pollRatingOk;
+
+  /// No description provided for @pollRatingGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get pollRatingGood;
+
+  /// No description provided for @pollRatingGreat.
+  ///
+  /// In en, this message translates to:
+  /// **'Great'**
+  String get pollRatingGreat;
+
+  /// No description provided for @pollRatingWow.
+  ///
+  /// In en, this message translates to:
+  /// **'Wow'**
+  String get pollRatingWow;
+
+  /// No description provided for @pollPlatformQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Where did you watch it?'**
+  String get pollPlatformQuestion;
+
+  /// No description provided for @pollEmotionQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How did it make you feel?'**
+  String get pollEmotionQuestion;
+
+  /// No description provided for @pollCharacterQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite character?'**
+  String get pollCharacterQuestion;
+
+  /// No description provided for @pollPlatformCinema.
+  ///
+  /// In en, this message translates to:
+  /// **'Cinema'**
+  String get pollPlatformCinema;
+
+  /// No description provided for @pollPlatformNetflix.
+  ///
+  /// In en, this message translates to:
+  /// **'Netflix'**
+  String get pollPlatformNetflix;
+
+  /// No description provided for @pollPlatformDisneyPlus.
+  ///
+  /// In en, this message translates to:
+  /// **'Disney+'**
+  String get pollPlatformDisneyPlus;
+
+  /// No description provided for @pollPlatformPrimeVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Prime Video'**
+  String get pollPlatformPrimeVideo;
+
+  /// No description provided for @pollPlatformPirate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pirated'**
+  String get pollPlatformPirate;
+
+  /// No description provided for @pollPlatformOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get pollPlatformOther;
+
+  /// No description provided for @pollEmotionHappy.
+  ///
+  /// In en, this message translates to:
+  /// **'Happy'**
+  String get pollEmotionHappy;
+
+  /// No description provided for @pollEmotionConfusing.
+  ///
+  /// In en, this message translates to:
+  /// **'Confusing'**
+  String get pollEmotionConfusing;
+
+  /// No description provided for @pollEmotionSad.
+  ///
+  /// In en, this message translates to:
+  /// **'Sad'**
+  String get pollEmotionSad;
+
+  /// No description provided for @pollEmotionScary.
+  ///
+  /// In en, this message translates to:
+  /// **'Scary'**
+  String get pollEmotionScary;
+
+  /// No description provided for @pollEmotionFrustrating.
+  ///
+  /// In en, this message translates to:
+  /// **'Frustrating'**
+  String get pollEmotionFrustrating;
+
+  /// No description provided for @pollEmotionShocking.
+  ///
+  /// In en, this message translates to:
+  /// **'Shocking'**
+  String get pollEmotionShocking;
+
+  /// No description provided for @pollEmotionExciting.
+  ///
+  /// In en, this message translates to:
+  /// **'Exciting'**
+  String get pollEmotionExciting;
+
+  /// No description provided for @pollEmotionBoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Boring'**
+  String get pollEmotionBoring;
 
   /// No description provided for @upNextTitle.
   ///

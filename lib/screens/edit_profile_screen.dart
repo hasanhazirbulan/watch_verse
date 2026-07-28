@@ -1,0 +1,216 @@
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:watch_verse/l10n/app_localizations.dart';
+import 'package:watch_verse/theme/app_theme.dart';
+
+/// Dedicated profile-photo/name editor, reached from Settings and kept off
+/// the main profile view so that screen stays a read-only summary. Fetches
+/// its own starting values so the caller doesn't need a Firestore read just
+/// to open this page.
+class EditProfileScreen extends StatefulWidget {
+  const EditProfileScreen({super.key});
+
+  @override
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
+}
+
+class _EditProfileScreenState extends State<EditProfileScreen> {
+  final TextEditingController _nameController = TextEditingController();
+  String _photoURL = '';
+  bool _loading = true;
+  bool _uploadingPhoto = false;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+  }
+
+  Future<void> _fetchUserData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (!mounted) return;
+      setState(() {
+        _nameController.text = (doc.data()?['name'] ?? '') as String;
+        _photoURL = (doc.data()?['photoURL'] ?? '') as String;
+        _loading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _changePhoto() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 600,
+        imageQuality: 80,
+      );
+      if (picked == null) return;
+      setState(() => _uploadingPhoto = true);
+      final ref = FirebaseStorage.instance.ref(
+        'profile_images/${user.uid}.jpg',
+      );
+      await ref.putFile(File(picked.path));
+      final url = await ref.getDownloadURL();
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'photoURL': url,
+      }, SetOptions(merge: true));
+      if (!mounted) return;
+      setState(() {
+        _photoURL = url;
+        _uploadingPhoto = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
+      setState(() => _uploadingPhoto = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.profileUpdatePhotoError(e.toString()))),
+      );
+    }
+  }
+
+  Future<void> _save() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _saving = true);
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'name': _nameController.text.trim(),
+      }, SetOptions(merge: true));
+      if (!mounted) return;
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.profileSaveNameError(e.toString()))),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final user = FirebaseAuth.instance.currentUser;
+    return Scaffold(
+      backgroundColor: context.colors.background,
+      appBar: AppBar(
+        title: Text(l10n.profileEditProfileTitle),
+        actions: [
+          TextButton(
+            onPressed: _saving ? null : _save,
+            child: Text(
+              l10n.save,
+              style: TextStyle(
+                color: context.colors.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: _uploadingPhoto ? null : _changePhoto,
+                    child: Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: context.colors.brandGradient,
+                          ),
+                          child: CircleAvatar(
+                            radius: 52,
+                            backgroundColor: context.colors.surfaceAlt,
+                            backgroundImage: _photoURL.isNotEmpty
+                                ? NetworkImage(_photoURL)
+                                : null,
+                            child: _uploadingPhoto
+                                ? const CircularProgressIndicator()
+                                : (_photoURL.isEmpty
+                                      ? Text(
+                                          (user?.email ?? '?')
+                                              .substring(0, 1)
+                                              .toUpperCase(),
+                                          style: const TextStyle(
+                                            fontSize: 34,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        )
+                                      : null),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: context.colors.primary,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: context.colors.background,
+                              width: 2.5,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt_rounded,
+                            size: 15,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  TextField(
+                    controller: _nameController,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: l10n.profileYourNameHint,
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      user?.email ?? '',
+                      style: TextStyle(color: context.colors.textSecondary),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+}

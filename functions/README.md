@@ -1,10 +1,17 @@
 # WatchVerse Cloud Functions
 
-Sends push notifications for new followers and friends' activity (see
-`src/index.ts` for the two triggers). This scaffold has **not been deployed**
-— the Flutter app works fully without it; `NotificationService` on the client
-side already registers each user's device token, but nothing sends a push
-until these functions are deployed.
+Sends push notifications for new followers and friends' activity, and
+auto-hides reported comments (see `src/index.ts`). This scaffold has **not
+been deployed** — the Flutter app works fully without it; `NotificationService`
+on the client side already registers each user's device token, but nothing
+sends a push until these functions are deployed.
+
+`onUserDeleted` is also here, but it's optional: `SettingsScreen`'s
+delete-account flow already purges every `users/{uid}` subcollection itself
+(client-side, no Admin SDK needed, since the schema is fixed) before deleting
+the Auth account. `onUserDeleted` only exists as a backstop for the rare case
+where the app is killed mid-purge — skip deploying it if you're staying on
+the free Spark plan.
 
 ## Prerequisites
 

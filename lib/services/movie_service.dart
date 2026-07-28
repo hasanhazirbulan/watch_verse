@@ -26,6 +26,10 @@ class MovieService {
           {required FirebaseFirestore firestore, required FirebaseAuth auth}) =>
       MovieService._(firestore: firestore, auth: auth);
 
+  /// Letterboxd-style cap: a showcase of exactly 3 favorite films, not an
+  /// unbounded list.
+  static const maxFavorites = 3;
+
   final FirebaseFirestore _db;
   final FirebaseAuth _auth;
   String? get _uid => _auth.currentUser?.uid;
@@ -150,8 +154,25 @@ class MovieService {
     }
   }
 
-  Future<void> setFavorite(Movie m, bool favorite) =>
-      _upsert(m, {'favorite': favorite});
+  /// Marks/unmarks a movie as one of the user's top favorites. Returns `false`
+  /// (without writing) when trying to favorite a 4th film while 3 are already
+  /// picked — the caller should prompt the user to unpick one first.
+  Future<bool> setFavorite(Movie m, bool favorite) async {
+    if (favorite) {
+      final col = _col;
+      if (col != null) {
+        final current =
+            await col.where('favorite', isEqualTo: true).get();
+        final alreadyFavorite =
+            current.docs.any((d) => d.id == m.id.toString());
+        if (!alreadyFavorite && current.docs.length >= maxFavorites) {
+          return false;
+        }
+      }
+    }
+    await _upsert(m, {'favorite': favorite});
+    return true;
+  }
 
   Future<void> setRating(Movie m, double rating) =>
       _upsert(m, {'rating': rating});

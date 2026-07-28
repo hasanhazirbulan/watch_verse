@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
+import 'package:watch_verse/services/api_service.dart';
+import 'package:watch_verse/services/poll_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/widgets/poll_widgets.dart';
 
 class EpisodeDetailScreen extends StatefulWidget {
   final TvShow show;
@@ -20,6 +23,15 @@ class _EpisodeDetailScreenState extends State<EpisodeDetailScreen> {
   final TvTrackingService _tracking = TvTrackingService.instance;
   final TextEditingController _noteController = TextEditingController();
   bool _noteSeeded = false;
+
+  late final Future<List<CastMember>> _cast = APIservices()
+      .getCredits(MediaType.tv, widget.show.id)
+      .catchError((_) => <CastMember>[]);
+  late final Future<List<WatchProvider>> _providers = APIservices()
+      .getWatchProviders(MediaType.tv, widget.show.id,
+          WidgetsBinding.instance.platformDispatcher.locale.countryCode ??
+              'US')
+      .catchError((_) => <WatchProvider>[]);
 
   TvShow get show => widget.show;
   Episode get ep => widget.episode;
@@ -79,6 +91,8 @@ class _EpisodeDetailScreenState extends State<EpisodeDetailScreen> {
           ],
           const SizedBox(height: 22),
           _noteAndRating(),
+          const SizedBox(height: 22),
+          _pollSection(),
         ],
       ),
     );
@@ -93,7 +107,7 @@ class _EpisodeDetailScreenState extends State<EpisodeDetailScreen> {
         return SizedBox(
           width: double.infinity,
           child: GestureDetector(
-            onTap: () => _tracking.setEpisodeWatched(show, ep, !watched),
+            onTap: () => _toggleWatched(watched),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
@@ -122,6 +136,68 @@ class _EpisodeDetailScreenState extends State<EpisodeDetailScreen> {
                           fontSize: 15)),
                 ],
               ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _toggleWatched(bool currentlyWatched) async {
+    await _tracking.setEpisodeWatched(show, ep, !currentlyWatched);
+    if (!currentlyWatched && mounted) _showPoll();
+  }
+
+  void _showPoll() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      backgroundColor: context.colors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (ctx) => ConstrainedBox(
+        constraints:
+            BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          child: FutureBuilder<List<CastMember>>(
+            future: _cast,
+            builder: (context, snap) => FutureBuilder<List<WatchProvider>>(
+              future: _providers,
+              builder: (context, provSnap) => PollCard(
+                pollId: PollService.instance.episodePollId(
+                    show.id, ep.seasonNumber, ep.episodeNumber),
+                cast: snap.data ?? const [],
+                providers: provSnap.data ?? const [],
+                isMovie: false,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // "How was it?" poll — visible once this episode has been watched, so
+  // users can answer/revisit it without waiting for the auto-popup.
+  Widget _pollSection() {
+    return StreamBuilder<Set<String>>(
+      stream: _tracking.watchedKeysStream(show.id),
+      builder: (context, snap) {
+        final watched = (snap.data ?? const <String>{}).contains(ep.key);
+        if (!watched) return const SizedBox.shrink();
+        return FutureBuilder<List<CastMember>>(
+          future: _cast,
+          builder: (context, castSnap) => FutureBuilder<List<WatchProvider>>(
+            future: _providers,
+            builder: (context, provSnap) => PollCard(
+              pollId: PollService.instance.episodePollId(
+                  show.id, ep.seasonNumber, ep.episodeNumber),
+              cast: castSnap.data ?? const [],
+              providers: provSnap.data ?? const [],
+              isMovie: false,
             ),
           ),
         );

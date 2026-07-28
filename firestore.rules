@@ -41,7 +41,11 @@ service cloud.firestore {
       allow update: if isOwner(userId) ||
         (isSignedIn() &&
          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followers']));
-      allow delete: if false;
+      // Lets SettingsScreen's account-deletion flow remove the profile doc.
+      // Subcollections aren't cascade-deleted by this (Firestore doesn't do
+      // that), so they're orphaned rather than purged — a full wipe needs a
+      // Cloud Function with the Admin SDK.
+      allow delete: if isOwner(userId);
 
       // Private per-user movie/show library. Read is opened up because
       // SocialService.userWatchedMovies/userFavoriteMovies/userShows read
@@ -79,6 +83,32 @@ service cloud.firestore {
       match /lists/{listId} {
         allow read, write: if isOwner(userId);
       }
+
+      // This user's own answers to the post-watch "how was it?" poll —
+      // never read cross-user (the aggregate in /polls covers that).
+      match /pollAnswers/{pollId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ---------------------------------------------------------------- polls --
+    // Cross-user aggregate counts for the post-watch poll (PollService).
+    // Anyone signed in can read (to show live percentages) and increment the
+    // count/total fields (to cast a vote) — same manipulation caveat as the
+    // `followers` field above: any signed-in user could inflate these for-fun
+    // stats, which is an acceptable, low-severity tradeoff for this app.
+    match /polls/{pollId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'ratingCounts', 'ratingTotal',
+          'platformCounts', 'platformTotal',
+          'emotionCounts', 'emotionTotal',
+          'characterCounts', 'characterTotal',
+          'updatedAt'
+        ]);
+      allow delete: if false;
     }
 
     // ------------------------------------------------------------ comments --

@@ -103,6 +103,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTitle => 'Settings';
 
   @override
+  String get settingsAccountSection => 'Account';
+
+  @override
+  String get settingsAppInfoSection => 'About';
+
+  @override
+  String settingsAppVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get settingsDeleteAccount => 'Delete Account';
+
+  @override
+  String get settingsDeleteAccountConfirmTitle => 'Delete your account?';
+
+  @override
+  String get settingsDeleteAccountConfirmBody =>
+      'This can\'t be undone. Your account and sign-in will be permanently deleted.';
+
+  @override
+  String get settingsDeleteAccountAction => 'Delete';
+
+  @override
+  String get settingsDeleteAccountRequiresRecentLogin =>
+      'For your security, this requires a recent sign-in. Please sign out and sign back in, then try again.';
+
+  @override
+  String settingsDeleteAccountError(String error) {
+    return 'Could not delete account: $error';
+  }
+
+  @override
   String get selectAvatarTitle => 'Select an Avatar';
 
   @override
@@ -304,7 +337,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileEditNameTitle => 'Edit name';
 
   @override
+  String get profileEditProfileTitle => 'Edit Profile';
+
+  @override
   String get profileYourNameHint => 'Your name';
+
+  @override
+  String profileSaveNameError(String error) {
+    return 'Could not save name: $error';
+  }
 
   @override
   String get profileSignInPrompt => 'Sign in to view your profile.';
@@ -356,7 +397,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileWatched => 'Watched';
 
   @override
-  String get profileFavoritesTitle => 'Favorites';
+  String get profileFavoritesTitle => 'Top 3 Favorite Films';
+
+  @override
+  String get profileFavoritesEmptyHint =>
+      'Tap the ♥ on a movie\'s page to add it here';
 
   @override
   String get profileMoviesTitle => 'Movies';
@@ -444,6 +489,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get movieSaveToDiary => 'Save to diary';
+
+  @override
+  String get movieFavoriteLimitReached =>
+      'You can only pick 3 favorite films — remove one first.';
+
+  @override
+  String get pollSectionTitle => 'How was it?';
+
+  @override
+  String get pollRatingQuestionMovie => 'Rate this movie';
+
+  @override
+  String get pollRatingQuestionEpisode => 'Rate this episode';
+
+  @override
+  String get pollRatingBad => 'Bad';
+
+  @override
+  String get pollRatingOk => 'OK';
+
+  @override
+  String get pollRatingGood => 'Good';
+
+  @override
+  String get pollRatingGreat => 'Great';
+
+  @override
+  String get pollRatingWow => 'Wow';
+
+  @override
+  String get pollPlatformQuestion => 'Where did you watch it?';
+
+  @override
+  String get pollEmotionQuestion => 'How did it make you feel?';
+
+  @override
+  String get pollCharacterQuestion => 'Favorite character?';
+
+  @override
+  String get pollPlatformCinema => 'Cinema';
+
+  @override
+  String get pollPlatformNetflix => 'Netflix';
+
+  @override
+  String get pollPlatformDisneyPlus => 'Disney+';
+
+  @override
+  String get pollPlatformPrimeVideo => 'Prime Video';
+
+  @override
+  String get pollPlatformPirate => 'Pirated';
+
+  @override
+  String get pollPlatformOther => 'Other';
+
+  @override
+  String get pollEmotionHappy => 'Happy';
+
+  @override
+  String get pollEmotionConfusing => 'Confusing';
+
+  @override
+  String get pollEmotionSad => 'Sad';
+
+  @override
+  String get pollEmotionScary => 'Scary';
+
+  @override
+  String get pollEmotionFrustrating => 'Frustrating';
+
+  @override
+  String get pollEmotionShocking => 'Shocking';
+
+  @override
+  String get pollEmotionExciting => 'Exciting';
+
+  @override
+  String get pollEmotionBoring => 'Boring';
 
   @override
   String get upNextTitle => 'Up Next';

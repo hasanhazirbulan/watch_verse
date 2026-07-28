@@ -24,15 +24,21 @@ class _ShowBundle {
 ///                (advances when you mark it), TV-Time style.
 ///   • My Shows — every show you track, with progress.
 class UpNextScreen extends StatefulWidget {
-  const UpNextScreen({super.key});
+  final int initialTab; // 0 = Up Next, 1 = My Shows
+  const UpNextScreen({super.key, this.initialTab = 0});
 
   @override
   State<UpNextScreen> createState() => _UpNextScreenState();
 }
 
 class _UpNextScreenState extends State<UpNextScreen> {
+  // TV Time marks a fully-finished show with a solid purple bar under its
+  // poster; kept as a fixed brand-independent color (not a theme token)
+  // since it signals a specific status, not the app's accent.
+  static const _finishedLineColor = Color(0xFF8B5CF6);
+
   final APIservices _api = APIservices();
-  int _tab = 0; // 0 = Up Next, 1 = My Shows
+  late int _tab = widget.initialTab;
   int _myShowsFilter = 0;
 
   List<String> get _showFilters {
@@ -253,14 +259,56 @@ class _UpNextScreenState extends State<UpNextScreen> {
         ),
         child: Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: SizedBox(
-                width: 64,
-                height: 96,
-                child: TmdbImage(
-                    url: Tmdb.poster((data['posterPath'] ?? '') as String,
-                        size: 'w185')),
+            SizedBox(
+              width: 64,
+              height: 96,
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: TmdbImage(
+                        url: Tmdb.poster((data['posterPath'] ?? '') as String,
+                            size: 'w185')),
+                  ),
+                  if (status == 'completed')
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        height: 4,
+                        decoration: const BoxDecoration(
+                          color: _finishedLineColor,
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(10),
+                            bottomRight: Radius.circular(10),
+                          ),
+                        ),
+                      ),
+                    )
+                  else if (status == 'watching' && progress > 0)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(10),
+                          bottomRight: Radius.circular(10),
+                        ),
+                        child: Stack(
+                          children: [
+                            Container(height: 4, color: Colors.black38),
+                            FractionallySizedBox(
+                              widthFactor: progress.clamp(0.0, 1.0),
+                              child: Container(
+                                  height: 4, color: context.colors.primary),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
             const SizedBox(width: 12),

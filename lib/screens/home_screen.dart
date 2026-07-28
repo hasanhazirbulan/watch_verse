@@ -4,12 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
+import 'package:watch_verse/screens/blocked_users_screen.dart';
 import 'package:watch_verse/screens/discover_screen.dart';
 import 'package:watch_verse/screens/friends_activity_screen.dart';
 import 'package:watch_verse/screens/history_screen.dart';
 import 'package:watch_verse/screens/lists_screen.dart';
 import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/movie_service.dart';
+import 'package:watch_verse/services/notification_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
@@ -87,7 +89,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildDrawer() {
     final l10n = AppLocalizations.of(context)!;
-    final user = FirebaseAuth.instance.currentUser;
     return Drawer(
       backgroundColor: context.colors.surface,
       child: SafeArea(
@@ -107,12 +108,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           fontSize: 24,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 0.5)),
-                  const SizedBox(height: 4),
-                  Text(user?.email ?? l10n.homeGuestLabel,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          color: Colors.white70, fontSize: 13)),
                 ],
               ),
             ),
@@ -135,6 +130,13 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.push(context,
                   MaterialPageRoute(builder: (_) => const HistoryScreen()));
             }),
+            _drawerItem(Icons.block_rounded, l10n.profileBlockedUsers, () {
+              _scaffoldKey.currentState?.closeDrawer();
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const BlockedUsersScreen()));
+            }),
             _drawerItem(Icons.settings_rounded, l10n.homeSettingsLabel, () {
               _scaffoldKey.currentState?.closeDrawer();
               Navigator.of(context, rootNavigator: true)
@@ -145,8 +147,19 @@ class _HomeScreenState extends State<HomeScreen> {
             _drawerItem(Icons.logout_rounded, l10n.homeSignOut, () async {
               _scaffoldKey.currentState?.closeDrawer();
               final rootNav = Navigator.of(context, rootNavigator: true);
-              await FirebaseAuth.instance.signOut();
-              rootNav.pushNamedAndRemoveUntil('/login', (r) => false);
+              final messenger = ScaffoldMessenger.of(context);
+              final uid = FirebaseAuth.instance.currentUser?.uid;
+              try {
+                if (uid != null) {
+                  await NotificationService.instance.clearToken(uid);
+                }
+                await FirebaseAuth.instance.signOut();
+                rootNav.pushNamedAndRemoveUntil('/login', (r) => false);
+              } catch (e) {
+                messenger.showSnackBar(
+                  SnackBar(content: Text(l10n.profileSignOutFailed(e.toString()))),
+                );
+              }
             }, danger: true),
             const SizedBox(height: 12),
           ],

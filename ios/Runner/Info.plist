@@ -53,5 +53,16 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<!-- Required by image_picker (profile photo upload) — App Store review
+	     rejects any app that calls a protected API without the matching
+	     usage-description string, and iOS itself will crash the app on
+	     first access without it. -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>WatchVerse needs access to your photos so you can set a profile picture.</string>
+	<!-- Declares the app only uses HTTPS/TLS (Firebase, TMDB), which is
+	     exempt from export-compliance documentation — skips the encryption
+	     question App Store Connect otherwise asks on every build upload. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

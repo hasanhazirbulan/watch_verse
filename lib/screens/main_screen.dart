@@ -16,6 +16,12 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  // The nav bar's icons are a fixed white (readable against the colored
+  // "bump" around the selected tab), so its resting background has to stay
+  // a fixed dark tone too — tying it to context.colors.surface made it pure
+  // white in light mode, hiding every unselected icon.
+  static const _navBarColor = Color(0xFF15171E);
+
   int _selectedIndex = 0;
 
   // One Navigator per tab so detail pages push *inside* the tab — the bottom
@@ -75,7 +81,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
         bottomNavigationBar: CurvedNavigationBar(
           backgroundColor: Colors.transparent,
-          color: context.colors.surface,
+          color: _navBarColor,
           buttonBackgroundColor: context.colors.primary,
           height: 62,
           animationDuration: const Duration(milliseconds: 300),

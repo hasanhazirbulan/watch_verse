@@ -18,6 +18,13 @@
  *     reported comment once it collects 3+ reports. This uses the Admin
  *     SDK, so it bypasses firestore.rules entirely — it's the only way a
  *     comment's `hidden` field gets set (no client path does).
+ *   - onUserDeleted: fires when a Firebase Auth account is deleted. NOT the
+ *     primary cleanup path — SettingsScreen's delete-account flow already
+ *     purges every `users/{uid}` subcollection itself before calling
+ *     `user.delete()` (the schema is fixed, so the client can enumerate it
+ *     without an Admin SDK). This is only a backstop for the case where the
+ *     app is killed mid-purge, using `recursiveDelete` to catch anything
+ *     left behind. Safe to skip deploying if you're not on Blaze.
  */
 
 import { initializeApp } from "firebase-admin/app";
@@ -25,6 +32,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { getMessaging } from "firebase-admin/messaging";
 import { onDocumentCreated, onDocumentWritten } from "firebase-functions/v2/firestore";
 import { logger } from "firebase-functions/v2";
+import * as functionsV1 from "firebase-functions/v1";
 
 initializeApp();
 const db = getFirestore();
@@ -112,4 +120,9 @@ export const onCommentReported = onDocumentCreated("reports/{reportId}", async (
     await db.collection("comments").doc(commentId).set({ hidden: true }, { merge: true });
     logger.info(`Auto-hid comment ${commentId} after ${reportsSnap.data().count} reports`);
   }
+});
+
+export const onUserDeleted = functionsV1.auth.user().onDelete(async (user) => {
+  await db.recursiveDelete(db.collection("users").doc(user.uid));
+  logger.info(`Purged Firestore data for deleted user ${user.uid}`);
 });

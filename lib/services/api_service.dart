@@ -18,6 +18,7 @@ class APIservices {
   Uri _uri(String path, [Map<String, String>? params]) {
     if (apiKey.isEmpty) {
       throw StateError(
+
         'TMDB_API_KEY is not set. Run with '
         '--dart-define-from-file=secrets.json (see secrets.example.json).',
       );

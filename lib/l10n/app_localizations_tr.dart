@@ -104,6 +104,40 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsTitle => 'Ayarlar';
 
   @override
+  String get settingsAccountSection => 'Hesap';
+
+  @override
+  String get settingsAppInfoSection => 'Hakkında';
+
+  @override
+  String settingsAppVersion(String version) {
+    return 'Sürüm $version';
+  }
+
+  @override
+  String get settingsDeleteAccount => 'Hesabı Sil';
+
+  @override
+  String get settingsDeleteAccountConfirmTitle =>
+      'Hesabını silmek istiyor musun?';
+
+  @override
+  String get settingsDeleteAccountConfirmBody =>
+      'Bu işlem geri alınamaz. Hesabın ve giriş bilgilerin kalıcı olarak silinecek.';
+
+  @override
+  String get settingsDeleteAccountAction => 'Sil';
+
+  @override
+  String get settingsDeleteAccountRequiresRecentLogin =>
+      'Güvenlik nedeniyle bu işlem için yakın zamanda giriş yapmış olman gerekiyor. Lütfen çıkış yapıp tekrar giriş yaparak tekrar dene.';
+
+  @override
+  String settingsDeleteAccountError(String error) {
+    return 'Hesap silinemedi: $error';
+  }
+
+  @override
   String get selectAvatarTitle => 'Avatar Seç';
 
   @override
@@ -305,7 +339,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get profileEditNameTitle => 'Adı düzenle';
 
   @override
+  String get profileEditProfileTitle => 'Profili Düzenle';
+
+  @override
   String get profileYourNameHint => 'Adınız';
+
+  @override
+  String profileSaveNameError(String error) {
+    return 'İsim kaydedilemedi: $error';
+  }
 
   @override
   String get profileSignInPrompt => 'Profilinizi görmek için giriş yapın.';
@@ -357,7 +399,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get profileWatched => 'İzlendi';
 
   @override
-  String get profileFavoritesTitle => 'Favoriler';
+  String get profileFavoritesTitle => 'En Sevdiğin 3 Film';
+
+  @override
+  String get profileFavoritesEmptyHint =>
+      'Buraya eklemek için bir filmin sayfasındaki ♥ butonuna dokun';
 
   @override
   String get profileMoviesTitle => 'Filmler';
@@ -445,6 +491,85 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get movieSaveToDiary => 'Günlüğe kaydet';
+
+  @override
+  String get movieFavoriteLimitReached =>
+      'En fazla 3 favori film seçebilirsin — önce birini kaldır.';
+
+  @override
+  String get pollSectionTitle => 'Nasıldı?';
+
+  @override
+  String get pollRatingQuestionMovie => 'Bu filmi puanla';
+
+  @override
+  String get pollRatingQuestionEpisode => 'Bu bölümü puanla';
+
+  @override
+  String get pollRatingBad => 'Kötü';
+
+  @override
+  String get pollRatingOk => 'İdare Eder';
+
+  @override
+  String get pollRatingGood => 'İyi';
+
+  @override
+  String get pollRatingGreat => 'Harika';
+
+  @override
+  String get pollRatingWow => 'Vay Canına';
+
+  @override
+  String get pollPlatformQuestion => 'Nereden izledin?';
+
+  @override
+  String get pollEmotionQuestion => 'Sana ne hissettirdi?';
+
+  @override
+  String get pollCharacterQuestion => 'Favori karakterin?';
+
+  @override
+  String get pollPlatformCinema => 'Sinema';
+
+  @override
+  String get pollPlatformNetflix => 'Netflix';
+
+  @override
+  String get pollPlatformDisneyPlus => 'Disney+';
+
+  @override
+  String get pollPlatformPrimeVideo => 'Prime Video';
+
+  @override
+  String get pollPlatformPirate => 'Korsan';
+
+  @override
+  String get pollPlatformOther => 'Diğer';
+
+  @override
+  String get pollEmotionHappy => 'Mutlu';
+
+  @override
+  String get pollEmotionConfusing => 'Kafam Karıştı';
+
+  @override
+  String get pollEmotionSad => 'Üzüldüm';
+
+  @override
+  String get pollEmotionScary => 'Korktum';
+
+  @override
+  String get pollEmotionFrustrating => 'Sinir Bozucu';
+
+  @override
+  String get pollEmotionShocking => 'Şoke Oldum';
+
+  @override
+  String get pollEmotionExciting => 'Heyecanlandım';
+
+  @override
+  String get pollEmotionBoring => 'Sıkıldım';
 
   @override
   String get upNextTitle => 'Sırada';

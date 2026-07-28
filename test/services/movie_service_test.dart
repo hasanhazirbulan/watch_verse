@@ -65,6 +65,47 @@ void main() {
     expect((await movieDoc()).data()!['favorite'], isFalse);
   });
 
+  test('setFavorite blocks a 4th favorite once 3 are already picked',
+      () async {
+    final other1 = Movie(
+        id: 1,
+        title: 'A',
+        overview: '',
+        posterPath: '',
+        backDropPath: '',
+        releaseDate: '',
+        voteAverage: 0);
+    final other2 = Movie(
+        id: 2,
+        title: 'B',
+        overview: '',
+        posterPath: '',
+        backDropPath: '',
+        releaseDate: '',
+        voteAverage: 0);
+    final other3 = Movie(
+        id: 3,
+        title: 'C',
+        overview: '',
+        posterPath: '',
+        backDropPath: '',
+        releaseDate: '',
+        voteAverage: 0);
+
+    expect(await service.setFavorite(other1, true), isTrue);
+    expect(await service.setFavorite(other2, true), isTrue);
+    expect(await service.setFavorite(other3, true), isTrue);
+
+    final blocked = await service.setFavorite(movie, true);
+    expect(blocked, isFalse);
+    expect((await movieDoc()).exists, isFalse);
+
+    // Freeing a slot lets a new favorite in.
+    await service.setFavorite(other1, false);
+    expect(await service.setFavorite(movie, true), isTrue);
+    expect((await movieDoc()).data()!['favorite'], isTrue);
+  });
+
   test('setRating stores the rating', () async {
     await service.setRating(movie, 4.5);
     expect((await movieDoc()).data()!['rating'], 4.5);

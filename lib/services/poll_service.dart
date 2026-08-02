@@ -34,6 +34,30 @@ class PollService {
     'boring',
   ];
 
+  /// Rating buckets, worst first — the index is also the star count.
+  ///
+  /// Unlike the other categories these are never tapped: the user already
+  /// scored the title in their diary entry (movies) or on the episode page,
+  /// and that score is mirrored here so the community breakdown can be shown
+  /// without asking the same question twice.
+  static const ratingOptions = ['bad', 'ok', 'good', 'great', 'wow'];
+
+  /// Maps a 0–5 star score onto [ratingOptions], rounding half stars up so
+  /// 3.5 reads as "great" rather than "good". Returns null for an unrated
+  /// (0) score, so callers skip the vote instead of recording a "bad".
+  static String? ratingBucket(double rating) {
+    if (rating <= 0) return null;
+    final index = (rating.ceil() - 1).clamp(0, ratingOptions.length - 1);
+    return ratingOptions[index];
+  }
+
+  /// Mirrors a star score into the poll aggregate. No-op when unrated.
+  Future<void> syncRating(String pollId, double rating) async {
+    final bucket = ratingBucket(rating);
+    if (bucket == null) return;
+    await vote(pollId, 'rating', bucket);
+  }
+
   String moviePollId(int movieId) => 'movie-$movieId';
   String episodePollId(int showId, int season, int episode) =>
       'episode-$showId-s${season}e$episode';

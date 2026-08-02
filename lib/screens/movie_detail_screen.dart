@@ -80,8 +80,14 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
         initialRating:
             rewatch ? 0 : ((data?['rating'] ?? 0) as num).toDouble(),
         initialNote: rewatch ? '' : (data?['note'] ?? '') as String,
-        onSave: (rating, note, date) =>
-            _movies.logWatch(movie, rating: rating, note: note, watchedOn: date),
+        onSave: (rating, note, date) async {
+          await _movies.logWatch(movie,
+              rating: rating, note: note, watchedOn: date);
+          // The poll's star row is a read-only mirror of this score, so the
+          // user never gets asked to rate the same film a second time.
+          await PollService.instance
+              .syncRating(PollService.instance.moviePollId(movie.id), rating);
+        },
       ),
     );
     if (saved == true && !wasWatched && mounted) {
@@ -257,8 +263,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         CastStrip(cast: snap.data ?? const []),
                   ),
                   const SizedBox(height: 22),
-                  _ratingSection(),
-                  const SizedBox(height: 22),
                   _diarySection(),
                   const SizedBox(height: 22),
                   _pollSection(),
@@ -396,50 +400,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
           color: favorite ? context.colors.primaryDark : context.colors.textSecondary,
         ),
       ),
-    );
-  }
-
-  // Persisted personal star rating for the movie.
-  Widget _ratingSection() {
-    return StreamBuilder<Map<String, dynamic>?>(
-      stream: _movies.movieStream(movie.id),
-      builder: (context, snap) {
-        final l10n = AppLocalizations.of(context)!;
-        final rating = ((snap.data?['rating'] ?? 0) as num).toDouble();
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(l10n.movieYourRating,
-                    style: const TextStyle(
-                        fontSize: 17, fontWeight: FontWeight.w700)),
-                const Spacer(),
-                if (rating > 0)
-                  Text(rating.toStringAsFixed(1),
-                      style: TextStyle(
-                          color: context.colors.accent,
-                          fontWeight: FontWeight.w700)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            KeyedSubtree(
-              key: ValueKey(rating),
-              child: RatingBar.builder(
-                initialRating: rating,
-                minRating: 0,
-                allowHalfRating: true,
-                itemCount: 5,
-                glowColor: context.colors.accent,
-                itemPadding: const EdgeInsets.symmetric(horizontal: 4),
-                itemBuilder: (context, _) =>
-                    Icon(Icons.star_rounded, color: context.colors.accent),
-                onRatingUpdate: (r) => _movies.setRating(movie, r),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 

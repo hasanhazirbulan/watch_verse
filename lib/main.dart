@@ -9,7 +9,6 @@ import 'package:watch_verse/screens/settings_screen.dart';
 import 'package:watch_verse/screens/profile_screen.dart';
 import 'package:watch_verse/services/notification_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
-import 'package:watch_verse/theme/theme_controller.dart';
 import 'firebase_options.dart'; // Firebase configuration import
 
 void main() async {
@@ -17,7 +16,6 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await ThemeController.instance.load();
   runApp(const MyApp());
 }
 
@@ -26,24 +24,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: ThemeController.instance,
-      builder: (context, mode, _) => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'WatchVerse',
-        theme: AppTheme.light,
-        darkTheme: AppTheme.dark,
-        themeMode: mode,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const SplashWrapper(),
-        routes: {
-          '/login': (context) => const LoginScreen(),
-          '/main': (context) => const MainScreen(),
-          '/settings': (context) => const SettingsScreen(),
-          '/profile': (context) => const ProfileScreen(),
-        },
-      ),
+    // WatchVerse is dark-only by design: poster art and backdrops carry the
+    // whole interface, and they read very differently against a light
+    // background. `theme` is set to the dark ThemeData as well as `darkTheme`
+    // so the platform's light mode can never pull a light palette through.
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'WatchVerse',
+      theme: AppTheme.dark,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.dark,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const SplashWrapper(),
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/main': (context) => const MainScreen(),
+        '/settings': (context) => const SettingsScreen(),
+        '/profile': (context) => const ProfileScreen(),
+      },
     );
   }
 }

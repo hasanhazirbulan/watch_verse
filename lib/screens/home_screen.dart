@@ -43,6 +43,11 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<List<MediaItem>> _onTheAir;
   late Future<List<MediaItem>> _topTv;
 
+  // Null unless one of the current tab's fetches failed — drives the retry
+  // banner (see _firstFailure).
+  late Future<Object?> _movieFailure;
+  late Future<Object?> _tvFailure;
+
   // Genre chips (fetched once; don't reset on pull-to-refresh)
   late final Future<List<Genre>> _movieGenres = _api.getGenres(MediaType.movie);
   late final Future<List<Genre>> _tvGenres = _api.getGenres(MediaType.tv);
@@ -72,6 +77,33 @@ class _HomeScreenState extends State<HomeScreen> {
     _airingToday = _api.getAiringTodayTv();
     _onTheAir = _api.getOnTheAirTv();
     _topTv = _api.getTopRatedTv();
+
+    _movieFailure = _firstFailure(
+        [_nowPlaying, _trendingMovies, _upcoming, _popularMovies, _topMovies]);
+    _tvFailure = _firstFailure(
+        [_trendingTv, _popularTv, _airingToday, _onTheAir, _topTv]);
+  }
+
+  /// Resolves to the first error among [futures], or null if they all
+  /// succeeded. Every rail on this screen renders `snapshot.data ?? []`, so a
+  /// failed fetch is indistinguishable from an empty one and shows as a
+  /// skeleton that never fills in. Watching the futures once, here, lets the
+  /// screen show a single banner instead of an error box inside every rail.
+  Future<Object?> _firstFailure(List<Future<List<MediaItem>>> futures) async {
+    Object? failure;
+    await Future.wait(futures.map((f) async {
+      try {
+        await f;
+      } catch (e) {
+        // Catching these is what lets the banner replace five dead rails, but
+        // it also stops them reaching the console as unhandled errors — and a
+        // missing API key then looks exactly like a flaky network. Log it so
+        // the cause stays visible.
+        debugPrint('WatchVerse: home fetch failed → $e');
+        failure ??= e;
+      }
+    }));
+    return failure;
   }
 
   Future<void> _refresh() async {
@@ -206,6 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               _genreChips(),
+              _loadFailureBanner(),
               ..._tab == 0 ? _movieSlivers() : _tvSlivers(),
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
@@ -243,6 +276,60 @@ class _HomeScreenState extends State<HomeScreen> {
           // Balances the leading menu button so the wordmark stays centered.
           const SizedBox(width: 48),
         ],
+      ),
+    );
+  }
+
+  // One banner for the whole tab when its fetches failed, so a dead network
+  // reads as an error with a way out instead of an app full of empty rails.
+  Widget _loadFailureBanner() {
+    return SliverToBoxAdapter(
+      child: FutureBuilder<Object?>(
+        future: _tab == 0 ? _movieFailure : _tvFailure,
+        builder: (context, snap) {
+          if (snap.connectionState != ConnectionState.done ||
+              snap.data == null) {
+            return const SizedBox.shrink();
+          }
+          final l10n = AppLocalizations.of(context)!;
+          return Container(
+            margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: context.colors.surface,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.cloud_off_rounded,
+                    color: context.colors.textMuted, size: 26),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l10n.homeLoadFailedTitle,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 14)),
+                      const SizedBox(height: 2),
+                      Text(l10n.homeLoadFailedBody,
+                          style: TextStyle(
+                              color: context.colors.textSecondary,
+                              fontSize: 12.5)),
+                    ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => setState(_initFutures),
+                  child: Text(l10n.homeRetryAction,
+                      style: TextStyle(
+                          color: context.colors.primary,
+                          fontWeight: FontWeight.w700)),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

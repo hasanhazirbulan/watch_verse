@@ -235,8 +235,15 @@ class _EpisodeDetailScreenState extends State<EpisodeDetailScreen> {
                 itemPadding: const EdgeInsets.symmetric(horizontal: 4),
                 itemBuilder: (context, _) =>
                     Icon(Icons.star_rounded, color: context.colors.accent),
-                onRatingUpdate: (r) =>
-                    _tracking.setEpisodeNote(show.id, ep.key, rating: r),
+                onRatingUpdate: (r) async {
+                  await _tracking.setEpisodeNote(show.id, ep.key, rating: r);
+                  // Mirrored into the poll's read-only star row, which no
+                  // longer asks for a score of its own.
+                  await PollService.instance.syncRating(
+                      PollService.instance.episodePollId(
+                          show.id, ep.seasonNumber, ep.episodeNumber),
+                      r);
+                },
               ),
             ),
             const SizedBox(height: 22),

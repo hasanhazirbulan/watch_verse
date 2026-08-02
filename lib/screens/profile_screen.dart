@@ -62,8 +62,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
         child: Column(
           children: [
+            // Kept deliberately tight: the header is not the content, and
+            // every pixel it gives back is another row of posters above the
+            // fold.
             CircleAvatar(
-              radius: 52,
+              radius: 40,
               backgroundColor: context.colors.surfaceAlt,
               backgroundImage:
                   _photoURL.isNotEmpty ? NetworkImage(_photoURL) : null,
@@ -71,25 +74,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ? Text(
                       (user.email ?? '?').substring(0, 1).toUpperCase(),
                       style: const TextStyle(
-                          fontSize: 34, fontWeight: FontWeight.bold),
+                          fontSize: 28, fontWeight: FontWeight.bold),
                     )
                   : null,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Text(
               _displayName.isEmpty ? l10n.profileAddYourName : _displayName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             _followCounts(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             _favoritesShowcase(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             _statsRow(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             _recentTrays(),
           ],
         ),
@@ -382,20 +385,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     fontSize: 13)),
           ),
         ),
-        SizedBox(
-          height: 168,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
-            itemBuilder: (context, i) => _recentPoster(items[i]),
-          ),
+        GridView.count(
+          crossAxisCount: _gridColumns,
+          shrinkWrap: true,
+          // The page already scrolls; let the grid size itself to its content.
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          // Real poster art is 2:3 — the old 96x120 tile cropped every one.
+          childAspectRatio: 2 / 3,
+          children: [
+            for (final item in items.take(_gridColumns * _gridRows))
+              _recentPoster(item),
+          ],
         ),
         const SizedBox(height: 20),
       ],
     );
   }
+
+  /// A profile is a showcase, not a browser: a Letterboxd-style grid shows the
+  /// whole recent run at a glance where a horizontal rail hid all but the
+  /// first three behind a swipe nobody makes. Titles are dropped because the
+  /// poster is already the identifier — that is what buys the density — so the
+  /// name moves to a [Semantics] label to keep screen readers working.
+  static const _gridColumns = 4;
+  static const _gridRows = 2;
 
   Widget _recentPoster(Map<String, dynamic> a) {
     final l10n = AppLocalizations.of(context)!;
@@ -407,38 +423,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         : kind == 'season'
             ? l10n.profileSeasonLabel('${a['season'] ?? ''}')
             : l10n.profileEpisodeLabel('${a['season'] ?? ''}', '${a['episode'] ?? ''}');
-    return GestureDetector(
-      onTap: () => _openActivity(a),
-      child: SizedBox(
-        width: 96,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: SizedBox(
-                width: 96,
-                height: 120,
-                child: TmdbImage(
-                  url: Tmdb.poster((a['posterPath'] ?? '') as String,
-                      size: 'w185'),
-                  placeholderIcon:
-                      isMovie ? Icons.movie_rounded : Icons.tv_rounded,
-                ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    fontSize: 12.5, fontWeight: FontWeight.w600)),
-            Text(sub,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style:
-                    TextStyle(color: context.colors.textMuted, fontSize: 11)),
-          ],
+    return Semantics(
+      label: '$title, $sub',
+      button: true,
+      child: GestureDetector(
+        onTap: () => _openActivity(a),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: TmdbImage(
+            url: Tmdb.poster((a['posterPath'] ?? '') as String, size: 'w185'),
+            placeholderIcon: isMovie ? Icons.movie_rounded : Icons.tv_rounded,
+          ),
         ),
       ),
     );

@@ -429,6 +429,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get followListEmptyMessage => 'Nobody here yet.';
 
   @override
+  String get homeLoadFailedTitle => 'Couldn\'t load titles';
+
+  @override
+  String get homeLoadFailedBody => 'Check your connection and try again.';
+
+  @override
+  String get homeRetryAction => 'Try again';
+
+  @override
   String asyncErrorMessage(String error) {
     return 'Something went wrong.\n$error';
   }
@@ -498,10 +507,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pollSectionTitle => 'How was it?';
 
   @override
-  String get pollRatingQuestionMovie => 'Rate this movie';
+  String get pollRatingCommunityMovie => 'How everyone rated this movie';
 
   @override
-  String get pollRatingQuestionEpisode => 'Rate this episode';
+  String get pollRatingCommunityEpisode => 'How everyone rated this episode';
+
+  @override
+  String get pollRatingUnrated => 'You haven\'t rated this yet';
 
   @override
   String get pollRatingBad => 'Bad';

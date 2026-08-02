@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:watch_verse/models/media.dart';
@@ -31,8 +32,19 @@ class APIservices {
     return Uri.parse('$_base$path').replace(queryParameters: query);
   }
 
+  /// A request that never comes back would leave the UI on a loading skeleton
+  /// forever — a hanging Future neither resolves nor errors, so no amount of
+  /// error handling upstream can catch it. Time out instead and fail loudly.
+  static const _timeout = Duration(seconds: 15);
+
   Future<Map<String, dynamic>> _getJson(Uri url) async {
-    final response = await http.get(url);
+    final http.Response response;
+    try {
+      response = await http.get(url).timeout(_timeout);
+    } on TimeoutException {
+      throw Exception(
+          'TMDB request timed out after ${_timeout.inSeconds}s for $url');
+    }
     if (response.statusCode == 200) {
       return json.decode(response.body) as Map<String, dynamic>;
     }

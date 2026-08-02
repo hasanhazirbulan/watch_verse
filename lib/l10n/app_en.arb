@@ -350,6 +350,9 @@
     }
   },
   "followListEmptyMessage": "Nobody here yet.",
+  "homeLoadFailedTitle": "Couldn't load titles",
+  "homeLoadFailedBody": "Check your connection and try again.",
+  "homeRetryAction": "Try again",
   "asyncErrorMessage": "Something went wrong.\n{error}",
   "@asyncErrorMessage": {
     "placeholders": {
@@ -388,8 +391,9 @@
   "movieSaveToDiary": "Save to diary",
   "movieFavoriteLimitReached": "You can only pick 3 favorite films — remove one first.",
   "pollSectionTitle": "How was it?",
-  "pollRatingQuestionMovie": "Rate this movie",
-  "pollRatingQuestionEpisode": "Rate this episode",
+  "pollRatingCommunityMovie": "How everyone rated this movie",
+  "pollRatingCommunityEpisode": "How everyone rated this episode",
+  "pollRatingUnrated": "You haven't rated this yet",
   "pollRatingBad": "Bad",
   "pollRatingOk": "OK",
   "pollRatingGood": "Good",

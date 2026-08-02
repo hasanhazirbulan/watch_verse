@@ -431,6 +431,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get followListEmptyMessage => 'Henüz kimse yok.';
 
   @override
+  String get homeLoadFailedTitle => 'İçerikler yüklenemedi';
+
+  @override
+  String get homeLoadFailedBody => 'Bağlantını kontrol edip tekrar dene.';
+
+  @override
+  String get homeRetryAction => 'Tekrar dene';
+
+  @override
   String asyncErrorMessage(String error) {
     return 'Bir şeyler ters gitti.\n$error';
   }
@@ -500,10 +509,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get pollSectionTitle => 'Nasıldı?';
 
   @override
-  String get pollRatingQuestionMovie => 'Bu filmi puanla';
+  String get pollRatingCommunityMovie => 'Bu filmi herkes nasıl puanladı';
 
   @override
-  String get pollRatingQuestionEpisode => 'Bu bölümü puanla';
+  String get pollRatingCommunityEpisode => 'Bu bölümü herkes nasıl puanladı';
+
+  @override
+  String get pollRatingUnrated => 'Bunu henüz puanlamadın';
 
   @override
   String get pollRatingBad => 'Kötü';

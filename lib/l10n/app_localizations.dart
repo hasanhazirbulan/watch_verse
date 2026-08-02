@@ -812,6 +812,24 @@ abstract class AppLocalizations {
   /// **'Nobody here yet.'**
   String get followListEmptyMessage;
 
+  /// No description provided for @homeLoadFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load titles'**
+  String get homeLoadFailedTitle;
+
+  /// No description provided for @homeLoadFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get homeLoadFailedBody;
+
+  /// No description provided for @homeRetryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get homeRetryAction;
+
   /// No description provided for @asyncErrorMessage.
   ///
   /// In en, this message translates to:
@@ -938,17 +956,23 @@ abstract class AppLocalizations {
   /// **'How was it?'**
   String get pollSectionTitle;
 
-  /// No description provided for @pollRatingQuestionMovie.
+  /// No description provided for @pollRatingCommunityMovie.
   ///
   /// In en, this message translates to:
-  /// **'Rate this movie'**
-  String get pollRatingQuestionMovie;
+  /// **'How everyone rated this movie'**
+  String get pollRatingCommunityMovie;
 
-  /// No description provided for @pollRatingQuestionEpisode.
+  /// No description provided for @pollRatingCommunityEpisode.
   ///
   /// In en, this message translates to:
-  /// **'Rate this episode'**
-  String get pollRatingQuestionEpisode;
+  /// **'How everyone rated this episode'**
+  String get pollRatingCommunityEpisode;
+
+  /// No description provided for @pollRatingUnrated.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t rated this yet'**
+  String get pollRatingUnrated;
 
   /// No description provided for @pollRatingBad.
   ///

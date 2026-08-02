@@ -109,8 +109,8 @@ class PollCard extends StatelessWidget {
           _PollRatingGroup(
             pollId: pollId,
             question: isMovie
-                ? l10n.pollRatingQuestionMovie
-                : l10n.pollRatingQuestionEpisode,
+                ? l10n.pollRatingCommunityMovie
+                : l10n.pollRatingCommunityEpisode,
           ),
           Divider(height: 32, color: context.colors.surfaceAlt),
           _PollGroup(
@@ -176,16 +176,25 @@ class PollCard extends StatelessWidget {
   }
 }
 
-/// "RATE THIS EPISODE"-style 1-5 star rating. Distinct from [_PollGroup]
-/// because star selection is cumulative (picking WOW fills all 5 stars,
-/// unlike the single-choice emoji/platform tiles), and the label + percent
-/// rows sit under a shared star row rather than each inside its own tile.
+/// Read-only 1-5 star breakdown of how everyone scored the title.
+///
+/// Deliberately not tappable: the user already rates in their diary entry
+/// (movies) / on the episode page, and [PollService.syncRating] mirrors that
+/// score here. Asking again right after they saved a rating was the same
+/// question twice. Stars show where their own score landed on the 5-point
+/// bucket scale; the percentages underneath are the cross-user split.
+///
+/// Distinct from [_PollGroup] because star fill is cumulative (a "wow" fills
+/// all 5) and the label + percent rows sit under one shared star row rather
+/// than each inside its own tile. Percentages show unconditionally — the
+/// "answer to reveal" gating on the other groups exists to reward voting,
+/// and there is no vote to reward here.
 class _PollRatingGroup extends StatelessWidget {
   final String pollId;
   final String question;
   const _PollRatingGroup({required this.pollId, required this.question});
 
-  static const _labels = ['bad', 'ok', 'good', 'great', 'wow'];
+  static const _labels = PollService.ratingOptions;
 
   String _labelText(AppLocalizations l10n, String key) {
     switch (key) {
@@ -218,7 +227,7 @@ class _PollRatingGroup extends StatelessWidget {
                 (stats?['ratingCounts'] as Map?)?.cast<String, dynamic>() ??
                     const <String, dynamic>{};
             final total = ((stats?['ratingTotal'] ?? 0) as num).toInt();
-            final answered = myPick != null;
+            final rated = myPick != null;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -236,24 +245,29 @@ class _PollRatingGroup extends StatelessWidget {
                   children: [
                     for (int i = 0; i < _labels.length; i++)
                       Expanded(
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => PollService.instance
-                              .vote(pollId, 'rating', _labels[i]),
-                          child: Icon(
-                            i < myStars
-                                ? Icons.star_rounded
-                                : Icons.star_border_rounded,
-                            size: 30,
-                            color: i < myStars
-                                ? context.colors.accent
-                                : context.colors.textMuted
-                                    .withValues(alpha: 0.4),
-                          ),
+                        child: Icon(
+                          i < myStars
+                              ? Icons.star_rounded
+                              : Icons.star_border_rounded,
+                          size: 30,
+                          color: i < myStars
+                              ? context.colors.accent
+                              : context.colors.textMuted
+                                  .withValues(alpha: 0.4),
                         ),
                       ),
                   ],
                 ),
+                if (!rated) ...[
+                  const SizedBox(height: 6),
+                  Center(
+                    child: Text(l10n.pollRatingUnrated,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: context.colors.textMuted)),
+                  ),
+                ],
                 const SizedBox(height: 6),
                 Row(
                   children: [
@@ -274,13 +288,13 @@ class _PollRatingGroup extends StatelessWidget {
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              answered
-                                  ? '${total > 0 ? (((counts[key] ?? 0) as num).toInt() / total * 100).round() : 0}%'
+                              total > 0
+                                  ? '${(((counts[key] ?? 0) as num).toInt() / total * 100).round()}%'
                                   : '-',
                               style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w800,
-                                  color: answered
+                                  color: total > 0
                                       ? context.colors.textPrimary
                                       : context.colors.textMuted),
                             ),

@@ -588,6 +588,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get upNextMyShowsLabel => 'My Shows';
 
   @override
+  String get upNextUpcomingLabel => 'Upcoming';
+
+  @override
+  String get upNextUpcomingEmptyTitle => 'Nothing coming up';
+
+  @override
+  String get upNextUpcomingEmptySubtitle =>
+      'New episodes of tracked shows and release dates for watchlisted movies will show up here.';
+
+  @override
+  String get upNextUpcomingToday => 'Today';
+
+  @override
+  String get upNextUpcomingTomorrow => 'Tomorrow';
+
+  @override
+  String get upNextUpcomingMovieTag => 'MOVIE';
+
+  @override
   String get upNextFilterAll => 'All';
 
   @override
@@ -624,7 +643,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String upNextSeasonEpisode(int season, int episode) {
-    return 'S$season  E$episode';
+    return 'S$season | E$episode';
   }
 
   @override
@@ -655,6 +674,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String upNextNextEpisodeOn(String date) {
     return 'Next episode $date';
   }
+
+  @override
+  String get upNextPremiereTag => 'PREMIERE';
+
+  @override
+  String get upNextSwipeStopLabel => 'Stop';
+
+  @override
+  String get upNextStopWatchingTitle => 'Stop watching this show?';
+
+  @override
+  String upNextStopWatchingContent(String name) {
+    return '\"$name\" will be removed from your list along with its watch history.';
+  }
+
+  @override
+  String get upNextStopWatchingConfirm => 'Stop watching';
+
+  @override
+  String get upNextStopWatchingCancel => 'Never mind';
 
   @override
   String get detailCastTitle => 'Cast';

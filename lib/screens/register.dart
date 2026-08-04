@@ -4,6 +4,7 @@ import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/screens/main_screen.dart';
 import 'package:watch_verse/services/database_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/validators.dart';
 import 'package:watch_verse/widgets/auth_backdrop.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -132,10 +133,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           icon: Icons.mail_outline_rounded,
                           keyboardType: TextInputType.emailAddress,
                           validator: (v) {
-                            if (v == null || v.isEmpty) {
+                            if (v == null || v.trim().isEmpty) {
                               return l10n.emailRequired;
                             }
-                            if (!v.contains('@')) return l10n.emailInvalid;
+                            if (!isValidEmail(v)) return l10n.emailInvalid;
                             return null;
                           },
                         ),

@@ -418,6 +418,12 @@
   "pollEmotionBoring": "Boring",
   "upNextTitle": "Up Next",
   "upNextMyShowsLabel": "My Shows",
+  "upNextUpcomingLabel": "Upcoming",
+  "upNextUpcomingEmptyTitle": "Nothing coming up",
+  "upNextUpcomingEmptySubtitle": "New episodes of tracked shows and release dates for watchlisted movies will show up here.",
+  "upNextUpcomingToday": "Today",
+  "upNextUpcomingTomorrow": "Tomorrow",
+  "upNextUpcomingMovieTag": "MOVIE",
   "upNextFilterAll": "All",
   "upNextStatusWatching": "Watching",
   "upNextStatusWatchlist": "Watchlist",
@@ -445,7 +451,7 @@
       }
     }
   },
-  "upNextSeasonEpisode": "S{season}  E{episode}",
+  "upNextSeasonEpisode": "S{season} | E{episode}",
   "@upNextSeasonEpisode": {
     "placeholders": {
       "season": {
@@ -494,6 +500,19 @@
       }
     }
   },
+  "upNextPremiereTag": "PREMIERE",
+  "upNextSwipeStopLabel": "Stop",
+  "upNextStopWatchingTitle": "Stop watching this show?",
+  "upNextStopWatchingContent": "\"{name}\" will be removed from your list along with its watch history.",
+  "@upNextStopWatchingContent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "upNextStopWatchingConfirm": "Stop watching",
+  "upNextStopWatchingCancel": "Never mind",
   "detailCastTitle": "Cast",
   "detailWhereToWatch": "Where to Watch",
   "detailReviewsTitle": "Reviews",

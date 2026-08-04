@@ -68,6 +68,22 @@ class TvTrackingService {
     return snap.docs.map((d) => d.id).toSet();
   }
 
+  /// When the most recently watched episode of this show was marked watched,
+  /// or null if none has been watched yet. Drives the "Up Next" feed's
+  /// most-recently-watched-first ordering.
+  Future<DateTime?> lastWatchedAt(int showId) async {
+    final ref = _showRef(showId);
+    if (ref == null) return null;
+    final snap = await ref
+        .collection('watched')
+        .orderBy('watchedAt', descending: true)
+        .limit(1)
+        .get();
+    if (snap.docs.isEmpty) return null;
+    final ts = snap.docs.first.data()['watchedAt'];
+    return ts is Timestamp ? ts.toDate() : null;
+  }
+
   Future<bool> isTracked(int showId) async {
     final ref = _showRef(showId);
     if (ref == null) return false;

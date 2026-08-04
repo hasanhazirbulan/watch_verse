@@ -590,6 +590,25 @@ class AppLocalizationsTr extends AppLocalizations {
   String get upNextMyShowsLabel => 'Dizilerim';
 
   @override
+  String get upNextUpcomingLabel => 'Yaklaşan';
+
+  @override
+  String get upNextUpcomingEmptyTitle => 'Yaklaşan bir şey yok';
+
+  @override
+  String get upNextUpcomingEmptySubtitle =>
+      'Takip ettiğin dizilerin yeni bölümleri ve izleme listendeki filmlerin çıkış tarihleri burada görünecek.';
+
+  @override
+  String get upNextUpcomingToday => 'Bugün';
+
+  @override
+  String get upNextUpcomingTomorrow => 'Yarın';
+
+  @override
+  String get upNextUpcomingMovieTag => 'FİLM';
+
+  @override
   String get upNextFilterAll => 'Tümü';
 
   @override
@@ -626,7 +645,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String upNextSeasonEpisode(int season, int episode) {
-    return 'S$season  B$episode';
+    return 'S$season | B$episode';
   }
 
   @override
@@ -657,6 +676,26 @@ class AppLocalizationsTr extends AppLocalizations {
   String upNextNextEpisodeOn(String date) {
     return 'Sonraki bölüm $date';
   }
+
+  @override
+  String get upNextPremiereTag => 'İLK BÖLÜM';
+
+  @override
+  String get upNextSwipeStopLabel => 'Bırak';
+
+  @override
+  String get upNextStopWatchingTitle => 'Bu diziyi izlemeyi bırak?';
+
+  @override
+  String upNextStopWatchingContent(String name) {
+    return '\"$name\" takip listenden ve tüm izleme geçmişinden kaldırılacak.';
+  }
+
+  @override
+  String get upNextStopWatchingConfirm => 'İzlemeyi bırak';
+
+  @override
+  String get upNextStopWatchingCancel => 'Vazgeç';
 
   @override
   String get detailCastTitle => 'Oyuncular';

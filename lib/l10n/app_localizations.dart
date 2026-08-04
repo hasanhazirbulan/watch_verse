@@ -1118,6 +1118,42 @@ abstract class AppLocalizations {
   /// **'My Shows'**
   String get upNextMyShowsLabel;
 
+  /// No description provided for @upNextUpcomingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get upNextUpcomingLabel;
+
+  /// No description provided for @upNextUpcomingEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing coming up'**
+  String get upNextUpcomingEmptyTitle;
+
+  /// No description provided for @upNextUpcomingEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New episodes of tracked shows and release dates for watchlisted movies will show up here.'**
+  String get upNextUpcomingEmptySubtitle;
+
+  /// No description provided for @upNextUpcomingToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get upNextUpcomingToday;
+
+  /// No description provided for @upNextUpcomingTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get upNextUpcomingTomorrow;
+
+  /// No description provided for @upNextUpcomingMovieTag.
+  ///
+  /// In en, this message translates to:
+  /// **'MOVIE'**
+  String get upNextUpcomingMovieTag;
+
   /// No description provided for @upNextFilterAll.
   ///
   /// In en, this message translates to:
@@ -1181,7 +1217,7 @@ abstract class AppLocalizations {
   /// No description provided for @upNextSeasonEpisode.
   ///
   /// In en, this message translates to:
-  /// **'S{season}  E{episode}'**
+  /// **'S{season} | E{episode}'**
   String upNextSeasonEpisode(int season, int episode);
 
   /// No description provided for @upNextEpisodeFallbackName.
@@ -1225,6 +1261,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next episode {date}'**
   String upNextNextEpisodeOn(String date);
+
+  /// No description provided for @upNextPremiereTag.
+  ///
+  /// In en, this message translates to:
+  /// **'PREMIERE'**
+  String get upNextPremiereTag;
+
+  /// No description provided for @upNextSwipeStopLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get upNextSwipeStopLabel;
+
+  /// No description provided for @upNextStopWatchingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop watching this show?'**
+  String get upNextStopWatchingTitle;
+
+  /// No description provided for @upNextStopWatchingContent.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" will be removed from your list along with its watch history.'**
+  String upNextStopWatchingContent(String name);
+
+  /// No description provided for @upNextStopWatchingConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop watching'**
+  String get upNextStopWatchingConfirm;
+
+  /// No description provided for @upNextStopWatchingCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Never mind'**
+  String get upNextStopWatchingCancel;
 
   /// No description provided for @detailCastTitle.
   ///

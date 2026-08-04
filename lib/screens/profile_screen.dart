@@ -210,18 +210,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // Letterboxd-style "vitrine": exactly 3 favorite-film slots, always shown
   // near the top of the profile (right under the follow counts) so it's the
-  // first thing a visitor's eye lands on.
+  // first thing a visitor's eye lands on. Which favorites fill the 3 slots
+  // is chosen by the user (tap an empty slot to pick, long-press a filled
+  // one to remove) rather than auto-filled by favoriting order.
   Widget _favoritesShowcase() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: MovieService.instance.favoritesStream(),
+      stream: MovieService.instance.showcaseStream(),
       builder: (context, snap) {
-        final items = List<Map<String, dynamic>>.from(snap.data ?? const []);
-        items.sort((a, b) {
-          final ta = a['addedAt'];
-          final tb = b['addedAt'];
-          if (ta is Timestamp && tb is Timestamp) return ta.compareTo(tb);
-          return 0;
-        });
+        final items = snap.data ?? const <Map<String, dynamic>>[];
+        final bySlot = List<Map<String, dynamic>?>.filled(
+            MovieService.showcaseSlots, null);
+        for (final m in items) {
+          final slot = (m['showcaseSlot'] as num?)?.toInt();
+          if (slot != null && slot >= 0 && slot < bySlot.length) {
+            bySlot[slot] = m;
+          }
+        }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -230,14 +234,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
-                children: List.generate(MovieService.maxFavorites, (i) {
-                  final isLast = i == MovieService.maxFavorites - 1;
+                children: List.generate(bySlot.length, (i) {
+                  final isLast = i == bySlot.length - 1;
+                  final movie = bySlot[i];
                   return Expanded(
                     child: Padding(
                       padding: EdgeInsets.only(right: isLast ? 0 : 10),
-                      child: i < items.length
-                          ? _favSlot(items[i])
-                          : _emptyFavSlot(i + 1),
+                      child: movie != null
+                          ? _favSlot(movie, i)
+                          : _emptyFavSlot(i),
                     ),
                   );
                 }),
@@ -249,12 +254,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _favSlot(Map<String, dynamic> m) {
+  Widget _favSlot(Map<String, dynamic> m, int slot) {
+    final id = (m['id'] ?? 0) as int;
     return GestureDetector(
       onTap: () => openMedia(
         context,
         MediaItem(
-          id: (m['id'] ?? 0) as int,
+          id: id,
           title: (m['title'] ?? '') as String,
           overview: '',
           posterPath: (m['posterPath'] ?? '') as String,
@@ -264,6 +270,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           mediaType: MediaType.movie,
         ),
       ),
+      onLongPress: () => _confirmRemoveFromShowcase(id),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -289,13 +296,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _emptyFavSlot(int rank) {
+  Widget _emptyFavSlot(int slot) {
     return GestureDetector(
-      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content:
-                Text(AppLocalizations.of(context)!.profileFavoritesEmptyHint)),
-      ),
+      onTap: () => _showShowcasePicker(slot),
       child: AspectRatio(
         aspectRatio: 96 / 130,
         child: DecoratedBox(
@@ -312,11 +315,126 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Icon(Icons.favorite_border_rounded,
                     color: context.colors.textMuted, size: 22),
                 const SizedBox(height: 6),
-                Text('$rank',
+                Text('${slot + 1}',
                     style: TextStyle(
                         color: context.colors.textMuted,
                         fontWeight: FontWeight.w700,
                         fontSize: 13)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _confirmRemoveFromShowcase(int movieId) {
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      backgroundColor: context.colors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: ListTile(
+          leading: const Icon(Icons.close_rounded),
+          title: Text(l10n.profileShowcaseRemove),
+          onTap: () {
+            Navigator.pop(ctx);
+            MovieService.instance.setShowcaseSlot(movieId, null);
+          },
+        ),
+      ),
+    );
+  }
+
+  // Picker for an empty showcase slot: lets the user choose from their
+  // favorited-but-not-yet-showcased films.
+  void _showShowcasePicker(int slot) {
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      backgroundColor: context.colors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: ConstrainedBox(
+          constraints:
+              BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.7),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: context.colors.textMuted,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(l10n.profileShowcasePickerTitle,
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 12),
+                Flexible(
+                  child: StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: MovieService.instance.favoritesStream(),
+                    builder: (context, snap) {
+                      final pickable = (snap.data ?? const [])
+                          .where((m) => m['showcaseSlot'] == null)
+                          .toList();
+                      if (pickable.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Text(l10n.profileFavoritesEmptyHint,
+                              style:
+                                  TextStyle(color: context.colors.textMuted)),
+                        );
+                      }
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: pickable.length,
+                        itemBuilder: (context, i) {
+                          final m = pickable[i];
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: SizedBox(
+                                width: 40,
+                                height: 56,
+                                child: TmdbImage(
+                                  url: Tmdb.poster(
+                                      (m['posterPath'] ?? '') as String,
+                                      size: 'w185'),
+                                  placeholderIcon: Icons.movie_rounded,
+                                ),
+                              ),
+                            ),
+                            title: Text((m['title'] ?? '') as String,
+                                maxLines: 1, overflow: TextOverflow.ellipsis),
+                            onTap: () {
+                              Navigator.pop(ctx);
+                              MovieService.instance.setShowcaseSlot(
+                                  (m['id'] as num).toInt(), slot);
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
           ),

@@ -406,6 +406,12 @@ class AppLocalizationsTr extends AppLocalizations {
       'Buraya eklemek için bir filmin sayfasındaki ♥ butonuna dokun';
 
   @override
+  String get profileShowcasePickerTitle => 'Vitrine ekle';
+
+  @override
+  String get profileShowcaseRemove => 'Vitrinden kaldır';
+
+  @override
   String get profileMoviesTitle => 'Filmler';
 
   @override
@@ -500,10 +506,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get movieSaveToDiary => 'Günlüğe kaydet';
-
-  @override
-  String get movieFavoriteLimitReached =>
-      'En fazla 3 favori film seçebilirsin — önce birini kaldır.';
 
   @override
   String get pollSectionTitle => 'Nasıldı?';

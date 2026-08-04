@@ -65,8 +65,7 @@ void main() {
     expect((await movieDoc()).data()!['favorite'], isFalse);
   });
 
-  test('setFavorite blocks a 4th favorite once 3 are already picked',
-      () async {
+  test('setFavorite is unbounded — a 4th favorite is not blocked', () async {
     final other1 = Movie(
         id: 1,
         title: 'A',
@@ -92,18 +91,42 @@ void main() {
         releaseDate: '',
         voteAverage: 0);
 
-    expect(await service.setFavorite(other1, true), isTrue);
-    expect(await service.setFavorite(other2, true), isTrue);
-    expect(await service.setFavorite(other3, true), isTrue);
+    await service.setFavorite(other1, true);
+    await service.setFavorite(other2, true);
+    await service.setFavorite(other3, true);
+    await service.setFavorite(movie, true);
 
-    final blocked = await service.setFavorite(movie, true);
-    expect(blocked, isFalse);
-    expect((await movieDoc()).exists, isFalse);
-
-    // Freeing a slot lets a new favorite in.
-    await service.setFavorite(other1, false);
-    expect(await service.setFavorite(movie, true), isTrue);
     expect((await movieDoc()).data()!['favorite'], isTrue);
+    expect(await service.favoritesStream().first, hasLength(4));
+  });
+
+  test('setShowcaseSlot curates the showcase independently of favorite order',
+      () async {
+    final other1 = Movie(
+        id: 1,
+        title: 'A',
+        overview: '',
+        posterPath: '',
+        backDropPath: '',
+        releaseDate: '',
+        voteAverage: 0);
+    await service.setFavorite(movie, true);
+    await service.setFavorite(other1, true);
+
+    await service.setShowcaseSlot(other1.id, 0);
+    await service.setShowcaseSlot(movie.id, 1);
+
+    final showcase = await service.showcaseStream().first;
+    expect(showcase.map((m) => m['id']), [other1.id, movie.id]);
+  });
+
+  test('un-favoriting a movie also removes it from the showcase', () async {
+    await service.setFavorite(movie, true);
+    await service.setShowcaseSlot(movie.id, 0);
+    expect((await movieDoc()).data()!['showcaseSlot'], 0);
+
+    await service.setFavorite(movie, false);
+    expect((await movieDoc()).data()!['showcaseSlot'], isNull);
   });
 
   test('setRating stores the rating', () async {

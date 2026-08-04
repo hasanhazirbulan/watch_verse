@@ -404,6 +404,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tap the ♥ on a movie\'s page to add it here';
 
   @override
+  String get profileShowcasePickerTitle => 'Add to showcase';
+
+  @override
+  String get profileShowcaseRemove => 'Remove from showcase';
+
+  @override
   String get profileMoviesTitle => 'Movies';
 
   @override
@@ -498,10 +504,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get movieSaveToDiary => 'Save to diary';
-
-  @override
-  String get movieFavoriteLimitReached =>
-      'You can only pick 3 favorite films — remove one first.';
 
   @override
   String get pollSectionTitle => 'How was it?';

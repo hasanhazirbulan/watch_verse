@@ -233,62 +233,60 @@ class TvTrackingService {
   }
 
   /// Toggles a single episode's watched state, keeping the denormalized
-  /// count/status on the parent show document in sync (atomic transaction).
+  /// count/status on the parent show document in sync.
+  ///
+  /// Uses a plain batch (like [setSeasonWatched]/[markEpisodesWatched])
+  /// instead of a transaction: `runTransaction` always forces a server
+  /// round-trip before resolving, which is what made each single-episode tap
+  /// feel laggy compared to the batch-based season/catch-up actions.
   Future<void> setEpisodeWatched(
       TvShow show, Episode episode, bool watched) async {
     final ref = _showRef(show.id);
     if (ref == null) return;
     final epRef = ref.collection('watched').doc(episode.key);
 
-    final changed = await _db.runTransaction<bool>((tx) async {
-      final showSnap = await tx.get(ref);
-      final epSnap = await tx.get(epRef);
-      int count = (showSnap.data()?['watchedCount'] ?? 0) as int;
-      final already = epSnap.exists;
-      final didChange = (watched && !already) || (!watched && already);
+    final current = await watchedKeys(show.id);
+    final already = current.contains(episode.key);
+    final changed = watched != already;
+    if (!changed) return;
 
-      if (watched && !already) {
-        tx.set(epRef, {
-          'season': episode.seasonNumber,
-          'episode': episode.episodeNumber,
-          'watchedAt': FieldValue.serverTimestamp(),
-        });
-        count++;
-      } else if (!watched && already) {
-        tx.delete(epRef);
-        count = count > 0 ? count - 1 : 0;
-      }
+    final batch = _db.batch();
+    if (watched) {
+      batch.set(epRef, {
+        'season': episode.seasonNumber,
+        'episode': episode.episodeNumber,
+        'watchedAt': FieldValue.serverTimestamp(),
+      });
+      current.add(episode.key);
+    } else {
+      batch.delete(epRef);
+      current.remove(episode.key);
+    }
+    final count = current.length;
+    batch.set(ref, {
+      ..._metadata(show),
+      'watchedCount': count,
+      'status': _statusFor(count, show.numberOfEpisodes),
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+    await batch.commit();
 
-      tx.set(ref, {
-        ..._metadata(show),
-        'watchedCount': count,
-        'status': _statusFor(count, show.numberOfEpisodes),
-        'addedAt': showSnap.exists
-            ? (showSnap.data()?['addedAt'] ?? FieldValue.serverTimestamp())
-            : FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-      return didChange;
-    });
-
-    // Mirror the change into the watch-history timeline (outside the tx).
-    if (changed) {
-      final epRefKey = 'ep-${show.id}-${episode.key}';
-      if (watched) {
-        await _activityCol?.add({
-          'kind': 'episode',
-          'ref': epRefKey,
-          'showId': show.id,
-          'showName': show.name,
-          'posterPath': show.posterPath,
-          'season': episode.seasonNumber,
-          'episode': episode.episodeNumber,
-          'episodeName': episode.name,
-          'at': FieldValue.serverTimestamp(),
-        });
-      } else {
-        await _deleteActivity(epRefKey);
-      }
+    // Mirror the change into the watch-history timeline.
+    final epRefKey = 'ep-${show.id}-${episode.key}';
+    if (watched) {
+      await _activityCol?.add({
+        'kind': 'episode',
+        'ref': epRefKey,
+        'showId': show.id,
+        'showName': show.name,
+        'posterPath': show.posterPath,
+        'season': episode.seasonNumber,
+        'episode': episode.episodeNumber,
+        'episodeName': episode.name,
+        'at': FieldValue.serverTimestamp(),
+      });
+    } else {
+      await _deleteActivity(epRefKey);
     }
   }
 

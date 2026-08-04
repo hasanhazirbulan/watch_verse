@@ -797,7 +797,11 @@ class _NextUpCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _showBadge(context, show.name),
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => openMedia(context, show.toMediaItem()),
+                      child: _showBadge(context, show.name),
+                    ),
                     const SizedBox(height: 8),
                     Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,

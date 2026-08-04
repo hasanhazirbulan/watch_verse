@@ -6,6 +6,7 @@ import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/poll_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/poll_widgets.dart';
 
@@ -48,7 +49,14 @@ class _EpisodeDetailScreenState extends State<EpisodeDetailScreen> {
     return Scaffold(
       appBar: AppBar(
           title: Text(
-              l10n.episodeSeasonEpisodeLabel(ep.seasonNumber, ep.episodeNumber))),
+              l10n.episodeSeasonEpisodeLabel(ep.seasonNumber, ep.episodeNumber)),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.tv_rounded),
+              tooltip: show.name,
+              onPressed: () => openMedia(context, show.toMediaItem()),
+            ),
+          ]),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
@@ -157,10 +165,13 @@ class _EpisodeDetailScreenState extends State<EpisodeDetailScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
-      builder: (ctx) => ConstrainedBox(
-        constraints:
-            BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
-        child: SingleChildScrollView(
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.6,
+        minChildSize: 0.3,
+        maxChildSize: 0.85,
+        builder: (context, scrollController) => SingleChildScrollView(
+          controller: scrollController,
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           child: FutureBuilder<List<CastMember>>(
             future: _cast,

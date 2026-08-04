@@ -26,9 +26,9 @@ class MovieService {
           {required FirebaseFirestore firestore, required FirebaseAuth auth}) =>
       MovieService._(firestore: firestore, auth: auth);
 
-  /// Letterboxd-style cap: a showcase of exactly 3 favorite films, not an
-  /// unbounded list.
-  static const maxFavorites = 3;
+  /// The profile "showcase" always has exactly 3 slots, manually chosen by
+  /// the user from their (unlimited) favorites — see [setShowcaseSlot].
+  static const showcaseSlots = 3;
 
   final FirebaseFirestore _db;
   final FirebaseAuth _auth;
@@ -120,6 +120,17 @@ class MovieService {
   Stream<List<Map<String, dynamic>>> favoritesStream() =>
       _streamWhere('favorite', true);
 
+  /// The manually-curated 3-slot showcase — a subset of [favoritesStream],
+  /// ordered by the slot the user picked (0, 1, 2) rather than add date.
+  Stream<List<Map<String, dynamic>>> showcaseStream() =>
+      favoritesStream().map((items) {
+        final showcased = items.where((m) => m['showcaseSlot'] != null)
+            .toList()
+          ..sort((a, b) =>
+              (a['showcaseSlot'] as num).compareTo(b['showcaseSlot'] as num));
+        return showcased;
+      });
+
   /// All diary entries (watches + rewatches) for one movie, newest-watched
   /// first. Single-field `where` (auto-indexed); sorted client-side so no
   /// composite index is needed.
@@ -154,24 +165,22 @@ class MovieService {
     }
   }
 
-  /// Marks/unmarks a movie as one of the user's top favorites. Returns `false`
-  /// (without writing) when trying to favorite a 4th film while 3 are already
-  /// picked — the caller should prompt the user to unpick one first.
-  Future<bool> setFavorite(Movie m, bool favorite) async {
-    if (favorite) {
-      final col = _col;
-      if (col != null) {
-        final current =
-            await col.where('favorite', isEqualTo: true).get();
-        final alreadyFavorite =
-            current.docs.any((d) => d.id == m.id.toString());
-        if (!alreadyFavorite && current.docs.length >= maxFavorites) {
-          return false;
-        }
-      }
-    }
-    await _upsert(m, {'favorite': favorite});
-    return true;
+  /// Marks/unmarks a movie as a favorite (an unlimited "liked films" list —
+  /// separate from the 3-slot profile showcase, see [setShowcaseSlot]).
+  Future<void> setFavorite(Movie m, bool favorite) async {
+    await _upsert(m, {
+      'favorite': favorite,
+      // Un-favoriting also drops it out of the showcase, if it was in it.
+      if (!favorite) 'showcaseSlot': null,
+    });
+  }
+
+  /// Puts/removes a favorited movie in one of the 3 profile showcase slots
+  /// (0, 1 or 2). Pass `null` to remove it from the showcase without
+  /// un-favoriting it.
+  Future<void> setShowcaseSlot(int movieId, int? slot) async {
+    await _ref(movieId)?.set(
+      {'showcaseSlot': slot}, SetOptions(merge: true));
   }
 
   Future<void> setRating(Movie m, double rating) =>

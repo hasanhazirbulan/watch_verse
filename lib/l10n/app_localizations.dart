@@ -770,6 +770,18 @@ abstract class AppLocalizations {
   /// **'Tap the ♥ on a movie\'s page to add it here'**
   String get profileFavoritesEmptyHint;
 
+  /// No description provided for @profileShowcasePickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to showcase'**
+  String get profileShowcasePickerTitle;
+
+  /// No description provided for @profileShowcaseRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from showcase'**
+  String get profileShowcaseRemove;
+
   /// No description provided for @profileMoviesTitle.
   ///
   /// In en, this message translates to:
@@ -943,12 +955,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save to diary'**
   String get movieSaveToDiary;
-
-  /// No description provided for @movieFavoriteLimitReached.
-  ///
-  /// In en, this message translates to:
-  /// **'You can only pick 3 favorite films — remove one first.'**
-  String get movieFavoriteLimitReached;
 
   /// No description provided for @pollSectionTitle.
   ///

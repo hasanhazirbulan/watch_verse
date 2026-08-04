@@ -104,10 +104,13 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
-      builder: (ctx) => ConstrainedBox(
-        constraints:
-            BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
-        child: SingleChildScrollView(
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.6,
+        minChildSize: 0.3,
+        maxChildSize: 0.85,
+        builder: (context, scrollController) => SingleChildScrollView(
+          controller: scrollController,
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           child: FutureBuilder<List<CastMember>>(
             future: _cast,
@@ -337,14 +340,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   }
 
   Future<void> _toggleFavorite(bool currentlyFavorite) async {
-    final l10n = AppLocalizations.of(context)!;
-    final messenger = ScaffoldMessenger.of(context);
-    final applied = await _movies.setFavorite(movie, !currentlyFavorite);
-    if (!applied) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.movieFavoriteLimitReached)),
-      );
-    }
+    await _movies.setFavorite(movie, !currentlyFavorite);
   }
 
   Widget _statusPill({

@@ -710,9 +710,11 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
           final season = show.seasons[index];
           final List<Episode> eps =
               data.episodesBySeason[season.seasonNumber] ?? const [];
+          final airedEps = eps.where((e) => e.hasAired).toList();
           final seasonWatched =
-              eps.where((e) => watched.contains(e.key)).length;
-          final allWatched = eps.isNotEmpty && seasonWatched == eps.length;
+              airedEps.where((e) => watched.contains(e.key)).length;
+          final allWatched =
+              airedEps.isNotEmpty && seasonWatched == airedEps.length;
           return Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: Theme(
@@ -748,12 +750,12 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
                     ),
                   ),
                   children: [
-                    if (eps.isNotEmpty)
+                    if (airedEps.isNotEmpty)
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton.icon(
                           onPressed: () => _tracking.setSeasonWatched(
-                              show, eps, !allWatched),
+                              show, allWatched ? eps : airedEps, !allWatched),
                           icon: Icon(
                               allWatched
                                   ? Icons.remove_done_rounded

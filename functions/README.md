@@ -6,6 +6,16 @@ been deployed** — the Flutter app works fully without it; `NotificationService
 on the client side already registers each user's device token, but nothing
 sends a push until these functions are deployed.
 
+> **The episode-reminder/activity-digest notifications ARE live in
+> production right now — just not through this scaffold.** This project is
+> on the free Spark plan, which can't deploy Cloud Functions v2 at all. That
+> logic runs instead as a free GitHub Actions cron job:
+> `../scripts/notify/run.js` + `../.github/workflows/notifications.yml`.
+> `onNewFollower` and `onCommentReported`/`onUserDeleted` here are still
+> genuinely undeployed. If this project ever moves to Blaze and you deploy
+> the notification functions below, disable the GitHub Actions schedules
+> first — running both sends every notification twice.
+
 `onUserDeleted` is also here, but it's optional: `SettingsScreen`'s
 delete-account flow already purges every `users/{uid}` subcollection itself
 (client-side, no Admin SDK needed, since the schema is fixed) before deleting

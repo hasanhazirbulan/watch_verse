@@ -290,6 +290,36 @@ abstract class AppLocalizations {
   /// **'About'**
   String get settingsAppInfoSection;
 
+  /// No description provided for @settingsNotificationsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get settingsNotificationsSection;
+
+  /// No description provided for @settingsNotifyEpisodeTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'New episodes airing tomorrow'**
+  String get settingsNotifyEpisodeTomorrow;
+
+  /// No description provided for @settingsNotifyEpisodeToday.
+  ///
+  /// In en, this message translates to:
+  /// **'New episodes out today'**
+  String get settingsNotifyEpisodeToday;
+
+  /// No description provided for @settingsNotifyFriendActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Friend activity'**
+  String get settingsNotifyFriendActivity;
+
+  /// No description provided for @settingsNotifySharedWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared watch matches'**
+  String get settingsNotifySharedWatch;
+
   /// No description provided for @settingsAppVersion.
   ///
   /// In en, this message translates to:
@@ -584,6 +614,30 @@ abstract class AppLocalizations {
   /// **'Your rating'**
   String get tvYourRating;
 
+  /// No description provided for @movieYourRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rating'**
+  String get movieYourRating;
+
+  /// No description provided for @movieCannotMarkUnreleased.
+  ///
+  /// In en, this message translates to:
+  /// **'This movie hasn\'t been released yet.'**
+  String get movieCannotMarkUnreleased;
+
+  /// No description provided for @movieNotYetReleased.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet released'**
+  String get movieNotYetReleased;
+
+  /// No description provided for @movieReleasesOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Releases on {date}'**
+  String movieReleasesOn(String date);
+
   /// No description provided for @tvUpNextLabel.
   ///
   /// In en, this message translates to:
@@ -619,6 +673,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark season watched'**
   String get tvMarkSeasonWatched;
+
+  /// No description provided for @tvCannotMarkUnaired.
+  ///
+  /// In en, this message translates to:
+  /// **'This episode hasn\'t aired yet.'**
+  String get tvCannotMarkUnaired;
+
+  /// No description provided for @tvMoreEpisodesComing.
+  ///
+  /// In en, this message translates to:
+  /// **'More episodes coming'**
+  String get tvMoreEpisodesComing;
+
+  /// No description provided for @tvMarkAllSeasonsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all seasons watched'**
+  String get tvMarkAllSeasonsButton;
+
+  /// No description provided for @tvMarkAllSeasonsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all seasons watched?'**
+  String get tvMarkAllSeasonsTitle;
+
+  /// No description provided for @tvMarkAllSeasonsQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Every aired episode of {name} will be marked as watched.'**
+  String tvMarkAllSeasonsQuestion(String name);
 
   /// No description provided for @tvEpisodeNumberLabel.
   ///
@@ -733,6 +817,58 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Films'**
   String get profileFilms;
+
+  /// No description provided for @profileMovieTimeSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Movie time'**
+  String get profileMovieTimeSpent;
+
+  /// No description provided for @profileShowTimeSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Show time'**
+  String get profileShowTimeSpent;
+
+  /// No description provided for @profileDurationCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h {minutes}m'**
+  String profileDurationCompact(String hours, String minutes);
+
+  /// No description provided for @profileDurationDaysHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d {hours}h'**
+  String profileDurationDaysHours(String days, String hours);
+
+  /// No description provided for @profileDurationMonthsDaysHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{months}mo {days}d {hours}h'**
+  String profileDurationMonthsDaysHours(
+    String months,
+    String days,
+    String hours,
+  );
+
+  /// No description provided for @watchedMoviesSortTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get watchedMoviesSortTooltip;
+
+  /// No description provided for @watchedMoviesSortByDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date added'**
+  String get watchedMoviesSortByDate;
+
+  /// No description provided for @watchedMoviesSortByRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating (high to low)'**
+  String get watchedMoviesSortByRating;
 
   /// No description provided for @profileShows.
   ///
@@ -883,12 +1019,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Watched'**
   String get movieWatched;
-
-  /// No description provided for @movieYourRating.
-  ///
-  /// In en, this message translates to:
-  /// **'Your rating'**
-  String get movieYourRating;
 
   /// No description provided for @movieYourDiary.
   ///
@@ -1273,6 +1403,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'PREMIERE'**
   String get upNextPremiereTag;
+
+  /// No description provided for @upNextNewBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'NEW'**
+  String get upNextNewBadge;
+
+  /// No description provided for @upNextAllCaughtUpEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All caught up'**
+  String get upNextAllCaughtUpEmptyTitle;
+
+  /// No description provided for @upNextAllCaughtUpEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No new episodes to watch right now — check the Upcoming tab for what\'s coming next.'**
+  String get upNextAllCaughtUpEmptySubtitle;
 
   /// No description provided for @upNextSwipeStopLabel.
   ///
@@ -1867,6 +2015,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Popular Shows'**
   String get homePopularShows;
+
+  /// No description provided for @homeFriendsAlsoWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Friends Also Watched'**
+  String get homeFriendsAlsoWatched;
+
+  /// No description provided for @statsSeeDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'See details'**
+  String get statsSeeDetails;
+
+  /// No description provided for @statsScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Statistics'**
+  String get statsScreenTitle;
+
+  /// No description provided for @statsTypeBreakdownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Movies vs Shows'**
+  String get statsTypeBreakdownTitle;
+
+  /// No description provided for @statsGenreBreakdownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time by genre'**
+  String get statsGenreBreakdownTitle;
+
+  /// No description provided for @statsOtherGenres.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get statsOtherGenres;
+
+  /// No description provided for @statsWeeklyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 8 weeks'**
+  String get statsWeeklyTitle;
+
+  /// No description provided for @statsThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get statsThisWeek;
+
+  /// No description provided for @statsWeekdayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'By day of week'**
+  String get statsWeekdayTitle;
+
+  /// No description provided for @statsDayMon.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get statsDayMon;
+
+  /// No description provided for @statsDayTue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get statsDayTue;
+
+  /// No description provided for @statsDayWed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get statsDayWed;
+
+  /// No description provided for @statsDayThu.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get statsDayThu;
+
+  /// No description provided for @statsDayFri.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get statsDayFri;
+
+  /// No description provided for @statsDaySat.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get statsDaySat;
+
+  /// No description provided for @statsDaySun.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun'**
+  String get statsDaySun;
+
+  /// No description provided for @statsEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch a few movies or shows to see your stats here.'**
+  String get statsEmptyMessage;
+
+  /// No description provided for @quickAddWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch'**
+  String get quickAddWatch;
+
+  /// No description provided for @quickAddLike.
+  ///
+  /// In en, this message translates to:
+  /// **'Like'**
+  String get quickAddLike;
+
+  /// No description provided for @quickAddWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Watchlist'**
+  String get quickAddWatchlist;
+
+  /// No description provided for @quickAddTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Track'**
+  String get quickAddTrack;
+
+  /// No description provided for @quickAddRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate'**
+  String get quickAddRate;
+
+  /// No description provided for @quickAddReviewOrLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Review or log'**
+  String get quickAddReviewOrLog;
+
+  /// No description provided for @quickAddAddToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to lists'**
+  String get quickAddAddToList;
+
+  /// No description provided for @quickAddGoTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to {title}'**
+  String quickAddGoTo(String title);
 
   /// No description provided for @homeBecauseYouWatched.
   ///

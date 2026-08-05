@@ -11,6 +11,11 @@ import 'package:watch_verse/services/notification_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'firebase_options.dart'; // Firebase configuration import
 
+/// Lets [NotificationService] push a route when a notification is tapped,
+/// without needing a BuildContext at the point the tap arrives (which can be
+/// before any screen has built, e.g. a cold start from a notification).
+final navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -29,6 +34,7 @@ class MyApp extends StatelessWidget {
     // background. `theme` is set to the dark ThemeData as well as `darkTheme`
     // so the platform's light mode can never pull a light palette through.
     return MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'WatchVerse',
       theme: AppTheme.dark,
@@ -92,7 +98,8 @@ class AuthWrapper extends StatelessWidget {
           // Fire-and-forget: request push permission and register the FCM
           // token for this user. Failures are swallowed inside the service
           // so they never block sign-in.
-          NotificationService.instance.initialize(snapshot.data!.uid);
+          NotificationService.instance
+              .initialize(snapshot.data!.uid, navigatorKey: navigatorKey);
           // Navigate to MainScreen if authenticated
           return const MainScreen();
         } else {

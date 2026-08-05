@@ -47,3 +47,4 @@ app.*.map.json
 # Local secrets (real API keys) — copy secrets.example.json to secrets.json
 # and fill it in; never commit secrets.json.
 secrets.json
+scripts/notify/node_modules/

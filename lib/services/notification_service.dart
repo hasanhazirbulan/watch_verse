@@ -3,7 +3,12 @@ import 'dart:io' show Platform;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:watch_verse/models/media.dart';
+import 'package:watch_verse/screens/friends_activity_screen.dart';
+import 'package:watch_verse/screens/public_profile_screen.dart';
+import 'package:watch_verse/utils/navigation.dart';
 
 /// Must be a top-level (or static) function: the OS calls this in a separate
 /// isolate when a push arrives while the app is backgrounded/terminated.
@@ -30,6 +35,7 @@ class NotificationService {
   final _messaging = FirebaseMessaging.instance;
   final _localNotifications = FlutterLocalNotificationsPlugin();
   bool _initialized = false;
+  GlobalKey<NavigatorState>? _navigatorKey;
 
   static const _androidChannel = AndroidNotificationChannel(
     'watchverse_default',
@@ -46,7 +52,12 @@ class NotificationService {
   /// Requests permission, registers the FCM token for [uid], and starts
   /// listening for foreground/background messages. Safe to call once per
   /// signed-in session (e.g. from [AuthWrapper] once a user is available).
-  Future<void> initialize(String uid) async {
+  /// [navigatorKey] is used to route a tapped notification to the relevant
+  /// screen (see [_handleTap]) without needing a BuildContext at the call
+  /// site — pass the same key the app's root `MaterialApp` uses.
+  Future<void> initialize(String uid,
+      {GlobalKey<NavigatorState>? navigatorKey}) async {
+    _navigatorKey = navigatorKey;
     if (_initialized || !_isSupportedPlatform) return;
     _initialized = true;
 
@@ -71,6 +82,11 @@ class NotificationService {
       FirebaseMessaging.onBackgroundMessage(
           firebaseMessagingBackgroundHandler);
       FirebaseMessaging.onMessage.listen(_showForegroundNotification);
+
+      // Tapped while backgrounded, and tapped from a cold start respectively.
+      FirebaseMessaging.onMessageOpenedApp.listen(_handleTap);
+      final initial = await _messaging.getInitialMessage();
+      if (initial != null) _handleTap(initial);
     } catch (e) {
       // Permission denied, unsupported simulator, etc. — the app should
       // keep working without push; just don't retry until the next launch.
@@ -109,6 +125,51 @@ class NotificationService {
         iOS: const DarwinNotificationDetails(),
       ),
     );
+  }
+
+  /// Routes a tapped notification to the relevant screen, using the `data`
+  /// payload the Cloud Function attached (see functions/src/index.ts) — no
+  /// extra network round-trip before navigating, since the function already
+  /// includes the title/poster it needs. Silently no-ops for unknown/legacy
+  /// payloads (e.g. an old `type: 'activity'` push still in the tray from
+  /// before the digest system existed).
+  void _handleTap(RemoteMessage message) {
+    final nav = _navigatorKey?.currentState;
+    if (nav == null) return;
+    final data = message.data;
+
+    switch (data['type']) {
+      case 'follow':
+        nav.push(MaterialPageRoute(
+          builder: (_) => PublicProfileScreen(
+              userId: data['actorUid'] ?? '', name: data['actorName'] ?? ''),
+        ));
+        return;
+      case 'activity-digest':
+        nav.push(
+            MaterialPageRoute(builder: (_) => const FriendsActivityScreen()));
+        return;
+      case 'episode-tomorrow':
+      case 'episode-today':
+      case 'shared-watch':
+        final id = int.tryParse(data['id'] ?? '');
+        if (id == null) return;
+        openMedia(
+          nav.context,
+          MediaItem(
+            id: id,
+            title: data['title'] ?? '',
+            overview: '',
+            posterPath: data['posterPath'] ?? '',
+            backdropPath: '',
+            date: '',
+            voteAverage: 0,
+            mediaType:
+                data['mediaType'] == 'movie' ? MediaType.movie : MediaType.tv,
+          ),
+        );
+        return;
+    }
   }
 
   /// Clears the stored token on sign-out so a stale token doesn't linger on

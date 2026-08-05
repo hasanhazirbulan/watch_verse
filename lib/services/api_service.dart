@@ -91,6 +91,20 @@ class APIservices {
   Future<List<MediaItem>> getTopRatedMovies() =>
       _getList('/movie/top_rated', MediaItem.fromMovieMap);
 
+  /// Runtime (minutes) and genre names from the movie detail endpoint —
+  /// neither is present on any list endpoint, so this is fetched once,
+  /// right before logging a watch, powering the profile's "time spent
+  /// watching movies" stat and the genre-time breakdown chart.
+  Future<({int runtime, List<String> genres})> getMovieDetailExtras(
+      int movieId) async {
+    final data = await _getJson(_uri('/movie/$movieId'));
+    final genres = (data['genres'] as List<dynamic>? ?? [])
+        .map((g) => (g as Map<String, dynamic>)['name'] as String? ?? '')
+        .where((g) => g.isNotEmpty)
+        .toList();
+    return (runtime: (data['runtime'] as num?)?.toInt() ?? 0, genres: genres);
+  }
+
   // ------------------------------------------------------------------- TV ----
 
   Future<List<MediaItem>> getTrendingTv() =>

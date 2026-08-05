@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:watch_verse/models/media.dart';
+import 'package:watch_verse/services/api_service.dart';
 
 /// Handles per-user TV show + episode tracking in Firestore.
 ///
@@ -41,6 +42,13 @@ class TvTrackingService {
         'voteAverage': show.voteAverage,
         'totalEpisodes': show.numberOfEpisodes,
         'totalSeasons': show.numberOfSeasons,
+        // ISO date string (or '' when unknown) — lets a scheduled Cloud
+        // Function find "airs tomorrow"/"airs today" shows with a single
+        // collectionGroup('shows') query instead of re-fetching every
+        // tracked show from TMDB itself.
+        'nextEpisodeAirDate': show.nextEpisodeToAir?.airDate ?? '',
+        // Powers the genre-time breakdown chart on the profile screen.
+        if (show.genres.isNotEmpty) 'genres': show.genres,
       };
 
   String _statusFor(int watched, int total) {
@@ -200,6 +208,7 @@ class TvTrackingService {
     if (ref == null || episodes.isEmpty) return;
     final current = await watchedKeys(show.id);
     final batch = _db.batch();
+    var minutesDelta = 0;
     for (final ep in episodes) {
       if (!current.contains(ep.key)) {
         batch.set(ref.collection('watched').doc(ep.key), {
@@ -208,11 +217,14 @@ class TvTrackingService {
           'watchedAt': FieldValue.serverTimestamp(),
         });
         current.add(ep.key);
+        minutesDelta += ep.runtime;
       }
     }
     batch.set(ref, {
       ..._metadata(show),
       'watchedCount': current.length,
+      if (minutesDelta > 0)
+        'watchedMinutes': FieldValue.increment(minutesDelta),
       'status': _statusFor(current.length, show.numberOfEpisodes),
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
@@ -266,6 +278,12 @@ class TvTrackingService {
     batch.set(ref, {
       ..._metadata(show),
       'watchedCount': count,
+      // Denormalized running total of watched-episode runtime, minutes.
+      // 0-runtime episodes (TMDB doesn't always have it) simply contribute
+      // nothing — this undercounts rather than blocking the feature.
+      if (episode.runtime > 0)
+        'watchedMinutes': FieldValue.increment(
+            watched ? episode.runtime : -episode.runtime),
       'status': _statusFor(count, show.numberOfEpisodes),
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
@@ -283,6 +301,7 @@ class TvTrackingService {
         'season': episode.seasonNumber,
         'episode': episode.episodeNumber,
         'episodeName': episode.name,
+        if (episode.runtime > 0) 'runtime': episode.runtime,
         'at': FieldValue.serverTimestamp(),
       });
     } else {
@@ -307,6 +326,7 @@ class TvTrackingService {
 
     final current = await watchedKeys(show.id);
     final batch = _db.batch();
+    var minutesDelta = 0;
 
     for (final ep in episodes) {
       final epRef = ref.collection('watched').doc(ep.key);
@@ -317,9 +337,11 @@ class TvTrackingService {
           'watchedAt': FieldValue.serverTimestamp(),
         });
         current.add(ep.key);
+        minutesDelta += ep.runtime;
       } else if (!watched && current.contains(ep.key)) {
         batch.delete(epRef);
         current.remove(ep.key);
+        minutesDelta -= ep.runtime;
       }
     }
 
@@ -327,6 +349,8 @@ class TvTrackingService {
     batch.set(ref, {
       ..._metadata(show),
       'watchedCount': count,
+      if (minutesDelta != 0)
+        'watchedMinutes': FieldValue.increment(minutesDelta),
       'status': _statusFor(count, show.numberOfEpisodes),
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
@@ -345,10 +369,74 @@ class TvTrackingService {
         'posterPath': show.posterPath,
         'season': seasonNumber,
         'count': episodes.length,
+        'runtime': episodes.fold<int>(0, (acc, e) => acc + e.runtime),
         'at': FieldValue.serverTimestamp(),
       });
     } else {
       await _deleteActivity(seasonRef);
+    }
+  }
+
+  /// One-time backfill for shows tracked before `watchedMinutes`/`genres`
+  /// existed: recomputes watched minutes from scratch by re-fetching each
+  /// watched season's episode runtimes from TMDB and summing the ones
+  /// actually marked watched, and fills in genres from the show detail
+  /// endpoint if missing. Safe to call repeatedly (minutes are overwritten,
+  /// not incremented).
+  Future<void> backfillShowDetails(int showId) async {
+    final ref = _showRef(showId);
+    if (ref == null) return;
+    final showSnap = await ref.get();
+    final watchedSnap = await ref.collection('watched').get();
+
+    final update = <String, dynamic>{};
+
+    if (((showSnap.data()?['genres'] as List?) ?? const []).isEmpty) {
+      try {
+        final show = await APIservices().getTvDetails(showId);
+        if (show.genres.isNotEmpty) update['genres'] = show.genres;
+      } catch (_) {
+        // Leave genres unset; the rest of the backfill can still proceed.
+      }
+    }
+
+    if (watchedSnap.docs.isNotEmpty) {
+      final episodeNumbersBySeason = <int, Set<int>>{};
+      for (final doc in watchedSnap.docs) {
+        final season = (doc.data()['season'] as num?)?.toInt();
+        final episode = (doc.data()['episode'] as num?)?.toInt();
+        if (season == null || episode == null) continue;
+        (episodeNumbersBySeason[season] ??= <int>{}).add(episode);
+      }
+
+      final api = APIservices();
+      var minutes = 0;
+      for (final entry in episodeNumbersBySeason.entries) {
+        try {
+          final episodes = await api.getSeasonEpisodes(showId, entry.key);
+          for (final ep in episodes) {
+            if (entry.value.contains(ep.episodeNumber)) minutes += ep.runtime;
+          }
+        } catch (_) {
+          // Skip a season TMDB couldn't return; the rest still get counted.
+        }
+      }
+      update['watchedMinutes'] = minutes;
+    }
+
+    if (update.isNotEmpty) {
+      await ref.set(update, SetOptions(merge: true));
+    }
+  }
+
+  /// Runs [backfillShowDetails] across every show the user tracks.
+  Future<void> backfillAllShowDetails() async {
+    final col = _showsCol;
+    if (col == null) return;
+    final snap = await col.get();
+    for (final doc in snap.docs) {
+      final id = (doc.data()['id'] as num?)?.toInt();
+      if (id != null) await backfillShowDetails(id);
     }
   }
 }

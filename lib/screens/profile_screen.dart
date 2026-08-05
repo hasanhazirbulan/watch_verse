@@ -5,11 +5,13 @@ import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/screens/follow_list_screen.dart';
 import 'package:watch_verse/screens/up_next_screen.dart';
+import 'package:watch_verse/screens/watch_stats_screen.dart';
 import 'package:watch_verse/screens/watched_movies_screen.dart';
 import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/duration_format.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 
@@ -28,6 +30,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _fetchUserData();
+    _backfillTimeStatsOnce();
+  }
+
+  /// Movies/episodes watched before the time-spent stat (or its genre data)
+  /// existed have no `runtime`/`watchedMinutes`/`genres` recorded. Runs the
+  /// backfill once per account (flagged on the user doc) so those older
+  /// watches count too, without re-fetching from TMDB on every profile
+  /// visit. Bumped to V2 to re-run once for accounts that already completed
+  /// the runtime-only V1 backfill, so genres get filled in too.
+  Future<void> _backfillTimeStatsOnce() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
+    final snap = await userRef.get();
+    if (snap.data()?['timeStatsBackfilledV2'] == true) return;
+    await Future.wait([
+      MovieService.instance.backfillDetails(),
+      TvTrackingService.instance.backfillAllShowDetails(),
+    ]);
+    await userRef.set({'timeStatsBackfilledV2': true}, SetOptions(merge: true));
   }
 
   Future<void> _fetchUserData() async {
@@ -92,6 +114,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _favoritesShowcase(),
             const SizedBox(height: 16),
             _statsRow(),
+            const SizedBox(height: 12),
+            _timeStatsRow(),
             const SizedBox(height: 16),
             _recentTrays(),
           ],
@@ -182,6 +206,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  // Separate movie vs show time-spent stats. Movie minutes come from the
+  // per-watched-movie `runtime` field (resolved lazily the first time each
+  // movie is logged, see MovieService/_openLogSheet); show minutes come from
+  // the denormalized `watchedMinutes` counter TvTrackingService maintains
+  // alongside `watchedCount`. Both are best-effort: episodes/movies logged
+  // before this field existed, or missing runtime data from TMDB, simply
+  // don't contribute rather than blocking the stat.
+  // Tapping either tile opens WatchStatsScreen (genre/type breakdown +
+  // weekly/day-of-week charts) — the two tiles are the "headline number",
+  // the stats screen is the drill-down.
+  Widget _timeStatsRow() {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+          context, MaterialPageRoute(builder: (_) => const WatchStatsScreen())),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: MovieService.instance.watchedStream(),
+                  builder: (context, snap) {
+                    final minutes = (snap.data ?? const []).fold<int>(0,
+                        (acc, m) => acc + ((m['runtime'] ?? 0) as num).toInt());
+                    return _statTile(
+                        Icons.movie_filter_rounded,
+                        formatWatchDuration(context, minutes),
+                        AppLocalizations.of(context)!.profileMovieTimeSpent);
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: TvTrackingService.instance.trackedShowsStream(),
+                  builder: (context, snap) {
+                    final minutes = (snap.data ?? const []).fold<int>(
+                        0,
+                        (acc, s) =>
+                            acc + ((s['watchedMinutes'] ?? 0) as num).toInt());
+                    return _statTile(
+                        Icons.timer_rounded,
+                        formatWatchDuration(context, minutes),
+                        AppLocalizations.of(context)!.profileShowTimeSpent);
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(AppLocalizations.of(context)!.statsSeeDetails,
+                  style: TextStyle(
+                      color: context.colors.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700)),
+              Icon(Icons.chevron_right_rounded,
+                  size: 16, color: context.colors.primary),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

@@ -139,6 +139,70 @@ class SocialService {
     return all;
   }
 
+  /// Movies followed users have watched, newest-watched first, tagged with
+  /// who watched it — powers the home screen's "Your Friends Also Watched"
+  /// slider. Same per-friend fan-out as [friendsActivity], but reads the raw
+  /// movie docs (via [userWatchedMovies]) instead of the activity feed, so
+  /// `rating` is guaranteed present when the friend rated it.
+  Future<List<Map<String, dynamic>>> friendsWatchedMovies(
+      List<String> followingUids, {int limit = 20}) async {
+    if (followingUids.isEmpty) return [];
+    final lists = await Future.wait(followingUids.take(20).map((u) async {
+      try {
+        final userSnap = await _users.doc(u).get();
+        final name = (userSnap.data()?['name'] ?? '') as String;
+        final photo = (userSnap.data()?['photoURL'] ?? '') as String;
+        final movies = await userWatchedMovies(u);
+        return movies
+            .map((m) => {...m, 'actorName': name, 'actorPhoto': photo, 'actorUid': u})
+            .toList();
+      } catch (_) {
+        return <Map<String, dynamic>>[];
+      }
+    }));
+    final all = lists.expand((e) => e).toList();
+    all.sort((a, b) {
+      final ta = a['watchedAt'];
+      final tb = b['watchedAt'];
+      if (ta is Timestamp && tb is Timestamp) return tb.compareTo(ta);
+      return 0;
+    });
+    return all.take(limit).toList();
+  }
+
+  /// Shows followed users are watching/have finished, newest-updated first,
+  /// tagged with who watched it — same shape as [friendsWatchedMovies], for
+  /// the TV Shows tab of the friends slider. `userRating` is the friend's
+  /// overall show rating (set via TvTrackingService.setRating), present
+  /// directly on the show doc.
+  Future<List<Map<String, dynamic>>> friendsWatchedShows(
+      List<String> followingUids, {int limit = 20}) async {
+    if (followingUids.isEmpty) return [];
+    final lists = await Future.wait(followingUids.take(20).map((u) async {
+      try {
+        final userSnap = await _users.doc(u).get();
+        final name = (userSnap.data()?['name'] ?? '') as String;
+        final photo = (userSnap.data()?['photoURL'] ?? '') as String;
+        final shows = (await userShows(u))
+            .where((s) => ((s['watchedCount'] ?? 0) as num) > 0)
+            .toList();
+        return shows
+            .map((s) => {...s, 'actorName': name, 'actorPhoto': photo, 'actorUid': u})
+            .toList();
+      } catch (_) {
+        return <Map<String, dynamic>>[];
+      }
+    }));
+    final all = lists.expand((e) => e).toList();
+    all.sort((a, b) {
+      final ta = a['updatedAt'];
+      final tb = b['updatedAt'];
+      if (ta is Timestamp && tb is Timestamp) return tb.compareTo(ta);
+      return 0;
+    });
+    return all.take(limit).toList();
+  }
+
   // ---------------------------------------------------------------- writes --
 
   Future<void> follow(String targetUid) async {

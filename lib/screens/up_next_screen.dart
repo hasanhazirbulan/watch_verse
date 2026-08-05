@@ -13,13 +13,17 @@ import 'package:watch_verse/widgets/media_widgets.dart';
 
 /// A tracked show with its full ordered episode list, plus watch-progress
 /// bookkeeping used to order the feed: how many aired episodes are watched,
-/// and when the most recent one was marked watched.
+/// when the most recent one was marked watched, and the next aired-but-
+/// unwatched episode (null once the show is fully caught up — those shows
+/// are filtered out of Up Next entirely, see `_upNextView`).
 class _ShowBundle {
   final TvShow show;
   final List<Episode> flat;
   final int watchedAiredCount;
   final DateTime? lastWatchedAt;
-  _ShowBundle(this.show, this.flat, this.watchedAiredCount, this.lastWatchedAt);
+  final Episode? nextUnwatched;
+  _ShowBundle(this.show, this.flat, this.watchedAiredCount, this.lastWatchedAt,
+      this.nextUnwatched);
 }
 
 /// One row on the Upcoming tab: a show's next episode to air, or a
@@ -119,7 +123,15 @@ class _UpNextScreenState extends State<UpNextScreen> {
             flat.where((e) => e.hasAired && watched.contains(e.key)).length;
         final lastWatchedAt =
             await TvTrackingService.instance.lastWatchedAt(id);
-        return _ShowBundle(show, flat, watchedAiredCount, lastWatchedAt);
+        Episode? nextUnwatched;
+        for (final e in flat) {
+          if (e.hasAired && !watched.contains(e.key)) {
+            nextUnwatched = e;
+            break;
+          }
+        }
+        return _ShowBundle(
+            show, flat, watchedAiredCount, lastWatchedAt, nextUnwatched);
       } catch (_) {
         return null;
       }
@@ -196,24 +208,31 @@ class _UpNextScreenState extends State<UpNextScreen> {
               ],
             );
           }
-          final bundles = [...snap.data!];
-          // Most recently watched episode first; shows with some watch
-          // progress before shows that were added but never started, which
-          // sink to the bottom in their tracked-list order.
-          final order = {for (int i = 0; i < ids.length; i++) ids[i]: i};
-          bundles.sort((a, b) {
-            final aStarted = a.watchedAiredCount > 0;
-            final bStarted = b.watchedAiredCount > 0;
-            if (aStarted != bStarted) return aStarted ? -1 : 1;
-            if (aStarted) {
-              final at = a.lastWatchedAt;
-              final bt = b.lastWatchedAt;
-              if (at != null && bt != null) return bt.compareTo(at);
-              if (at != null) return -1;
-              if (bt != null) return 1;
-            }
-            return (order[a.show.id] ?? 999).compareTo(order[b.show.id] ?? 999);
-          });
+          // Only shows with a real, watchable-right-now episode belong in Up
+          // Next — a show that's fully caught up (nothing aired left to
+          // watch) has nothing actionable and just clutters the list; it's
+          // still reachable via the Upcoming tab once TMDB announces its
+          // next air date. Sorted by that next episode's air date, newest
+          // first, so anything airing today naturally lands at the top and
+          // older unwatched backlog trails behind it by date.
+          final bundles = snap.data!
+              .where((b) => b.nextUnwatched != null)
+              .toList()
+            ..sort((a, b) {
+              final da = DateTime.tryParse(a.nextUnwatched!.airDate);
+              final db = DateTime.tryParse(b.nextUnwatched!.airDate);
+              if (da == null && db == null) return 0;
+              if (da == null) return 1;
+              if (db == null) return -1;
+              return db.compareTo(da);
+            });
+          if (bundles.isEmpty) {
+            return _empty(
+              Icons.celebration_rounded,
+              AppLocalizations.of(context)!.upNextAllCaughtUpEmptyTitle,
+              AppLocalizations.of(context)!.upNextAllCaughtUpEmptySubtitle,
+            );
+          }
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
             children: [
@@ -695,11 +714,6 @@ class _NextUpCard extends StatelessWidget {
   // not the app's accent.
   static const _stopColor = Color(0xFFEF4444);
 
-  static const _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ];
-
   @override
   Widget build(BuildContext context) {
     final show = bundle.show;
@@ -719,12 +733,16 @@ class _NextUpCard extends StatelessWidget {
           }
         }
 
-        if (next != null) {
-          return _nextUp(context, show, next, watchedAired, aired.length);
-        }
-        final upcoming = show.nextEpisodeToAir;
-        if (upcoming != null) return _caughtUp(context, show, upcoming);
-        return const SizedBox.shrink();
+        // `_upNextView` already filters to shows with a next-unwatched
+        // episode, but this card is stream-driven and can outlive that
+        // snapshot (e.g. the user marks the last remaining episode watched
+        // while the card is still on screen) — so it still needs to handle
+        // `next` going null live, by simply disappearing. Up Next is "what
+        // to watch next", not "shows I like": nothing actionable means
+        // nothing to show here (the detail screen still surfaces a "more
+        // episodes coming" note once TMDB announces a date).
+        if (next == null) return const SizedBox.shrink();
+        return _nextUp(context, show, next, watchedAired, aired.length);
       },
     );
   }
@@ -734,6 +752,7 @@ class _NextUpCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final isPremiere = ep.seasonNumber == 1 && ep.episodeNumber == 1;
     final backlog = airedTotal - watchedAired - 1;
+    final isNew = _isToday(ep.airDate);
 
     return Dismissible(
       key: ValueKey('nextup-${show.id}'),
@@ -776,6 +795,9 @@ class _NextUpCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: context.colors.surface,
             borderRadius: BorderRadius.circular(16),
+            border: isNew
+                ? Border.all(color: context.colors.primary, width: 1.4)
+                : null,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -815,6 +837,12 @@ class _NextUpCard extends StatelessWidget {
                                 fontWeight: FontWeight.w700,
                                 fontSize: 12.5,
                                 color: context.colors.textSecondary)),
+                        if (isNew)
+                          _tag(
+                              context,
+                              l10n.upNextNewBadge,
+                              context.colors.primary,
+                              Colors.white),
                         if (backlog > 0)
                           _tag(
                               context,
@@ -1031,97 +1059,10 @@ class _NextUpCard extends StatelessWidget {
     return result ?? false;
   }
 
-  Widget _caughtUp(BuildContext context, TvShow show, Episode upcoming) {
-    final l10n = AppLocalizations.of(context)!;
-    final today = _isToday(upcoming.airDate);
-    return Dismissible(
-      key: ValueKey('caughtup-${show.id}'),
-      direction: DismissDirection.endToStart,
-      secondaryBackground: _swipeBackground(
-        context,
-        color: _stopColor,
-        icon: Icons.remove_circle_rounded,
-        label: l10n.upNextSwipeStopLabel,
-        alignment: Alignment.centerRight,
-      ),
-      confirmDismiss: (_) => _confirmStopWatching(context, show),
-      onDismissed: (_) {
-        TvTrackingService.instance.removeShow(show.id);
-        onStoppedWatching();
-      },
-      child: GestureDetector(
-        onTap: () => openMedia(context, show.toMediaItem()),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: context.colors.surface,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                  width: 46,
-                  height: 68,
-                  child: TmdbImage(url: Tmdb.poster(show.posterPath)),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(show.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 14)),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(Icons.check_circle_rounded,
-                            size: 14, color: context.colors.success),
-                        const SizedBox(width: 4),
-                        Text(l10n.upNextAllCaughtUp,
-                            style: TextStyle(
-                                color: context.colors.textSecondary, fontSize: 12)),
-                      ],
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      today
-                          ? l10n.upNextNewEpisodeToday
-                          : l10n.upNextNextEpisodeOn(_friendlyDate(upcoming.airDate)),
-                      style: TextStyle(
-                          color: today
-                              ? context.colors.primaryDark
-                              : context.colors.textMuted,
-                          fontSize: 12,
-                          fontWeight: today ? FontWeight.w700 : FontWeight.w400),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   bool _isToday(String iso) {
     final d = DateTime.tryParse(iso);
     if (d == null) return false;
     final now = DateTime.now();
     return d.year == now.year && d.month == now.month && d.day == now.day;
-  }
-
-  String _friendlyDate(String iso) {
-    final d = DateTime.tryParse(iso);
-    if (d == null) return iso;
-    return '${_months[d.month - 1]} ${d.day}';
   }
 }

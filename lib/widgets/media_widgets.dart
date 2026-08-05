@@ -86,6 +86,46 @@ class RatingBadge extends StatelessWidget {
   }
 }
 
+/// Small "★ 4.5" pill for a user's own 0-5 rating — visually distinct from
+/// [RatingBadge] (always TMDB's 0-10 community score) so the two scales are
+/// never mistaken for each other.
+class UserRatingBadge extends StatelessWidget {
+  final double rating;
+  final bool compact;
+  const UserRatingBadge({super.key, required this.rating, this.compact = false});
+
+  @override
+  Widget build(BuildContext context) {
+    if (rating <= 0) return const SizedBox.shrink();
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 6 : 8,
+        vertical: compact ? 3 : 4,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.62),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.star_rounded, color: context.colors.accent,
+              size: compact ? 12 : 14),
+          const SizedBox(width: 3),
+          Text(
+            rating.toStringAsFixed(1),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: compact ? 11 : 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// "Movie" / "TV" chip used on search + mixed lists.
 class MediaTypeChip extends StatelessWidget {
   final MediaType type;
@@ -166,18 +206,21 @@ class PosterCard extends StatelessWidget {
   final MediaItem item;
   final double width;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   const PosterCard({
     super.key,
     required this.item,
     this.width = 130,
     this.onTap,
+    this.onLongPress,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap ?? () => openMedia(context, item),
+      onLongPress: onLongPress,
       child: SizedBox(
         width: width,
         child: Column(

@@ -12,10 +12,13 @@ import 'package:watch_verse/screens/lists_screen.dart';
 import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/notification_service.dart';
+import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
+import 'package:watch_verse/widgets/friend_poster_card.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/widgets/quick_add_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -58,6 +61,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<List<MediaItem>>? _becauseMovieRecs;
   int? _becauseTvId;
   Future<List<MediaItem>>? _becauseTvRecs;
+
+  // "Your Friends Also Watched" — memoized per following-list snapshot, same
+  // reasoning as the "because you watched" futures above.
+  String? _friendsKey;
+  Future<List<Map<String, dynamic>>>? _friendsMoviesFuture;
+  Future<List<Map<String, dynamic>>>? _friendsShowsFuture;
 
   @override
   void initState() {
@@ -388,6 +397,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return [
       _spotlight(_nowPlaying),
       _becauseYouWatchedMovie(),
+      _friendsSlider(isMovie: true),
       _rail(l10n.homeTrendingThisWeek, _trendingMovies),
       _rail(l10n.homeComingSoon, _upcoming),
       _rail(l10n.homePopular, _popularMovies),
@@ -400,11 +410,96 @@ class _HomeScreenState extends State<HomeScreen> {
     return [
       _spotlight(_trendingTv),
       _becauseYouWatchedTv(),
+      _friendsSlider(isMovie: false),
       _rail(l10n.homeAiringToday, _airingToday),
       _rail(l10n.homeOnTheAir, _onTheAir),
       _rail(l10n.homePopularShows, _popularTv),
       _rail(l10n.homeTopRated, _topTv),
     ];
+  }
+
+  // "Your Friends Also Watched" — a per-friend fan-out (SocialService) of
+  // raw watched movie/show docs, rendered as friend-tagged poster cards with
+  // long-press quick-add, matching the Letterboxd "New from friends" rail
+  // this feature was modeled on.
+  Widget _friendsSlider({required bool isMovie}) {
+    return SliverToBoxAdapter(
+      child: StreamBuilder<Map<String, dynamic>?>(
+        stream: SocialService.instance.myStream(),
+        builder: (context, snap) {
+          final following =
+              ((snap.data?['following'] as List?) ?? const []).cast<String>();
+          if (following.isEmpty) return const SizedBox.shrink();
+          final key = following.join(',');
+          if (_friendsKey != key) {
+            _friendsKey = key;
+            _friendsMoviesFuture =
+                SocialService.instance.friendsWatchedMovies(following);
+            _friendsShowsFuture =
+                SocialService.instance.friendsWatchedShows(following);
+          }
+          final future = isMovie ? _friendsMoviesFuture! : _friendsShowsFuture!;
+          final l10n = AppLocalizations.of(context)!;
+          return FutureBuilder<List<Map<String, dynamic>>>(
+            future: future,
+            builder: (context, snap) {
+              final items = snap.data ?? const <Map<String, dynamic>>[];
+              if (items.isEmpty) return const SizedBox.shrink();
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  SectionHeader(title: l10n.homeFriendsAlsoWatched),
+                  SizedBox(
+                    height: 250,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: items.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 12),
+                      itemBuilder: (context, i) =>
+                          _friendPoster(items[i], isMovie),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _friendPoster(Map<String, dynamic> m, bool isMovie) {
+    final item = isMovie
+        ? MediaItem(
+            id: (m['id'] ?? 0) as int,
+            title: (m['title'] ?? '') as String,
+            overview: '',
+            posterPath: (m['posterPath'] ?? '') as String,
+            backdropPath: (m['backdropPath'] ?? '') as String,
+            date: (m['releaseDate'] ?? '') as String,
+            voteAverage: ((m['voteAverage'] ?? 0) as num).toDouble(),
+            mediaType: MediaType.movie,
+          )
+        : MediaItem(
+            id: (m['id'] ?? 0) as int,
+            title: (m['name'] ?? '') as String,
+            overview: '',
+            posterPath: (m['posterPath'] ?? '') as String,
+            backdropPath: (m['backdropPath'] ?? '') as String,
+            date: (m['firstAirDate'] ?? '') as String,
+            voteAverage: ((m['voteAverage'] ?? 0) as num).toDouble(),
+            mediaType: MediaType.tv,
+          );
+    final rating =
+        (((isMovie ? m['rating'] : m['userRating']) ?? 0) as num).toDouble();
+    return FriendPosterCard(
+      item: item,
+      friendName: (m['actorName'] ?? '') as String,
+      friendPhoto: (m['actorPhoto'] ?? '') as String,
+      rating: rating,
+    );
   }
 
   // Personalized rail seeded from the most recent thing you watched.
@@ -488,6 +583,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemBuilder: (context, i) => PosterCard(
                   item: items[i],
                   onTap: () => openMedia(context, items[i]),
+                  onLongPress: () => showQuickAddSheet(context, items[i]),
                 ),
               ),
             ),
@@ -558,6 +654,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) => PosterCard(
                     item: items[index],
                     onTap: () => openMedia(context, items[index]),
+                    onLongPress: () =>
+                        showQuickAddSheet(context, items[index]),
                   ),
                 );
               },

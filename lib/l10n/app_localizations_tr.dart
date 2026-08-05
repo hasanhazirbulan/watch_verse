@@ -110,6 +110,21 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsAppInfoSection => 'Hakkında';
 
   @override
+  String get settingsNotificationsSection => 'Bildirimler';
+
+  @override
+  String get settingsNotifyEpisodeTomorrow => 'Yarın çıkan bölümler';
+
+  @override
+  String get settingsNotifyEpisodeToday => 'Bugün yayınlanan bölümler';
+
+  @override
+  String get settingsNotifyFriendActivity => 'Arkadaş aktivitesi';
+
+  @override
+  String get settingsNotifySharedWatch => 'Ortak içerik eşleşmesi';
+
+  @override
   String settingsAppVersion(String version) {
     return 'Sürüm $version';
   }
@@ -294,6 +309,20 @@ class AppLocalizationsTr extends AppLocalizations {
   String get tvYourRating => 'Puanınız';
 
   @override
+  String get movieYourRating => 'Puanınız';
+
+  @override
+  String get movieCannotMarkUnreleased => 'Bu film henüz vizyona girmedi.';
+
+  @override
+  String get movieNotYetReleased => 'Henüz vizyona girmedi';
+
+  @override
+  String movieReleasesOn(String date) {
+    return '$date tarihinde vizyona girecek';
+  }
+
+  @override
   String get tvUpNextLabel => 'SIRADAKİ';
 
   @override
@@ -316,6 +345,24 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get tvMarkSeasonWatched => 'Sezonu izlendi olarak işaretle';
+
+  @override
+  String get tvCannotMarkUnaired => 'Bu bölüm henüz yayınlanmadı.';
+
+  @override
+  String get tvMoreEpisodesComing => 'Daha fazla bölüm geliyor';
+
+  @override
+  String get tvMarkAllSeasonsButton => 'Tüm sezonları izlendi olarak işaretle';
+
+  @override
+  String get tvMarkAllSeasonsTitle =>
+      'Tüm sezonlar izlendi olarak işaretlensin mi?';
+
+  @override
+  String tvMarkAllSeasonsQuestion(String name) {
+    return '$name dizisinin yayınlanmış tüm bölümleri izlendi olarak işaretlenecek.';
+  }
 
   @override
   String tvEpisodeNumberLabel(String number, String name) {
@@ -383,6 +430,40 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get profileFilms => 'Filmler';
+
+  @override
+  String get profileMovieTimeSpent => 'Film süresi';
+
+  @override
+  String get profileShowTimeSpent => 'Dizi süresi';
+
+  @override
+  String profileDurationCompact(String hours, String minutes) {
+    return '${hours}sa ${minutes}dk';
+  }
+
+  @override
+  String profileDurationDaysHours(String days, String hours) {
+    return '${days}gün ${hours}sa';
+  }
+
+  @override
+  String profileDurationMonthsDaysHours(
+    String months,
+    String days,
+    String hours,
+  ) {
+    return '${months}ay ${days}gün ${hours}sa';
+  }
+
+  @override
+  String get watchedMoviesSortTooltip => 'Sırala';
+
+  @override
+  String get watchedMoviesSortByDate => 'Eklenme tarihi';
+
+  @override
+  String get watchedMoviesSortByRating => 'Puan (yüksekten düşüğe)';
 
   @override
   String get profileShows => 'Diziler';
@@ -467,9 +548,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get movieWatched => 'İzlendi';
-
-  @override
-  String get movieYourRating => 'Puanınız';
 
   @override
   String get movieYourDiary => 'Günlüğünüz';
@@ -681,6 +759,16 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get upNextPremiereTag => 'İLK BÖLÜM';
+
+  @override
+  String get upNextNewBadge => 'YENİ';
+
+  @override
+  String get upNextAllCaughtUpEmptyTitle => 'Her şey güncel';
+
+  @override
+  String get upNextAllCaughtUpEmptySubtitle =>
+      'İzlenecek yeni bölüm yok — sıradaki bölümler için Yaklaşan sekmesine bakabilirsiniz.';
 
   @override
   String get upNextSwipeStopLabel => 'Bırak';
@@ -1009,6 +1097,84 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get homePopularShows => 'Popüler Diziler';
+
+  @override
+  String get homeFriendsAlsoWatched => 'Arkadaşların da İzledi';
+
+  @override
+  String get statsSeeDetails => 'Detayları gör';
+
+  @override
+  String get statsScreenTitle => 'İzleme İstatistikleri';
+
+  @override
+  String get statsTypeBreakdownTitle => 'Film / Dizi';
+
+  @override
+  String get statsGenreBreakdownTitle => 'Türe göre süre';
+
+  @override
+  String get statsOtherGenres => 'Diğer';
+
+  @override
+  String get statsWeeklyTitle => 'Son 8 hafta';
+
+  @override
+  String get statsThisWeek => 'Bu hafta';
+
+  @override
+  String get statsWeekdayTitle => 'Haftanın gününe göre';
+
+  @override
+  String get statsDayMon => 'Pzt';
+
+  @override
+  String get statsDayTue => 'Sal';
+
+  @override
+  String get statsDayWed => 'Çar';
+
+  @override
+  String get statsDayThu => 'Per';
+
+  @override
+  String get statsDayFri => 'Cum';
+
+  @override
+  String get statsDaySat => 'Cmt';
+
+  @override
+  String get statsDaySun => 'Paz';
+
+  @override
+  String get statsEmptyMessage =>
+      'İstatistiklerini görmek için birkaç film ya da dizi izle.';
+
+  @override
+  String get quickAddWatch => 'İzledim';
+
+  @override
+  String get quickAddLike => 'Beğen';
+
+  @override
+  String get quickAddWatchlist => 'İzleme Listesi';
+
+  @override
+  String get quickAddTrack => 'Takip Et';
+
+  @override
+  String get quickAddRate => 'Puanla';
+
+  @override
+  String get quickAddReviewOrLog => 'Yorum yap / günlüğe ekle';
+
+  @override
+  String get quickAddAddToList => 'Listelere ekle';
+
+  @override
+  String quickAddGoTo(String title) {
+    return '$title sayfasına git';
+  }
 
   @override
   String homeBecauseYouWatched(String title) {

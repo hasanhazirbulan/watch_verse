@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:watch_verse/models/model.dart';
+import 'package:watch_verse/services/api_service.dart';
 
 /// Per-user movie library + ratings, mirroring [TvTrackingService] for shows.
 ///
@@ -67,6 +68,11 @@ class MovieService {
       'title': m.title,
       'posterPath': m.posterPath,
       if (rating != null && rating > 0) 'rating': rating,
+      // Minutes this watch contributed — powers the weekly/day-of-week
+      // watch-time charts, which sum activity entries rather than re-fetch
+      // from TMDB. 0/missing just doesn't contribute (same as the profile's
+      // running totals).
+      if (m.runtime > 0) 'runtime': m.runtime,
       'at': FieldValue.serverTimestamp(),
     });
   }
@@ -83,6 +89,12 @@ class MovieService {
         'releaseDate': m.releaseDate,
         'voteAverage': m.voteAverage,
         'overview': m.overview,
+        // Only known once resolved via APIservices.getMovieDetailExtras (the
+        // list endpoints this app browses with don't include either) — 0/
+        // empty means "unknown", not "none", and is left out of the
+        // time-spent sum / genre chart on the profile screen.
+        if (m.runtime > 0) 'runtime': m.runtime,
+        if (m.genres.isNotEmpty) 'genres': m.genres,
       };
 
   Future<void> _upsert(Movie m, Map<String, dynamic> fields) async {
@@ -230,5 +242,35 @@ class MovieService {
   Future<void> remove(int id) async {
     await _ref(id)?.delete();
     await _unlogWatched(id);
+  }
+
+  /// One-time backfill for movies watched before `runtime`/`genres` existed:
+  /// fetches both from TMDB for every watched movie still missing either.
+  /// Safe to call repeatedly — already-known values are left untouched.
+  Future<void> backfillDetails() async {
+    final col = _col;
+    if (col == null) return;
+    final snap = await col.where('status', isEqualTo: 'watched').get();
+    final api = APIservices();
+    for (final doc in snap.docs) {
+      final data = doc.data();
+      final hasRuntime = ((data['runtime'] ?? 0) as num).toInt() > 0;
+      final hasGenres = ((data['genres'] as List?) ?? const []).isNotEmpty;
+      if (hasRuntime && hasGenres) continue;
+      final id = (data['id'] as num?)?.toInt();
+      if (id == null) continue;
+      try {
+        final extras = await api.getMovieDetailExtras(id);
+        final update = <String, dynamic>{
+          if (extras.runtime > 0) 'runtime': extras.runtime,
+          if (extras.genres.isNotEmpty) 'genres': extras.genres,
+        };
+        if (update.isNotEmpty) {
+          await doc.reference.set(update, SetOptions(merge: true));
+        }
+      } catch (_) {
+        // Skip a movie TMDB couldn't return; the rest still get backfilled.
+      }
+    }
   }
 }

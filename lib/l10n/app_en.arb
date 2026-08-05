@@ -49,6 +49,11 @@
   "settingsTitle": "Settings",
   "settingsAccountSection": "Account",
   "settingsAppInfoSection": "About",
+  "settingsNotificationsSection": "Notifications",
+  "settingsNotifyEpisodeTomorrow": "New episodes airing tomorrow",
+  "settingsNotifyEpisodeToday": "New episodes out today",
+  "settingsNotifyFriendActivity": "Friend activity",
+  "settingsNotifySharedWatch": "Shared watch matches",
   "settingsAppVersion": "Version {version}",
   "@settingsAppVersion": {
     "placeholders": {
@@ -220,6 +225,17 @@
     }
   },
   "tvYourRating": "Your rating",
+  "movieYourRating": "Your rating",
+  "movieCannotMarkUnreleased": "This movie hasn't been released yet.",
+  "movieNotYetReleased": "Not yet released",
+  "movieReleasesOn": "Releases on {date}",
+  "@movieReleasesOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "tvUpNextLabel": "UP NEXT",
   "tvUpNextEpisodeLabel": "S{season} E{episode}  {name}",
   "@tvUpNextEpisodeLabel": {
@@ -256,6 +272,18 @@
   },
   "tvUnmarkSeason": "Unmark season",
   "tvMarkSeasonWatched": "Mark season watched",
+  "tvCannotMarkUnaired": "This episode hasn't aired yet.",
+  "tvMoreEpisodesComing": "More episodes coming",
+  "tvMarkAllSeasonsButton": "Mark all seasons watched",
+  "tvMarkAllSeasonsTitle": "Mark all seasons watched?",
+  "tvMarkAllSeasonsQuestion": "Every aired episode of {name} will be marked as watched.",
+  "@tvMarkAllSeasonsQuestion": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "tvEpisodeNumberLabel": "{number}. {name}",
   "@tvEpisodeNumberLabel": {
     "placeholders": {
@@ -313,6 +341,47 @@
   "profileFollowers": "Followers",
   "profileFollowing": "Following",
   "profileFilms": "Films",
+  "profileMovieTimeSpent": "Movie time",
+  "profileShowTimeSpent": "Show time",
+  "profileDurationCompact": "{hours}h {minutes}m",
+  "@profileDurationCompact": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "profileDurationDaysHours": "{days}d {hours}h",
+  "@profileDurationDaysHours": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "profileDurationMonthsDaysHours": "{months}mo {days}d {hours}h",
+  "@profileDurationMonthsDaysHours": {
+    "placeholders": {
+      "months": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      },
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "watchedMoviesSortTooltip": "Sort",
+  "watchedMoviesSortByDate": "Date added",
+  "watchedMoviesSortByRating": "Rating (high to low)",
   "profileShows": "Shows",
   "profileEpisodes": "Episodes",
   "profileYourYear": "Your {year}",
@@ -502,6 +571,9 @@
     }
   },
   "upNextPremiereTag": "PREMIERE",
+  "upNextNewBadge": "NEW",
+  "upNextAllCaughtUpEmptyTitle": "All caught up",
+  "upNextAllCaughtUpEmptySubtitle": "No new episodes to watch right now — check the Upcoming tab for what's coming next.",
   "upNextSwipeStopLabel": "Stop",
   "upNextStopWatchingTitle": "Stop watching this show?",
   "upNextStopWatchingContent": "\"{name}\" will be removed from your list along with its watch history.",
@@ -695,6 +767,38 @@
   "homeAiringToday": "Airing Today",
   "homeOnTheAir": "On The Air",
   "homePopularShows": "Popular Shows",
+  "homeFriendsAlsoWatched": "Your Friends Also Watched",
+  "statsSeeDetails": "See details",
+  "statsScreenTitle": "Watch Statistics",
+  "statsTypeBreakdownTitle": "Movies vs Shows",
+  "statsGenreBreakdownTitle": "Time by genre",
+  "statsOtherGenres": "Other",
+  "statsWeeklyTitle": "Last 8 weeks",
+  "statsThisWeek": "This week",
+  "statsWeekdayTitle": "By day of week",
+  "statsDayMon": "Mon",
+  "statsDayTue": "Tue",
+  "statsDayWed": "Wed",
+  "statsDayThu": "Thu",
+  "statsDayFri": "Fri",
+  "statsDaySat": "Sat",
+  "statsDaySun": "Sun",
+  "statsEmptyMessage": "Watch a few movies or shows to see your stats here.",
+  "quickAddWatch": "Watch",
+  "quickAddLike": "Like",
+  "quickAddWatchlist": "Watchlist",
+  "quickAddTrack": "Track",
+  "quickAddRate": "Rate",
+  "quickAddReviewOrLog": "Review or log",
+  "quickAddAddToList": "Add to lists",
+  "quickAddGoTo": "Go to {title}",
+  "@quickAddGoTo": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "homeBecauseYouWatched": "Because you watched {title}",
   "@homeBecauseYouWatched": {
     "placeholders": {

@@ -1,0 +1,12 @@
+{
+  "name": "watchverse-notify",
+  "private": true,
+  "description": "Free alternative to functions/src/index.ts's notification logic — run from GitHub Actions on a schedule (see .github/workflows/notifications.yml) instead of Cloud Functions, so it works without the Blaze plan. Do not deploy the equivalent Cloud Functions (notifyEpisodesAiringTomorrow/Today, onNewActivity's digest path, flushActivityDigests) alongside this — they'd double-send.",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}

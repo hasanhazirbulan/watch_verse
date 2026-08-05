@@ -148,6 +148,8 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
     final watchedCount = data.flat.where((e) => watched.contains(e.key)).length;
     final progress = data.total == 0 ? 0.0 : watchedCount / data.total;
     final upNext = _nextEpisode(data, watched);
+    final hasUnwatchedAired =
+        data.flat.any((e) => e.hasAired && !watched.contains(e.key));
 
     return CustomScrollView(
       slivers: [
@@ -165,6 +167,10 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
                 if (data.total > 0) ...[
                   const SizedBox(height: 18),
                   _progressCard(context, watchedCount, data.total, progress),
+                  if (hasUnwatchedAired) ...[
+                    const SizedBox(height: 10),
+                    _markAllSeasonsButton(context, data, watched),
+                  ],
                 ],
                 if (upNext != null) ...[
                   const SizedBox(height: 16),
@@ -470,10 +476,16 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
   }
 
   /// Marks/unmarks an episode; when marking one ahead of unwatched earlier
-  /// episodes, offers to catch those up too (TV-Time style).
+  /// episodes, offers to catch those up too (TV-Time style). Refuses to mark
+  /// an episode watched before it has aired (rating/notes stay unrestricted).
   Future<void> _onEpisodeTap(
       _TvData data, Set<String> watched, Episode ep, bool nowWatched) async {
     final l10n = AppLocalizations.of(context)!;
+    if (nowWatched && !ep.hasAired) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.tvCannotMarkUnaired)));
+      return;
+    }
     if (nowWatched) HapticFeedback.lightImpact();
     await _tracking.setEpisodeWatched(data.show, ep, nowWatched);
     if (!nowWatched || !mounted) return;
@@ -486,31 +498,44 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
             .take(idx)
             .where((e) => e.hasAired && !watched.contains(e.key))
             .toList();
-    if (earlier.isNotEmpty) {
-      final n = earlier.length;
-      final episodesPhrase = n == 1
-          ? l10n.tvEpisodeCountSingular(n.toString())
-          : l10n.tvEpisodeCountPlural(n.toString());
-      final yes = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(l10n.tvMarkPreviousTitle),
-          content: Text(l10n.tvMarkPreviousQuestion(episodesPhrase)),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text(l10n.tvNo)),
-            ElevatedButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: Text(l10n.tvYesMarkAll)),
-          ],
-        ),
-      );
-      if (yes == true) await _tracking.markEpisodesWatched(data.show, earlier);
-    }
+    await _offerCatchUp(data, earlier);
     if (!mounted) return;
+    await _celebrateIfComplete(data, seasonNumber: ep.seasonNumber);
+  }
 
-    // Celebrate finishing a season or the whole show.
+  /// Offers to mark [earlier] episodes watched too (TV-Time style catch-up).
+  /// No-op when [earlier] is empty. Shared by single-episode and
+  /// whole-season "mark watched" actions so both cascade the same way.
+  Future<void> _offerCatchUp(_TvData data, List<Episode> earlier) async {
+    if (earlier.isEmpty || !mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    final n = earlier.length;
+    final episodesPhrase = n == 1
+        ? l10n.tvEpisodeCountSingular(n.toString())
+        : l10n.tvEpisodeCountPlural(n.toString());
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.tvMarkPreviousTitle),
+        content: Text(l10n.tvMarkPreviousQuestion(episodesPhrase)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.tvNo)),
+          ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.tvYesMarkAll)),
+        ],
+      ),
+    );
+    if (yes == true) await _tracking.markEpisodesWatched(data.show, earlier);
+  }
+
+  /// Celebrates finishing a season (when [seasonNumber] is given) or the
+  /// whole show, if that just became fully watched.
+  Future<void> _celebrateIfComplete(_TvData data, {int? seasonNumber}) async {
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
     final fresh = await _tracking.watchedKeys(data.show.id);
     if (!mounted) return;
     final messenger = ScaffoldMessenger.of(context);
@@ -518,17 +543,126 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
     if (total > 0 && fresh.length >= total) {
       HapticFeedback.mediumImpact();
       _celebrate(context, messenger, l10n.tvFinishedShow(data.show.name));
-    } else {
-      final seasonKeys =
-          (data.episodesBySeason[ep.seasonNumber] ?? const <Episode>[])
-              .map((e) => e.key)
-              .toSet();
-      if (seasonKeys.isNotEmpty && seasonKeys.every(fresh.contains)) {
-        HapticFeedback.mediumImpact();
-        _celebrate(context, messenger,
-            l10n.tvSeasonComplete(ep.seasonNumber.toString()));
-      }
+      return;
     }
+    if (seasonNumber == null) return;
+    final seasonKeys =
+        (data.episodesBySeason[seasonNumber] ?? const <Episode>[])
+            .map((e) => e.key)
+            .toSet();
+    if (seasonKeys.isNotEmpty && seasonKeys.every(fresh.contains)) {
+      HapticFeedback.mediumImpact();
+      _celebrate(
+          context, messenger, l10n.tvSeasonComplete(seasonNumber.toString()));
+    }
+  }
+
+  /// Marks/unmarks a whole season watched (bug fix: previously this never
+  /// checked earlier seasons for unwatched aired episodes, unlike tapping a
+  /// single episode, which already offers to catch those up).
+  Future<void> _onSeasonMarkTap(_TvData data, Set<String> watched,
+      SeasonSummary season, List<Episode> eps, List<Episode> airedEps,
+      bool allWatched) async {
+    final markWatched = !allWatched;
+    await _tracking.setSeasonWatched(
+        data.show, markWatched ? airedEps : eps, markWatched);
+    if (!markWatched || !mounted) return;
+
+    final earlier = data.flat
+        .where((e) =>
+            e.seasonNumber < season.seasonNumber &&
+            e.hasAired &&
+            !watched.contains(e.key))
+        .toList();
+    await _offerCatchUp(data, earlier);
+    if (!mounted) return;
+    await _celebrateIfComplete(data, seasonNumber: season.seasonNumber);
+  }
+
+  /// Marks every aired-but-unwatched episode across the whole show watched
+  /// in one batch (unaired episodes are left alone, same as the per-season
+  /// action already does).
+  Future<void> _onMarkAllSeasonsTap(_TvData data, Set<String> watched) async {
+    final l10n = AppLocalizations.of(context)!;
+    final toMark = data.flat
+        .where((e) => e.hasAired && !watched.contains(e.key))
+        .toList();
+    if (toMark.isEmpty) return;
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.tvMarkAllSeasonsTitle),
+        content: Text(l10n.tvMarkAllSeasonsQuestion(data.show.name)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.tvNo)),
+          ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.tvYesMarkAll)),
+        ],
+      ),
+    );
+    if (yes != true) return;
+    await _tracking.markEpisodesWatched(data.show, toMark);
+    if (!mounted) return;
+    await _celebrateIfComplete(data);
+  }
+
+  Widget _markAllSeasonsButton(
+      BuildContext context, _TvData data, Set<String> watched) {
+    final l10n = AppLocalizations.of(context)!;
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () => _onMarkAllSeasonsTap(data, watched),
+        icon: const Icon(Icons.done_all_rounded, size: 18),
+        label: Text(l10n.tvMarkAllSeasonsButton),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: context.colors.primary,
+          side: BorderSide(color: context.colors.primary.withOpacity(0.4)),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+    );
+  }
+
+  /// TMDB `status` values that mean the show is still producing new
+  /// episodes (as opposed to `Ended`/`Canceled`).
+  static const _ongoingStatuses = {
+    'Returning Series',
+    'In Production',
+    'Planned',
+  };
+
+  Widget _moreEpisodesBanner(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: context.colors.primary.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.live_tv_rounded,
+                size: 16, color: context.colors.primary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(l10n.tvMoreEpisodesComing,
+                  style: TextStyle(
+                      color: context.colors.primary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12.5)),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _celebrate(
@@ -715,6 +849,10 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
               airedEps.where((e) => watched.contains(e.key)).length;
           final allWatched =
               airedEps.isNotEmpty && seasonWatched == airedEps.length;
+          final isLastSeason = index == show.seasons.length - 1;
+          final showsMoreComing = isLastSeason &&
+              allWatched &&
+              _ongoingStatuses.contains(show.status);
           return Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: Theme(
@@ -754,8 +892,8 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton.icon(
-                          onPressed: () => _tracking.setSeasonWatched(
-                              show, allWatched ? eps : airedEps, !allWatched),
+                          onPressed: () => _onSeasonMarkTap(
+                              data, watched, season, eps, airedEps, allWatched),
                           icon: Icon(
                               allWatched
                                   ? Icons.remove_done_rounded
@@ -766,6 +904,7 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
                               : l10n.tvMarkSeasonWatched),
                         ),
                       ),
+                    if (showsMoreComing) _moreEpisodesBanner(context),
                     ...eps.map((ep) => _episodeTile(context, data, ep, watched)),
                     const SizedBox(height: 8),
                   ],

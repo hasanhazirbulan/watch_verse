@@ -152,6 +152,12 @@ class _EpisodeDetailScreenState extends State<EpisodeDetailScreen> {
   }
 
   Future<void> _toggleWatched(bool currentlyWatched) async {
+    if (!currentlyWatched && !ep.hasAired) {
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.tvCannotMarkUnaired)));
+      return;
+    }
     await _tracking.setEpisodeWatched(show, ep, !currentlyWatched);
     if (!currentlyWatched && mounted) _showPoll();
   }

@@ -66,29 +66,12 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   Future<void> _openLogSheet(BuildContext context, Map<String, dynamic>? data,
       {bool rewatch = false}) async {
     final wasWatched = data?['status'] == 'watched';
-    final saved = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      backgroundColor: context.colors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
-      builder: (ctx) => _DiarySheet(
-        movieTitle: movie.title,
-        rewatch: rewatch,
-        initialRating:
-            rewatch ? 0 : ((data?['rating'] ?? 0) as num).toDouble(),
-        initialNote: rewatch ? '' : (data?['note'] ?? '') as String,
-        onSave: (rating, note, date) async {
-          await _movies.logWatch(movie,
-              rating: rating, note: note, watchedOn: date);
-          // The poll's star row is a read-only mirror of this score, so the
-          // user never gets asked to rate the same film a second time.
-          await PollService.instance
-              .syncRating(PollService.instance.moviePollId(movie.id), rating);
-        },
-      ),
+    final saved = await showMovieLogSheet(
+      context,
+      movie,
+      rewatch: rewatch,
+      initialRating: rewatch ? 0 : ((data?['rating'] ?? 0) as num).toDouble(),
+      initialNote: rewatch ? '' : (data?['note'] ?? '') as String,
     );
     if (saved == true && !wasWatched && mounted) {
       _showPoll(context);
@@ -237,6 +220,9 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   ]),
                   const SizedBox(height: 16),
                   _libraryControls(),
+                  if (!movie.hasReleased) _unreleasedNotice(context, l10n),
+                  const SizedBox(height: 18),
+                  _ratingSection(),
                   TrailerButton(type: MediaType.movie, id: movie.id),
                   if (movie.overview.isNotEmpty) ...[
                     const SizedBox(height: 20),
@@ -300,6 +286,9 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
         final data = snap.data;
         final status = data?['status'] as String?;
         final favorite = data?['favorite'] == true;
+        // Already-watched movies stay toggleable (so a mistaken mark can
+        // still be undone) even if the release date somehow looks future.
+        final canMarkWatched = status == 'watched' || movie.hasReleased;
         return Column(
           children: [
             Row(
@@ -322,16 +311,94 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     label: l10n.movieWatched,
                     icon: Icons.check_circle_rounded,
                     selected: status == 'watched',
+                    dimmed: !canMarkWatched,
                     // Tap toggles: log it when new, remove it when already
                     // watched — so the same button clears it, no extra link.
-                    onTap: () => status == 'watched'
-                        ? _movies.remove(movie.id)
-                        : _openLogSheet(context, data),
+                    // Unreleased movies can't be logged watched (rating/
+                    // comments stay available via _ratingSection + comments).
+                    onTap: () {
+                      if (!canMarkWatched) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content:
+                                Text(l10n.movieCannotMarkUnreleased)));
+                        return;
+                      }
+                      status == 'watched'
+                          ? _movies.remove(movie.id)
+                          : _openLogSheet(context, data);
+                    },
                   ),
                 ),
                 const SizedBox(width: 10),
                 _favPill(context, favorite, () => _toggleFavorite(favorite)),
               ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _unreleasedNotice(BuildContext context, AppLocalizations l10n) {
+    final date = movie.releaseDate;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: [
+          Icon(Icons.event_rounded, size: 14, color: context.colors.textMuted),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              date.isNotEmpty
+                  ? l10n.movieReleasesOn(date)
+                  : l10n.movieNotYetReleased,
+              style: TextStyle(color: context.colors.textMuted, fontSize: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Standalone star rating, independent of watched-status (mirrors the TV
+  // detail screen's rating section) — so unreleased movies can still be
+  // rated even though they can't be marked watched yet.
+  Widget _ratingSection() {
+    return StreamBuilder<Map<String, dynamic>?>(
+      stream: _movies.movieStream(movie.id),
+      builder: (context, snap) {
+        final l10n = AppLocalizations.of(context)!;
+        final current = ((snap.data?['rating'] ?? 0) as num).toDouble();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(l10n.movieYourRating,
+                    style: const TextStyle(
+                        fontSize: 17, fontWeight: FontWeight.w700)),
+                const Spacer(),
+                if (current > 0)
+                  Text(current.toStringAsFixed(1),
+                      style: TextStyle(
+                          color: context.colors.accent,
+                          fontWeight: FontWeight.w700)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            KeyedSubtree(
+              key: ValueKey(current),
+              child: RatingBar.builder(
+                initialRating: current,
+                minRating: 0,
+                allowHalfRating: true,
+                itemCount: 5,
+                glowColor: context.colors.accent,
+                itemPadding: const EdgeInsets.symmetric(horizontal: 4),
+                itemBuilder: (context, _) =>
+                    Icon(Icons.star_rounded, color: context.colors.accent),
+                onRatingUpdate: (rating) => _movies.setRating(movie, rating),
+              ),
             ),
           ],
         );
@@ -349,28 +416,35 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     required IconData icon,
     required bool selected,
     required VoidCallback onTap,
+    bool dimmed = false,
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          gradient: selected ? context.colors.brandGradient : null,
-          color: selected ? null : context.colors.surfaceAlt,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon,
-                size: 18,
-                color: selected ? Colors.white : context.colors.textSecondary),
-            const SizedBox(width: 8),
-            Text(label,
-                style: TextStyle(
-                    color: selected ? Colors.white : context.colors.textSecondary,
-                    fontWeight: FontWeight.w700)),
-          ],
+      child: Opacity(
+        opacity: dimmed ? 0.45 : 1,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            gradient: selected ? context.colors.brandGradient : null,
+            color: selected ? null : context.colors.surfaceAlt,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon,
+                  size: 18,
+                  color:
+                      selected ? Colors.white : context.colors.textSecondary),
+              const SizedBox(width: 8),
+              Text(label,
+                  style: TextStyle(
+                      color: selected
+                          ? Colors.white
+                          : context.colors.textSecondary,
+                      fontWeight: FontWeight.w700)),
+            ],
+          ),
         ),
       ),
     );
@@ -559,6 +633,49 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
 /// Diary bottom sheet — owns its own controller (disposed here, not by the
 /// caller) and scrolls so the keyboard never overflows it. Includes a watch
 /// date so users can back-date logs and record rewatches.
+/// Opens the "review or log" diary sheet for [movie] and, on save, marks it
+/// watched with the given rating/note/date (resolving runtime lazily first
+/// so the profile's time-spent stat stays accurate). Shared between this
+/// screen's own diary section and the poster long-press quick-add sheet, so
+/// both offer the exact same review flow. Callers are responsible for
+/// checking [Movie.hasReleased] before invoking this — it always logs a
+/// watch unconditionally once opened.
+Future<bool?> showMovieLogSheet(BuildContext context, Movie movie,
+    {bool rewatch = false, double initialRating = 0, String initialNote = ''}) {
+  final api = APIservices();
+  return showModalBottomSheet<bool>(
+    context: context,
+    isScrollControlled: true,
+    useRootNavigator: true,
+    backgroundColor: context.colors.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+    ),
+    builder: (ctx) => _DiarySheet(
+      movieTitle: movie.title,
+      rewatch: rewatch,
+      initialRating: initialRating,
+      initialNote: initialNote,
+      onSave: (rating, note, date) async {
+        var withDetails = movie;
+        if (movie.runtime <= 0 || movie.genres.isEmpty) {
+          final extras = await api
+              .getMovieDetailExtras(movie.id)
+              .catchError((_) => (runtime: 0, genres: <String>[]));
+          withDetails = movie.withDetails(
+              runtime: extras.runtime, genres: extras.genres);
+        }
+        await MovieService.instance.logWatch(withDetails,
+            rating: rating, note: note, watchedOn: date);
+        // The poll's star row is a read-only mirror of this score, so the
+        // user never gets asked to rate the same film a second time.
+        await PollService.instance
+            .syncRating(PollService.instance.moviePollId(movie.id), rating);
+      },
+    ),
+  );
+}
+
 class _DiarySheet extends StatefulWidget {
   final String movieTitle;
   final bool rewatch;

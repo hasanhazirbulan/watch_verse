@@ -1,0 +1,67 @@
+name: WatchVerse Notifications
+
+# Free stand-in for the Cloud Functions in functions/src/index.ts's episode
+# reminder + activity digest logic (see scripts/notify/run.js) — this repo's
+# Firebase project is on the Spark (free) plan, which can't deploy Cloud
+# Functions v2 (needs Blaze for Cloud Build/Artifact Registry). Running on a
+# schedule here instead needs no billing account at all.
+#
+# All times below are UTC; Europe/Istanbul is UTC+3 year-round (no DST).
+#   06:00 UTC = 09:00 Istanbul -> episode-tomorrow
+#   16:00 UTC = 19:00 Istanbul -> digest-flush
+#   17:00 UTC = 20:00 Istanbul -> episode-today
+#   every 30 minutes           -> activity-poll (shared-watch / digest queue)
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+    - cron: "0 16 * * *"
+    - cron: "0 17 * * *"
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Notification job to run manually"
+        required: true
+        type: choice
+        options:
+          - episode-tomorrow
+          - episode-today
+          - digest-flush
+          - activity-poll
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: scripts/notify
+        run: npm install --omit=dev
+
+      - name: Determine mode for this trigger
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ github.event.inputs.mode }}" >> "$GITHUB_OUTPUT"
+          else
+            case "${{ github.event.schedule }}" in
+              "0 6 * * *") echo "value=episode-tomorrow" >> "$GITHUB_OUTPUT" ;;
+              "0 16 * * *") echo "value=digest-flush" >> "$GITHUB_OUTPUT" ;;
+              "0 17 * * *") echo "value=episode-today" >> "$GITHUB_OUTPUT" ;;
+              "*/30 * * * *") echo "value=activity-poll" >> "$GITHUB_OUTPUT" ;;
+              *) echo "Unrecognized schedule: ${{ github.event.schedule }}" && exit 1 ;;
+            esac
+          fi
+
+      - name: Run notification job
+        working-directory: scripts/notify
+        env:
+          NOTIFY_MODE: ${{ steps.mode.outputs.value }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node run.js

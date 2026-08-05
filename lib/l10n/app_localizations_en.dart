@@ -109,6 +109,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAppInfoSection => 'About';
 
   @override
+  String get settingsNotificationsSection => 'Notifications';
+
+  @override
+  String get settingsNotifyEpisodeTomorrow => 'New episodes airing tomorrow';
+
+  @override
+  String get settingsNotifyEpisodeToday => 'New episodes out today';
+
+  @override
+  String get settingsNotifyFriendActivity => 'Friend activity';
+
+  @override
+  String get settingsNotifySharedWatch => 'Shared watch matches';
+
+  @override
   String settingsAppVersion(String version) {
     return 'Version $version';
   }
@@ -292,6 +307,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tvYourRating => 'Your rating';
 
   @override
+  String get movieYourRating => 'Your rating';
+
+  @override
+  String get movieCannotMarkUnreleased =>
+      'This movie hasn\'t been released yet.';
+
+  @override
+  String get movieNotYetReleased => 'Not yet released';
+
+  @override
+  String movieReleasesOn(String date) {
+    return 'Releases on $date';
+  }
+
+  @override
   String get tvUpNextLabel => 'UP NEXT';
 
   @override
@@ -314,6 +344,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tvMarkSeasonWatched => 'Mark season watched';
+
+  @override
+  String get tvCannotMarkUnaired => 'This episode hasn\'t aired yet.';
+
+  @override
+  String get tvMoreEpisodesComing => 'More episodes coming';
+
+  @override
+  String get tvMarkAllSeasonsButton => 'Mark all seasons watched';
+
+  @override
+  String get tvMarkAllSeasonsTitle => 'Mark all seasons watched?';
+
+  @override
+  String tvMarkAllSeasonsQuestion(String name) {
+    return 'Every aired episode of $name will be marked as watched.';
+  }
 
   @override
   String tvEpisodeNumberLabel(String number, String name) {
@@ -381,6 +428,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileFilms => 'Films';
+
+  @override
+  String get profileMovieTimeSpent => 'Movie time';
+
+  @override
+  String get profileShowTimeSpent => 'Show time';
+
+  @override
+  String profileDurationCompact(String hours, String minutes) {
+    return '${hours}h ${minutes}m';
+  }
+
+  @override
+  String profileDurationDaysHours(String days, String hours) {
+    return '${days}d ${hours}h';
+  }
+
+  @override
+  String profileDurationMonthsDaysHours(
+    String months,
+    String days,
+    String hours,
+  ) {
+    return '${months}mo ${days}d ${hours}h';
+  }
+
+  @override
+  String get watchedMoviesSortTooltip => 'Sort';
+
+  @override
+  String get watchedMoviesSortByDate => 'Date added';
+
+  @override
+  String get watchedMoviesSortByRating => 'Rating (high to low)';
 
   @override
   String get profileShows => 'Shows';
@@ -465,9 +546,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get movieWatched => 'Watched';
-
-  @override
-  String get movieYourRating => 'Your rating';
 
   @override
   String get movieYourDiary => 'Your Diary';
@@ -679,6 +757,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get upNextPremiereTag => 'PREMIERE';
+
+  @override
+  String get upNextNewBadge => 'NEW';
+
+  @override
+  String get upNextAllCaughtUpEmptyTitle => 'All caught up';
+
+  @override
+  String get upNextAllCaughtUpEmptySubtitle =>
+      'No new episodes to watch right now — check the Upcoming tab for what\'s coming next.';
 
   @override
   String get upNextSwipeStopLabel => 'Stop';
@@ -1006,6 +1094,84 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homePopularShows => 'Popular Shows';
+
+  @override
+  String get homeFriendsAlsoWatched => 'Your Friends Also Watched';
+
+  @override
+  String get statsSeeDetails => 'See details';
+
+  @override
+  String get statsScreenTitle => 'Watch Statistics';
+
+  @override
+  String get statsTypeBreakdownTitle => 'Movies vs Shows';
+
+  @override
+  String get statsGenreBreakdownTitle => 'Time by genre';
+
+  @override
+  String get statsOtherGenres => 'Other';
+
+  @override
+  String get statsWeeklyTitle => 'Last 8 weeks';
+
+  @override
+  String get statsThisWeek => 'This week';
+
+  @override
+  String get statsWeekdayTitle => 'By day of week';
+
+  @override
+  String get statsDayMon => 'Mon';
+
+  @override
+  String get statsDayTue => 'Tue';
+
+  @override
+  String get statsDayWed => 'Wed';
+
+  @override
+  String get statsDayThu => 'Thu';
+
+  @override
+  String get statsDayFri => 'Fri';
+
+  @override
+  String get statsDaySat => 'Sat';
+
+  @override
+  String get statsDaySun => 'Sun';
+
+  @override
+  String get statsEmptyMessage =>
+      'Watch a few movies or shows to see your stats here.';
+
+  @override
+  String get quickAddWatch => 'Watch';
+
+  @override
+  String get quickAddLike => 'Like';
+
+  @override
+  String get quickAddWatchlist => 'Watchlist';
+
+  @override
+  String get quickAddTrack => 'Track';
+
+  @override
+  String get quickAddRate => 'Rate';
+
+  @override
+  String get quickAddReviewOrLog => 'Review or log';
+
+  @override
+  String get quickAddAddToList => 'Add to lists';
+
+  @override
+  String quickAddGoTo(String title) {
+    return 'Go to $title';
+  }
 
   @override
   String homeBecauseYouWatched(String title) {

@@ -1,0 +1,76 @@
+{
+  "identifier" : "AF7A2C2E-6B0A-4C7E-9C4A-1F2E3D4B5A6C",
+  "nonRenewingSubscriptions" : [],
+  "products" : [],
+  "settings" : {
+    "_applicationInternalID" : "6799669377",
+    "_developerTeamID" : "2KYD52S7B3",
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : []
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "09B0AE6C-90C0-40D9-BE61-1573C39A6245",
+      "localizations" : [
+        {
+          "description" : "",
+          "displayName" : "WatchVerse Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "name" : "WatchVerse Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "1.99",
+          "familyShareable" : true,
+          "groupNumber" : 1,
+          "internalID" : "E8970525-ADB9-44A1-B49E-4049C73CE493",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "All Pro features, billed monthly",
+              "displayName" : "Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.example.watchVerse.pro.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "WatchVerse Pro Monthly",
+          "subscriptionGroupID" : "09B0AE6C-90C0-40D9-BE61-1573C39A6245",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : []
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "14.99",
+          "familyShareable" : true,
+          "groupNumber" : 1,
+          "internalID" : "E52B4F96-5368-483C-BF3F-8E55E236359F",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "All Pro features, billed yearly",
+              "displayName" : "Yearly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.example.watchVerse.pro.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "WatchVerse Pro Yearly",
+          "subscriptionGroupID" : "09B0AE6C-90C0-40D9-BE61-1573C39A6245",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : []
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

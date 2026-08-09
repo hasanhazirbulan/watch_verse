@@ -2,6 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:watch_verse/models/media.dart';
+import 'package:watch_verse/services/pro_service.dart';
+
+/// Thrown by [ListService.createList] when a free account is already at the
+/// [ListService.freeListLimit] and tries to create another list. Callers
+/// catch this specifically to open the Pro paywall instead of a generic
+/// error (see `lists_screen.dart`).
+class ListLimitReachedException implements Exception {
+  const ListLimitReachedException();
+}
 
 /// User-created custom lists (Letterboxd-style), e.g. "Watch in 2026", "Top 10".
 ///
@@ -31,6 +40,21 @@ class ListService {
     if (uid == null) return null;
     return _db.collection('users').doc(uid).collection('lists');
   }
+
+  /// This user's own record of a list they follow — a self-owned doc, not a
+  /// write to the list owner's data, so it needs no new cross-user security
+  /// rule (unlike SocialService.follow(), which does write into another
+  /// user's doc and carries a documented caveat for it — see
+  /// firestore.rules). Denormalizes enough to render a preview card without
+  /// re-fetching the source list.
+  CollectionReference<Map<String, dynamic>>? get _followedCol {
+    final uid = _uid;
+    if (uid == null) return null;
+    return _db.collection('users').doc(uid).collection('followedLists');
+  }
+
+  static String _followedRefId(String ownerUid, String listId) =>
+      '${ownerUid}_$listId';
 
   static String keyFor(MediaItem m) => '${m.mediaType.apiPath}-${m.id}';
 
@@ -76,11 +100,75 @@ class ListService {
         .map((d) => d.exists ? {...d.data()!, 'id': d.id} : null);
   }
 
+  /// Live read of a list belonging to [ownerUid] — works for your own lists
+  /// and, thanks to the public-read rule below, anyone else's *public*
+  /// list too. Used both for viewing a friend's public list and for
+  /// re-rendering something already in [followedListsStream].
+  Stream<Map<String, dynamic>?> publicListStream(
+      String ownerUid, String listId) {
+    return _db
+        .collection('users')
+        .doc(ownerUid)
+        .collection('lists')
+        .doc(listId)
+        .snapshots()
+        .map((d) => d.exists
+            ? {...d.data()!, 'id': d.id, 'ownerUid': ownerUid}
+            : null);
+  }
+
+  /// [ownerUid]'s public lists — for their public profile screen. A plain
+  /// one-time fetch (matches the other userXxx() reads in SocialService)
+  /// rather than a stream, since a visited profile doesn't need to update
+  /// live.
+  Future<List<Map<String, dynamic>>> publicListsFor(String ownerUid) async {
+    try {
+      final snap = await _db
+          .collection('users')
+          .doc(ownerUid)
+          .collection('lists')
+          .where('public', isEqualTo: true)
+          .get();
+      return snap.docs
+          .map((d) => {...d.data(), 'id': d.id, 'ownerUid': ownerUid})
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Lists this user follows, newest-followed first.
+  Stream<List<Map<String, dynamic>>> followedListsStream() {
+    final col = _followedCol;
+    if (col == null) return Stream.value([]);
+    return col.orderBy('addedAt', descending: true).snapshots().map(
+        (s) => s.docs.map((d) => {...d.data(), 'refId': d.id}).toList());
+  }
+
+  Stream<bool> isFollowingListStream(String ownerUid, String listId) {
+    final col = _followedCol;
+    if (col == null) return Stream.value(false);
+    return col
+        .doc(_followedRefId(ownerUid, listId))
+        .snapshots()
+        .map((d) => d.exists);
+  }
+
   // ----------------------------------------------------------------- writes --
+
+  /// Custom lists a free (non-Pro) account can have at once. WatchVerse Pro
+  /// removes this cap entirely.
+  static const freeListLimit = 3;
 
   Future<String?> createList(String name) async {
     final col = _col;
     if (col == null) return null;
+    if (!ProService.instance.isPro) {
+      final existing = await col.count().get();
+      if ((existing.count ?? 0) >= freeListLimit) {
+        throw const ListLimitReachedException();
+      }
+    }
     final doc = col.doc();
     await doc.set({
       'name': name,
@@ -95,6 +183,42 @@ class ListService {
     await _col?.doc(id).set(
         {'name': name, 'updatedAt': FieldValue.serverTimestamp()},
         SetOptions(merge: true));
+  }
+
+  /// Makes a list visible on the owner's public profile and readable
+  /// (read-only) by other signed-in users — see the relaxed `lists` read
+  /// rule in firestore.rules. Defaults to private (missing/false).
+  Future<void> setPublic(String id, bool public) async {
+    await _col?.doc(id).set(
+        {'public': public, 'updatedAt': FieldValue.serverTimestamp()},
+        SetOptions(merge: true));
+  }
+
+  /// Follows someone else's public list — a doc under *this* user's own
+  /// `followedLists`, not a write to the owner's list, so it needs no
+  /// cross-user write permission. [ownerName]/[listName]/[coverPosterPath]
+  /// are denormalized for the "lists I follow" preview card.
+  Future<void> followList({
+    required String ownerUid,
+    required String listId,
+    required String ownerName,
+    required String listName,
+    String coverPosterPath = '',
+  }) async {
+    final col = _followedCol;
+    if (col == null || ownerUid == _uid) return; // can't follow your own list
+    await col.doc(_followedRefId(ownerUid, listId)).set({
+      'ownerUid': ownerUid,
+      'listId': listId,
+      'ownerName': ownerName,
+      'listName': listName,
+      'coverPosterPath': coverPosterPath,
+      'addedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> unfollowList(String ownerUid, String listId) async {
+    await _followedCol?.doc(_followedRefId(ownerUid, listId)).delete();
   }
 
   Future<void> deleteList(String id) async {

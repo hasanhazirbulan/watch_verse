@@ -92,7 +92,7 @@
 
 <header>
   <h1>Privacy Policy</h1>
-  <p class="meta">WatchVerse &middot; Last updated: 28 July 2026</p>
+  <p class="meta">WatchVerse &middot; Last updated: 9 August 2026</p>
 </header>
 
 <p class="lead">
@@ -119,8 +119,10 @@
 <h2>2. What we collect</h2>
 
 <p>
-  WatchVerse has no advertising, no analytics SDK, and no third-party tracker.
-  Everything below is data you create by using the app.
+  WatchVerse has no advertising and does not sell or share your data with
+  advertisers. It uses Firebase Analytics and Firebase Crashlytics — see
+  &ldquo;Technical data&rdquo; below and section 5 for what those collect.
+  Everything else below is data you create by using the app.
 </p>
 
 <h3>Account data</h3>
@@ -161,6 +163,15 @@
       deleted from your profile when you turn notifications off.</li>
   <li>Google Firebase records standard technical information such as IP address
       and timestamps when the app connects to its servers.</li>
+  <li><strong>App usage data (Firebase Analytics)</strong> — which screens you
+      open and basic navigation events, so we can see which parts of the app
+      are actually used. This is <em>not</em> linked to your account or email
+      — Firebase assigns it an anonymous device-installation identifier
+      only.</li>
+  <li><strong>Crash and error reports (Firebase Crashlytics)</strong> — technical
+      details captured automatically if the app crashes (device model, OS
+      version, and the point in the code where it failed), so bugs can be
+      fixed. Also not linked to your account.</li>
 </ul>
 
 <div class="callout">
@@ -257,10 +268,12 @@
   <tbody>
     <tr>
       <td><strong>Google Firebase</strong><br>(Authentication, Firestore,
-          Storage, Cloud Messaging, Cloud Functions)</td>
-      <td>Hosts the account system, database, profile images, and push
-          notifications</td>
-      <td>All account, library, and social data described above</td>
+          Storage, Cloud Messaging, Cloud Functions, Analytics,
+          Crashlytics)</td>
+      <td>Hosts the account system, database, profile images, push
+          notifications, app-usage analytics, and crash reporting</td>
+      <td>All account, library, and social data described above, plus
+          anonymous usage and crash data not linked to your account</td>
     </tr>
     <tr>
       <td><strong>TMDB</strong><br>(The Movie Database)</td>

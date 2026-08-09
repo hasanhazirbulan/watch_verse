@@ -29,6 +29,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   late final Future<List<CastMember>> _cast;
   late final Future<List<MediaItem>> _recs;
   late final Future<List<WatchProvider>> _providers;
+  late final Future<List<String>> _genres;
 
   Movie get movie => widget.movie;
 
@@ -57,6 +58,15 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     _providers = _api
         .getWatchProviders(MediaType.movie, id, region)
         .catchError((_) => <WatchProvider>[]);
+    // Genre tag row under the title: MediaItem.toMovie() never carries
+    // genres (only the detail endpoint has them), so fetch it here rather
+    // than waiting for the log-sheet's lazy backfill to happen to populate it.
+    _genres = movie.genres.isNotEmpty
+        ? Future.value(movie.genres)
+        : _api
+            .getMovieDetailExtras(id)
+            .then((e) => e.genres)
+            .catchError((_) => <String>[]);
   }
 
   /// Opens the log sheet. When [rewatch] is true the fields start empty so the
@@ -73,7 +83,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       initialRating: rewatch ? 0 : ((data?['rating'] ?? 0) as num).toDouble(),
       initialNote: rewatch ? '' : (data?['note'] ?? '') as String,
     );
-    if (saved == true && !wasWatched && mounted) {
+    if (saved == true && !wasWatched && context.mounted) {
       _showPoll(context);
     }
   }
@@ -214,9 +224,21 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Wrap(spacing: 8, children: [
+                  Wrap(spacing: 8, runSpacing: 8, children: [
                     if (year.isNotEmpty) _pill(context, year),
                     _pill(context, l10n.movieTypeLabel, accent: true),
+                    FutureBuilder<List<String>>(
+                      future: _genres,
+                      builder: (context, snap) {
+                        final genres = snap.data ?? const <String>[];
+                        return Wrap(
+                          spacing: 8,
+                          children: [
+                            for (final g in genres) _pill(context, g),
+                          ],
+                        );
+                      },
+                    ),
                   ]),
                   const SizedBox(height: 16),
                   _libraryControls(),
@@ -308,8 +330,14 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                 Expanded(
                   child: _statusPill(
                     context: context,
-                    label: l10n.movieWatched,
-                    icon: Icons.check_circle_rounded,
+                    // No label at all until it's actually marked — any text
+                    // here ("Watched", "Mark watched", ...) kept reading as
+                    // a status claim to first-time users. A bare checkbox
+                    // can't be misread; the word only appears once it's true.
+                    label: status == 'watched' ? l10n.movieWatched : null,
+                    icon: status == 'watched'
+                        ? Icons.check_circle_rounded
+                        : Icons.check_circle_outline_rounded,
                     selected: status == 'watched',
                     dimmed: !canMarkWatched,
                     // Tap toggles: log it when new, remove it when already
@@ -412,7 +440,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
 
   Widget _statusPill({
     required BuildContext context,
-    required String label,
+    String? label,
     required IconData icon,
     required bool selected,
     required VoidCallback onTap,
@@ -436,13 +464,15 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   size: 18,
                   color:
                       selected ? Colors.white : context.colors.textSecondary),
-              const SizedBox(width: 8),
-              Text(label,
-                  style: TextStyle(
-                      color: selected
-                          ? Colors.white
-                          : context.colors.textSecondary,
-                      fontWeight: FontWeight.w700)),
+              if (label != null) ...[
+                const SizedBox(width: 8),
+                Text(label,
+                    style: TextStyle(
+                        color: selected
+                            ? Colors.white
+                            : context.colors.textSecondary,
+                        fontWeight: FontWeight.w700)),
+              ],
             ],
           ),
         ),

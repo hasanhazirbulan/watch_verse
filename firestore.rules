@@ -76,11 +76,22 @@ service cloud.firestore {
         allow write: if isOwner(userId);
       }
 
-      // Diary entries and custom lists are private — never read cross-user.
+      // Diary entries are private — never read cross-user.
       match /diary/{entryId} {
         allow read, write: if isOwner(userId);
       }
+      // Custom lists are private by default; the owner can flip `public`
+      // (ListService.setPublic) to let any signed-in user read (not write)
+      // one specific list — used for the public-profile "Lists" rail and
+      // for following someone else's list. Writing always stays owner-only.
       match /lists/{listId} {
+        allow read: if isOwner(userId) ||
+          (isSignedIn() && resource.data.get('public', false) == true);
+        allow write: if isOwner(userId);
+      }
+      // A user's own record of which (other users') lists they follow —
+      // fully self-owned, no cross-user access needed at all.
+      match /followedLists/{refId} {
         allow read, write: if isOwner(userId);
       }
 
@@ -89,6 +100,22 @@ service cloud.firestore {
       match /pollAnswers/{pollId} {
         allow read, write: if isOwner(userId);
       }
+
+      // Daily guessing-game progress (DailyGameService), one doc per day
+      // played (`yyyy-mm-dd`) — private, same reasoning as diary entries.
+      match /gamePlays/{dateKey} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // -------------------------------------------------------- gameConfig --
+    // Daily guessing-game movie pool (DailyGameService) — world-readable
+    // (every signed-in user needs it to compute today's puzzle), written only
+    // by the one-off seed script via the Admin SDK (bypasses these rules
+    // entirely), never by the client.
+    match /gameConfig/{docId} {
+      allow read: if isSignedIn();
+      allow write: if false;
     }
 
     // ---------------------------------------------------------------- polls --
@@ -109,6 +136,26 @@ service cloud.firestore {
           'updatedAt'
         ]);
       allow delete: if false;
+    }
+
+    // --------------------------------------------------------- watchPolls --
+    // "What should we watch?" group polls (WatchPollService) — scoped to
+    // the poll's own member list, unlike /polls above which is world-
+    // readable. Only members can read; the creator can change anything
+    // (title, status, delete); any other member may only touch `options`
+    // (their vote) + `updatedAt` — same "trusts the client not to touch
+    // someone else's entry" caveat as `followers`/`polls` above.
+    match /watchPolls/{pollId} {
+      allow read: if isSignedIn() && request.auth.uid in resource.data.memberUids;
+      allow create: if isSignedIn() &&
+        request.resource.data.creatorUid == request.auth.uid &&
+        request.auth.uid in request.resource.data.memberUids;
+      allow update: if isSignedIn() && (
+        resource.data.creatorUid == request.auth.uid ||
+        (request.auth.uid in resource.data.memberUids &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['options', 'updatedAt']))
+      );
+      allow delete: if isSignedIn() && resource.data.creatorUid == request.auth.uid;
     }
 
     // ------------------------------------------------------------ comments --

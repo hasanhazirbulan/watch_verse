@@ -1,6 +1,12 @@
+import 'dart:async';
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/screens/main_screen.dart'; // MainScreen import
 import 'package:watch_verse/screens/login.dart'; // LoginScreen import
@@ -8,6 +14,7 @@ import 'package:watch_verse/screens/splash_screen.dart'; // SplashScreen import
 import 'package:watch_verse/screens/settings_screen.dart';
 import 'package:watch_verse/screens/profile_screen.dart';
 import 'package:watch_verse/services/notification_service.dart';
+import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'firebase_options.dart'; // Firebase configuration import
 
@@ -16,12 +23,39 @@ import 'firebase_options.dart'; // Firebase configuration import
 /// before any screen has built, e.g. a cold start from a notification).
 final navigatorKey = GlobalKey<NavigatorState>();
 
+/// Screen-view + default-event tracking. `navigatorObservers` picks this up
+/// in [MyApp]. Screens pushed without an explicit `RouteSettings.name` (most
+/// of this app's `Navigator.push(MaterialPageRoute(...))` calls) show up as
+/// unnamed in Analytics — session/first-open/app-update events still fire
+/// regardless, this only affects per-screen breakdowns.
+final analytics = FirebaseAnalytics.instance;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+
+  // No-ops until REVENUECAT_API_KEY_IOS is set (see secrets.example.json) —
+  // every Pro gate just stays locked until then.
+  await ProService.instance.initialize();
+
+  // Crash/error reporting. Disabled in debug builds (kDebugMode) so local
+  // development noise never lands in the Crashlytics console — TestFlight
+  // and App Store builds are release/profile, so they're unaffected.
+  await FirebaseCrashlytics.instance
+      .setCrashlyticsCollectionEnabled(!kDebugMode);
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
+  runZonedGuarded(
+    () => runApp(const MyApp()),
+    (error, stack) =>
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -35,6 +69,7 @@ class MyApp extends StatelessWidget {
     // so the platform's light mode can never pull a light palette through.
     return MaterialApp(
       navigatorKey: navigatorKey,
+      navigatorObservers: [FirebaseAnalyticsObserver(analytics: analytics)],
       debugShowCheckedModeBanner: false,
       title: 'WatchVerse',
       theme: AppTheme.dark,
@@ -54,7 +89,7 @@ class MyApp extends StatelessWidget {
 }
 
 class SplashWrapper extends StatefulWidget {
-  const SplashWrapper({Key? key}) : super(key: key);
+  const SplashWrapper({super.key});
 
   @override
   State<SplashWrapper> createState() => _SplashWrapperState();
@@ -80,7 +115,7 @@ class _SplashWrapperState extends State<SplashWrapper> {
 }
 
 class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({Key? key}) : super(key: key);
+  const AuthWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {

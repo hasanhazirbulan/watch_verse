@@ -315,6 +315,8 @@
   "profileEditNameTitle": "Edit name",
   "profileEditProfileTitle": "Edit Profile",
   "profileYourNameHint": "Your name",
+  "profileCharacterQuoteHint": "If I were a movie/TV character, I'd be...",
+  "profileAvatarBackgroundLabel": "Profile background",
   "profileSaveNameError": "Could not save name: {error}",
   "@profileSaveNameError": {
     "placeholders": {
@@ -424,6 +426,9 @@
   "homeLoadFailedTitle": "Couldn't load titles",
   "homeLoadFailedBody": "Check your connection and try again.",
   "homeRetryAction": "Try again",
+  "homeFindFriendsBannerTitle": "Find friends on WatchVerse",
+  "homeFindFriendsBannerBody": "Follow people to see what they're watching.",
+  "homeFindFriendsBannerAction": "Find",
   "asyncErrorMessage": "Something went wrong.\n{error}",
   "@asyncErrorMessage": {
     "placeholders": {
@@ -708,6 +713,7 @@
   "pubProfileFavoriteFilms": "Favorite Films",
   "pubProfileWatchedMovies": "Watched Movies",
   "pubProfileShows": "Shows",
+  "pubProfileLists": "Lists",
   "pubProfileDefaultUserName": "WatchVerse user",
   "pubProfileMemberLabel": "WatchVerse member",
   "pubProfileFilms": "Films",
@@ -756,6 +762,7 @@
   "homeMyLists": "My Lists",
   "homeFriendsActivity": "Friends' Activity",
   "homeWatchHistory": "Watch History",
+  "homeWatchPolls": "Watch Polls",
   "homeSettingsLabel": "Settings",
   "homeSignOut": "Sign Out",
   "homeTabMovies": "Movies",
@@ -813,6 +820,12 @@
   "listDetailDeleteConfirm": "Delete",
   "listDetailRenameMenuItem": "Rename",
   "listDetailDeleteMenuItem": "Delete list",
+  "listDetailMakePublicMenuItem": "Make public",
+  "listDetailMakePrivateMenuItem": "Make private",
+  "listDetailMadePublic": "List is now public",
+  "listDetailMadePrivate": "List is now private",
+  "listDetailFollow": "Follow",
+  "listDetailFollowing": "Following",
   "listDetailEmptyTitle": "Empty list",
   "listDetailEmptySubtitle": "Open any movie or show and tap \"Add to list\".",
   "personKnownForTitle": "Known For",
@@ -829,6 +842,18 @@
   "listsEmptyTitle": "No lists yet",
   "listsEmptySubtitle": "Tap + to create your first list.",
   "listsUntitled": "Untitled",
+  "listsTabMine": "Mine",
+  "listsTabFollowing": "Following",
+  "listsFollowingEmptyTitle": "Not following any lists yet",
+  "listsFollowingEmptySubtitle": "Public lists you follow from other users will show up here.",
+  "listsFollowingByLabel": "by {name}",
+  "@listsFollowingByLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "listsTitleSingular": "title",
   "listsTitlePlural": "titles",
   "listsCardEmptySubtitle": "Empty — add titles from any movie or show.",
@@ -1026,5 +1051,141 @@
   "blockedDefaultUserName": "WatchVerse user",
   "blockedUnblockButton": "Unblock",
   "blockedEmptyTitle": "No blocked users",
-  "blockedEmptySubtitle": "People you block will appear here."
+  "blockedEmptySubtitle": "People you block will appear here.",
+
+  "watchPollsTitle": "Watch Polls",
+  "watchPollDefaultTitle": "What should we watch?",
+  "watchPollClosedLabel": "CLOSED",
+  "watchPollVoteCountSingular": "{count} vote",
+  "@watchPollVoteCountSingular": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "watchPollVoteCountPlural": "{count} votes",
+  "@watchPollVoteCountPlural": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "watchPollsEmptyTitle": "No polls yet",
+  "watchPollsEmptySubtitle": "Start a poll to let friends vote on what to watch next.",
+  "createWatchPollTitle": "New Watch Poll",
+  "watchPollTitleHint": "Poll title (optional)",
+  "watchPollOptionsLabel": "Options ({count}/{max})",
+  "@watchPollOptionsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "watchPollSearchHint": "Search movies or shows to add",
+  "watchPollInviteLabel": "Invite friends",
+  "watchPollInviteSubtitle": "Optional — anyone invited can vote. You can also just create it for yourself.",
+  "watchPollNoFriendsYet": "Follow some friends to invite them to a poll.",
+  "watchPollCreateAction": "Create Poll",
+  "watchPollCloseTitle": "Close this poll?",
+  "watchPollCloseContent": "This locks in the current standings — no one will be able to vote after this.",
+  "watchPollCloseConfirm": "Close poll",
+  "watchPollCloseMenuItem": "Close poll",
+  "watchPollDeleteTitle": "Delete poll?",
+  "watchPollDeleteContent": "This removes the poll for everyone invited.",
+  "watchPollDeleteConfirm": "Delete",
+  "watchPollDeleteMenuItem": "Delete poll",
+  "watchPollNotFound": "This poll no longer exists.",
+  "watchPollClosedBanner": "This poll is closed — here's how it landed.",
+  "watchPollOptionVotesSingular": "{count} vote",
+  "@watchPollOptionVotesSingular": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "watchPollOptionVotesPlural": "{count} votes",
+  "@watchPollOptionVotesPlural": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "homeWatchVersePro": "WatchVerse Pro",
+  "proSheetTitle": "WatchVerse Pro",
+  "proSheetSubtitle": "Unlock the full WatchVerse experience",
+  "proFeatureStats": "Advanced watch stats & charts",
+  "proFeatureLists": "Unlimited custom lists",
+  "proFeatureProfile": "Exclusive profile themes",
+  "proFeatureExport": "Export your data to CSV",
+  "proFeatureGame": "Daily movie guessing game",
+  "proMonthly": "Monthly",
+  "proYearly": "Yearly",
+  "proYearlySave": "Save {percent}%",
+  "@proYearlySave": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "proContinue": "Continue",
+  "proRestore": "Restore purchases",
+  "proRestoreSuccess": "Pro restored!",
+  "proRestoreFailure": "No previous purchase found for this account",
+  "proPurchaseFailure": "Purchase failed — please try again",
+  "proNotConfigured": "Pro isn't available yet — check back soon",
+  "proActiveBadge": "You're a Pro member",
+  "proSignInToContinue": "Sign In to Continue",
+  "proSignInRequired": "Sign in or create an account first to subscribe.",
+  "proListLimitReached": "Free accounts get 3 custom lists — upgrade to WatchVerse Pro for unlimited lists.",
+  "proUnlockStats": "Unlock with Pro",
+  "proUnlockProfileTheme": "Pro theme",
+  "proExporting": "Preparing your export…",
+  "proExportAction": "Export my data (CSV)",
+  "dailyGameTitle": "Daily Movie Game",
+  "dailyGameDrawerLabel": "Daily Movie Game",
+  "dailyGameSearchHint": "Search for a movie…",
+  "dailyGameGuessesLeft": "{count} guesses left",
+  "@dailyGameGuessesLeft": {
+    "placeholders": { "count": { "type": "String" } }
+  },
+  "dailyGameStreak": "Streak {count}",
+  "@dailyGameStreak": {
+    "placeholders": { "count": { "type": "String" } }
+  },
+  "dailyGameBestStreak": "Best {count}",
+  "@dailyGameBestStreak": {
+    "placeholders": { "count": { "type": "String" } }
+  },
+  "dailyGameClueDirector": "Director",
+  "dailyGameClueStudio": "Studio",
+  "dailyGameClueYear": "Year",
+  "dailyGameClueRevenue": "Box Office",
+  "dailyGameClueRating": "Rating",
+  "dailyGameClueCertification": "Rated",
+  "dailyGameClueCast": "Cast",
+  "dailyGameClueGenres": "Genres",
+  "dailyGameHintUnlocked": "Hint unlocked!",
+  "dailyGameShowHint": "Show hint",
+  "dailyGameWinTitle": "You got it!",
+  "dailyGameLoseTitle": "Out of guesses",
+  "dailyGameLoseSubtitle": "Today's movie was {title}",
+  "@dailyGameLoseSubtitle": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "dailyGameShareResult": "Share result",
+  "dailyGameRewatch": "Rewatch",
+  "dailyGamePlayAgainTomorrow": "Come back tomorrow for a new movie",
+  "dailyGameLoading": "Loading today's movie…",
+  "dailyGameNoPool": "Today's puzzle isn't ready yet — check back soon",
+  "dailyGameGuessedAlready": "Already guessed",
+  "dailyGamePickAnotherDay": "Pick a day"
 }

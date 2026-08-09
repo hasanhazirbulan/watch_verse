@@ -5,6 +5,7 @@ import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/widgets/quick_add_sheet.dart';
 
 /// Browse a single genre (movies or TV). Lazily loads more pages as the user
 /// scrolls toward the bottom.
@@ -144,6 +145,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           item: _items[i],
           width: double.infinity,
           onTap: () => openMedia(context, _items[i]),
+          onLongPress: () => showQuickAddSheet(context, _items[i]),
+          showProviderBadge: true,
         );
       },
     );

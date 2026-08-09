@@ -113,7 +113,7 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
       fit: StackFit.expand,
       children: [
         TmdbImage(url: Tmdb.backdrop(widget.seed.backdropPath)),
-        Container(color: Colors.black.withOpacity(0.55)),
+        Container(color: Colors.black.withValues(alpha: 0.55)),
         const Center(child: CircularProgressIndicator()),
         SafeArea(
           child: Align(
@@ -375,7 +375,7 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: accent
-            ? context.colors.primary.withOpacity(0.14)
+            ? context.colors.primary.withValues(alpha: 0.14)
             : context.colors.surfaceAlt,
         borderRadius: BorderRadius.circular(8),
       ),
@@ -620,7 +620,7 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
         label: Text(l10n.tvMarkAllSeasonsButton),
         style: OutlinedButton.styleFrom(
           foregroundColor: context.colors.primary,
-          side: BorderSide(color: context.colors.primary.withOpacity(0.4)),
+          side: BorderSide(color: context.colors.primary.withValues(alpha: 0.4)),
           padding: const EdgeInsets.symmetric(vertical: 12),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -644,7 +644,7 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: context.colors.primary.withOpacity(0.12),
+          color: context.colors.primary.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(

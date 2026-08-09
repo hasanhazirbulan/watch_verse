@@ -392,6 +392,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get profileYourNameHint => 'Adınız';
 
   @override
+  String get profileCharacterQuoteHint => 'Bir film/dizi karakteri olsaydım...';
+
+  @override
+  String get profileAvatarBackgroundLabel => 'Profil arka planı';
+
+  @override
   String profileSaveNameError(String error) {
     return 'İsim kaydedilemedi: $error';
   }
@@ -439,12 +445,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String profileDurationCompact(String hours, String minutes) {
-    return '${hours}sa ${minutes}dk';
+    return '${hours}s ${minutes}d';
   }
 
   @override
   String profileDurationDaysHours(String days, String hours) {
-    return '${days}gün ${hours}sa';
+    return '${days}g ${hours}s';
   }
 
   @override
@@ -453,7 +459,7 @@ class AppLocalizationsTr extends AppLocalizations {
     String days,
     String hours,
   ) {
-    return '${months}ay ${days}gün ${hours}sa';
+    return '${months}a ${days}g ${hours}s';
   }
 
   @override
@@ -525,6 +531,15 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get homeRetryAction => 'Tekrar dene';
+
+  @override
+  String get homeFindFriendsBannerTitle => 'WatchVerse\'de arkadaş bul';
+
+  @override
+  String get homeFindFriendsBannerBody => 'Takip et, ne izlediklerini gör.';
+
+  @override
+  String get homeFindFriendsBannerAction => 'Bul';
 
   @override
   String asyncErrorMessage(String error) {
@@ -978,6 +993,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get pubProfileShows => 'Diziler';
 
   @override
+  String get pubProfileLists => 'Listeler';
+
+  @override
   String get pubProfileDefaultUserName => 'WatchVerse kullanıcısı';
 
   @override
@@ -1064,6 +1082,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get homeWatchHistory => 'İzleme Geçmişi';
+
+  @override
+  String get homeWatchPolls => 'İzleme Oylamaları';
 
   @override
   String get homeSettingsLabel => 'Ayarlar';
@@ -1200,6 +1221,24 @@ class AppLocalizationsTr extends AppLocalizations {
   String get listDetailDeleteMenuItem => 'Listeyi sil';
 
   @override
+  String get listDetailMakePublicMenuItem => 'Herkese açık yap';
+
+  @override
+  String get listDetailMakePrivateMenuItem => 'Gizli yap';
+
+  @override
+  String get listDetailMadePublic => 'Liste artık herkese açık';
+
+  @override
+  String get listDetailMadePrivate => 'Liste artık gizli';
+
+  @override
+  String get listDetailFollow => 'Takip et';
+
+  @override
+  String get listDetailFollowing => 'Takip ediliyor';
+
+  @override
   String get listDetailEmptyTitle => 'Boş liste';
 
   @override
@@ -1249,6 +1288,24 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get listsUntitled => 'Adsız';
+
+  @override
+  String get listsTabMine => 'Benim';
+
+  @override
+  String get listsTabFollowing => 'Takip Ettiklerim';
+
+  @override
+  String get listsFollowingEmptyTitle => 'Henüz takip ettiğiniz liste yok';
+
+  @override
+  String get listsFollowingEmptySubtitle =>
+      'Başka kullanıcılardan takip ettiğiniz herkese açık listeler burada görünecek.';
+
+  @override
+  String listsFollowingByLabel(String name) {
+    return '$name tarafından';
+  }
 
   @override
   String get listsTitleSingular => 'başlık';
@@ -1472,4 +1529,268 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get blockedEmptySubtitle => 'Engellediğiniz kişiler burada görünür.';
+
+  @override
+  String get watchPollsTitle => 'İzleme Oylamaları';
+
+  @override
+  String get watchPollDefaultTitle => 'Ne izlesek?';
+
+  @override
+  String get watchPollClosedLabel => 'KAPANDI';
+
+  @override
+  String watchPollVoteCountSingular(String count) {
+    return '$count oy';
+  }
+
+  @override
+  String watchPollVoteCountPlural(String count) {
+    return '$count oy';
+  }
+
+  @override
+  String get watchPollsEmptyTitle => 'Henüz oylama yok';
+
+  @override
+  String get watchPollsEmptySubtitle =>
+      'Arkadaşlarınızın sıradaki bölüm/film için oy vermesi için bir oylama başlatın.';
+
+  @override
+  String get createWatchPollTitle => 'Yeni Oylama';
+
+  @override
+  String get watchPollTitleHint => 'Oylama başlığı (isteğe bağlı)';
+
+  @override
+  String watchPollOptionsLabel(int count, int max) {
+    return 'Seçenekler ($count/$max)';
+  }
+
+  @override
+  String get watchPollSearchHint => 'Eklemek için film veya dizi arayın';
+
+  @override
+  String get watchPollInviteLabel => 'Arkadaşları davet et';
+
+  @override
+  String get watchPollInviteSubtitle =>
+      'İsteğe bağlı — davet edilen herkes oy verebilir. Sadece kendiniz için de oluşturabilirsiniz.';
+
+  @override
+  String get watchPollNoFriendsYet =>
+      'Oylamaya davet etmek için önce birkaç arkadaş takip edin.';
+
+  @override
+  String get watchPollCreateAction => 'Oylama Oluştur';
+
+  @override
+  String get watchPollCloseTitle => 'Bu oylama kapatılsın mı?';
+
+  @override
+  String get watchPollCloseContent =>
+      'Bu, mevcut durumu sabitler — bundan sonra kimse oy veremez.';
+
+  @override
+  String get watchPollCloseConfirm => 'Oylamayı kapat';
+
+  @override
+  String get watchPollCloseMenuItem => 'Oylamayı kapat';
+
+  @override
+  String get watchPollDeleteTitle => 'Oylama silinsin mi?';
+
+  @override
+  String get watchPollDeleteContent =>
+      'Bu, oylamayı davet edilen herkes için kaldırır.';
+
+  @override
+  String get watchPollDeleteConfirm => 'Sil';
+
+  @override
+  String get watchPollDeleteMenuItem => 'Oylamayı sil';
+
+  @override
+  String get watchPollNotFound => 'Bu oylama artık mevcut değil.';
+
+  @override
+  String get watchPollClosedBanner => 'Bu oylama kapandı — sonuç böyle.';
+
+  @override
+  String watchPollOptionVotesSingular(String count) {
+    return '$count oy';
+  }
+
+  @override
+  String watchPollOptionVotesPlural(String count) {
+    return '$count oy';
+  }
+
+  @override
+  String get homeWatchVersePro => 'WatchVerse Pro';
+
+  @override
+  String get proSheetTitle => 'WatchVerse Pro';
+
+  @override
+  String get proSheetSubtitle =>
+      'WatchVerse\'in tüm özelliklerinin kilidini aç';
+
+  @override
+  String get proFeatureStats => 'Gelişmiş izleme istatistikleri ve grafikler';
+
+  @override
+  String get proFeatureLists => 'Sınırsız özel liste';
+
+  @override
+  String get proFeatureProfile => 'Özel profil temaları';
+
+  @override
+  String get proFeatureExport => 'Verilerini CSV olarak dışa aktar';
+
+  @override
+  String get proFeatureGame => 'Günlük film tahmin oyunu';
+
+  @override
+  String get proMonthly => 'Aylık';
+
+  @override
+  String get proYearly => 'Yıllık';
+
+  @override
+  String proYearlySave(String percent) {
+    return '%$percent tasarruf';
+  }
+
+  @override
+  String get proContinue => 'Devam Et';
+
+  @override
+  String get proRestore => 'Satın alımları geri yükle';
+
+  @override
+  String get proRestoreSuccess => 'Pro geri yüklendi!';
+
+  @override
+  String get proRestoreFailure =>
+      'Bu hesap için önceki bir satın alma bulunamadı';
+
+  @override
+  String get proPurchaseFailure =>
+      'Satın alma başarısız oldu — lütfen tekrar deneyin';
+
+  @override
+  String get proNotConfigured => 'Pro henüz kullanıma açık değil — yakında';
+
+  @override
+  String get proActiveBadge => 'Pro üyesin';
+
+  @override
+  String get proSignInToContinue => 'Devam Etmek İçin Giriş Yap';
+
+  @override
+  String get proSignInRequired =>
+      'Abone olmadan önce giriş yapman veya hesap oluşturman gerekiyor.';
+
+  @override
+  String get proListLimitReached =>
+      'Ücretsiz hesaplar 3 özel liste ile sınırlıdır — sınırsız liste için WatchVerse Pro\'ya geç.';
+
+  @override
+  String get proUnlockStats => 'Pro ile kilidi aç';
+
+  @override
+  String get proUnlockProfileTheme => 'Pro tema';
+
+  @override
+  String get proExporting => 'Dışa aktarman hazırlanıyor…';
+
+  @override
+  String get proExportAction => 'Verilerimi dışa aktar (CSV)';
+
+  @override
+  String get dailyGameTitle => 'Günlük Film Oyunu';
+
+  @override
+  String get dailyGameDrawerLabel => 'Günlük Film Oyunu';
+
+  @override
+  String get dailyGameSearchHint => 'Bir film ara…';
+
+  @override
+  String dailyGameGuessesLeft(String count) {
+    return '$count tahmin hakkı kaldı';
+  }
+
+  @override
+  String dailyGameStreak(String count) {
+    return 'Seri $count';
+  }
+
+  @override
+  String dailyGameBestStreak(String count) {
+    return 'En iyi $count';
+  }
+
+  @override
+  String get dailyGameClueDirector => 'Yönetmen';
+
+  @override
+  String get dailyGameClueStudio => 'Yapım Stüdyosu';
+
+  @override
+  String get dailyGameClueYear => 'Yıl';
+
+  @override
+  String get dailyGameClueRevenue => 'Hasılat';
+
+  @override
+  String get dailyGameClueRating => 'Puan';
+
+  @override
+  String get dailyGameClueCertification => 'Yaş Sınırı';
+
+  @override
+  String get dailyGameClueCast => 'Oyuncular';
+
+  @override
+  String get dailyGameClueGenres => 'Türler';
+
+  @override
+  String get dailyGameHintUnlocked => 'İpucu açıldı!';
+
+  @override
+  String get dailyGameShowHint => 'İpucunu göster';
+
+  @override
+  String get dailyGameWinTitle => 'Bildin!';
+
+  @override
+  String get dailyGameLoseTitle => 'Tahmin hakkın bitti';
+
+  @override
+  String dailyGameLoseSubtitle(String title) {
+    return 'Bugünün filmi $title idi';
+  }
+
+  @override
+  String get dailyGameShareResult => 'Sonucu paylaş';
+
+  @override
+  String get dailyGameRewatch => 'Geçmiş günler';
+
+  @override
+  String get dailyGamePlayAgainTomorrow => 'Yeni film için yarın tekrar gel';
+
+  @override
+  String get dailyGameLoading => 'Bugünün filmi yükleniyor…';
+
+  @override
+  String get dailyGameNoPool => 'Bugünün bulmacası henüz hazır değil — yakında';
+
+  @override
+  String get dailyGameGuessedAlready => 'Zaten tahmin edildi';
+
+  @override
+  String get dailyGamePickAnotherDay => 'Başka bir gün seç';
 }

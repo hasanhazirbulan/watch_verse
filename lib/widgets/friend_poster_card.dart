@@ -7,20 +7,21 @@ import 'package:watch_verse/widgets/quick_add_sheet.dart';
 import 'package:watch_verse/widgets/social_widgets.dart';
 
 /// Poster card for the home screen's "Your Friends Also Watched" slider —
-/// like [PosterCard], but with the friend's avatar, name and rating
-/// overlaid at the bottom (Letterboxd's "New from friends" row). Long-press
-/// opens the same quick-add sheet as the other home-screen poster rails.
+/// like [PosterCard], but with the contributing friends' avatars, name(s)
+/// and rating overlaid at the bottom (Letterboxd's "New from friends" row).
+/// When more than one followed friend watched the same title, [friends]
+/// holds all of them (stacked avatars + "Name +N") instead of one card per
+/// friend. Long-press opens the same quick-add sheet as the other
+/// home-screen poster rails.
 class FriendPosterCard extends StatelessWidget {
   final MediaItem item;
-  final String friendName;
-  final String friendPhoto;
-  final double rating; // 0-5, 0 when the friend hasn't rated it
+  final List<Map<String, dynamic>> friends; // {uid, name, photo} per watcher
+  final double rating; // 0-5, 0 when the representative friend hasn't rated it
   final double width;
   const FriendPosterCard({
     super.key,
     required this.item,
-    required this.friendName,
-    required this.friendPhoto,
+    required this.friends,
     required this.rating,
     this.width = 130,
   });
@@ -47,7 +48,7 @@ class FriendPosterCard extends StatelessWidget {
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withOpacity(0.85),
+                        Colors.black.withValues(alpha: 0.85),
                       ],
                       stops: const [0.55, 1.0],
                     ),
@@ -65,11 +66,11 @@ class FriendPosterCard extends StatelessWidget {
                   bottom: 8,
                   child: Row(
                     children: [
-                      UserAvatar(photoURL: friendPhoto, name: friendName, radius: 10),
+                      _avatarStack(),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          friendName,
+                          _label,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -86,6 +87,44 @@ class FriendPosterCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  String get _label {
+    final firstName = friends.isNotEmpty ? (friends.first['name'] as String? ?? '') : '';
+    final extra = friends.length - 1;
+    return extra > 0 ? '$firstName +$extra' : firstName;
+  }
+
+  // Up to 3 overlapping avatars, oldest-on-top-visually (drawn left to
+  // right, each offset so only a sliver of the ones behind it shows).
+  Widget _avatarStack() {
+    final shown = friends.take(3).toList();
+    if (shown.length <= 1) {
+      final f = shown.isNotEmpty ? shown.first : const {};
+      return UserAvatar(
+          photoURL: f['photo'] as String?, name: (f['name'] as String?) ?? '', radius: 10);
+    }
+    return SizedBox(
+      width: 20 + (shown.length - 1) * 10,
+      height: 20,
+      child: Stack(
+        children: [
+          for (var i = 0; i < shown.length; i++)
+            Positioned(
+              left: i * 10,
+              child: Container(
+                padding: const EdgeInsets.all(1),
+                decoration: const BoxDecoration(
+                    color: Colors.white, shape: BoxShape.circle),
+                child: UserAvatar(
+                    photoURL: shown[i]['photo'] as String?,
+                    name: (shown[i]['name'] as String?) ?? '',
+                    radius: 9),
+              ),
+            ),
+        ],
       ),
     );
   }

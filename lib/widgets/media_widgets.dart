@@ -1,6 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
+import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
 
@@ -21,23 +23,24 @@ class TmdbImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (url == null) return _placeholder(context);
-    return Image.network(
-      url!,
+    // Disk-cached (not just in-memory): the same poster/backdrop/still
+    // shows up across many screens (rails, friends slider, profile grids,
+    // detail pages) — without a disk cache every one of those re-downloads
+    // it from TMDB's CDN on every screen open.
+    return CachedNetworkImage(
+      imageUrl: url!,
       fit: fit,
-      loadingBuilder: (context, child, progress) {
-        if (progress == null) return child;
-        return Container(
-          color: context.colors.surfaceAlt,
-          child: const Center(
-            child: SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
+      placeholder: (context, _) => Container(
+        color: context.colors.surfaceAlt,
+        child: const Center(
+          child: SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(strokeWidth: 2),
           ),
-        );
-      },
-      errorBuilder: (_, __, ___) => _placeholder(context),
+        ),
+      ),
+      errorWidget: (_, __, ___) => _placeholder(context),
     );
   }
 
@@ -64,7 +67,7 @@ class RatingBadge extends StatelessWidget {
         vertical: compact ? 3 : 4,
       ),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.62),
+        color: Colors.black.withValues(alpha: 0.62),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -103,7 +106,7 @@ class UserRatingBadge extends StatelessWidget {
         vertical: compact ? 3 : 4,
       ),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.62),
+        color: Colors.black.withValues(alpha: 0.62),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -139,7 +142,7 @@ class MediaTypeChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: (isTv ? context.colors.info : context.colors.primary)
-            .withOpacity(0.16),
+            .withValues(alpha: 0.16),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
@@ -207,6 +210,11 @@ class PosterCard extends StatelessWidget {
   final double width;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
+  /// Shows a small "where to watch" logo badge in the bottom-right corner,
+  /// lazily fetched (and cached, see APIservices.getWatchProvidersCached) —
+  /// off by default so existing callers don't suddenly fire an extra
+  /// network request per poster; opt in per rail.
+  final bool showProviderBadge;
 
   const PosterCard({
     super.key,
@@ -214,6 +222,7 @@ class PosterCard extends StatelessWidget {
     this.width = 130,
     this.onTap,
     this.onLongPress,
+    this.showProviderBadge = false,
   });
 
   @override
@@ -241,6 +250,12 @@ class PosterCard extends StatelessWidget {
                     left: 6,
                     child: RatingBadge(rating: item.voteAverage, compact: true),
                   ),
+                  if (showProviderBadge)
+                    Positioned(
+                      bottom: 6,
+                      right: 6,
+                      child: _ProviderBadge(item: item),
+                    ),
                 ],
               ),
             ),
@@ -266,6 +281,47 @@ class PosterCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Small square logo for the first (most relevant) streaming/rent/buy option
+/// TMDB lists for [item] in the device's region — same data source as the
+/// detail screen's "Where to Watch" section, just surfaced one level up.
+/// Renders nothing while loading or when no provider is listed, rather than
+/// a placeholder — a missing badge should read as "unknown", not "broken".
+class _ProviderBadge extends StatelessWidget {
+  final MediaItem item;
+  const _ProviderBadge({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final region =
+        WidgetsBinding.instance.platformDispatcher.locale.countryCode ?? 'US';
+    return FutureBuilder<List<WatchProvider>>(
+      future: APIservices()
+          .getWatchProvidersCached(item.mediaType, item.id, region),
+      builder: (context, snap) {
+        final providers = snap.data ?? const <WatchProvider>[];
+        if (providers.isEmpty) return const SizedBox.shrink();
+        return Container(
+          width: 26,
+          height: 26,
+          padding: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.55),
+            borderRadius: BorderRadius.circular(7),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: CachedNetworkImage(
+              imageUrl: Tmdb.logo(providers.first.logoPath) ?? '',
+              fit: BoxFit.cover,
+              errorWidget: (_, __, ___) => const SizedBox.shrink(),
+            ),
+          ),
+        );
+      },
     );
   }
 }

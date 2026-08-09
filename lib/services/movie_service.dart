@@ -163,6 +163,17 @@ class MovieService {
     });
   }
 
+  /// Every diary entry this user has ever logged (all movies), newest first.
+  /// A one-time fetch, not a stream — same "point-in-time report" reasoning
+  /// as `TvTrackingService.activityOnce`, used by [ExportService] to build
+  /// the CSV export.
+  Future<List<Map<String, dynamic>>> allDiaryEntriesOnce() async {
+    final col = _diaryCol;
+    if (col == null) return [];
+    final snap = await col.orderBy('watchedOn', descending: true).get();
+    return snap.docs.map((d) => {...d.data(), 'entryId': d.id}).toList();
+  }
+
   // --------------------------------------------------------------- writes ---
 
   Future<void> setStatus(Movie m, String status) async {

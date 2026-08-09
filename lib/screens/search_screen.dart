@@ -33,7 +33,8 @@ extension on _Filter {
 }
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
+  final bool initialPeople;
+  const SearchScreen({super.key, this.initialPeople = false});
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -44,7 +45,8 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _controller = TextEditingController();
   Timer? _debounce;
 
-  _Filter _filter = _Filter.all;
+  late _Filter _filter =
+      widget.initialPeople ? _Filter.people : _Filter.all;
 
   // Cached raw results per scope + the query they belong to, so toggling
   // Movies/TV/All never triggers a refetch (client-side filter instead).

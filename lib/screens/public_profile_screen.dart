@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/screens/follow_list_screen.dart';
+import 'package:watch_verse/screens/list_detail_screen.dart';
+import 'package:watch_verse/services/list_service.dart';
 import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
@@ -31,6 +33,8 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
   late final Future<List<MediaItem>> _shows = _social
       .userShows(widget.userId)
       .then((list) => list.map(_showItem).toList());
+  late final Future<List<Map<String, dynamic>>> _publicLists =
+      ListService.instance.publicListsFor(widget.userId);
 
   MediaItem _movieItem(Map<String, dynamic> d) => MediaItem(
         id: (d['id'] ?? 0) as int,
@@ -69,6 +73,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
             _rail(l10n.pubProfileFavoriteFilms, _favorites),
             _addableMoviesRail(l10n.pubProfileWatchedMovies, _movies),
             _rail(l10n.pubProfileShows, _shows),
+            _listsSection(l10n),
           ],
         ),
       ),
@@ -208,6 +213,89 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
           child: MediaRail(title: title, items: snap.data!),
         );
       },
+    );
+  }
+
+  // This user's public lists — private ones never show up here (see the
+  // `public`-gated Firestore read rule in ListService.publicListsFor).
+  Widget _listsSection(AppLocalizations l10n) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _publicLists,
+      builder: (context, snap) {
+        final lists = snap.data ?? const <Map<String, dynamic>>[];
+        if (lists.isEmpty) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.pubProfileLists,
+                  style: const TextStyle(
+                      fontSize: 17, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 12),
+              for (final list in lists) _listTile(list),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _listTile(Map<String, dynamic> list) {
+    final l10n = AppLocalizations.of(context)!;
+    final name = (list['name'] ?? l10n.listsUntitled) as String;
+    final cover = ListService.itemsFrom(list);
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ListDetailScreen(
+            listId: list['id'] as String,
+            name: name,
+            ownerUid: widget.userId,
+            ownerName: widget.name,
+          ),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: context.colors.surface,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  width: 40,
+                  height: 56,
+                  child: cover.isEmpty
+                      ? Container(
+                          color: context.colors.surfaceAlt,
+                          child: Icon(Icons.playlist_play_rounded,
+                              color: context.colors.textMuted))
+                      : TmdbImage(
+                          url: Tmdb.poster(cover.first.posterPath,
+                              size: 'w185')),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 14)),
+              ),
+              Icon(Icons.chevron_right_rounded,
+                  color: context.colors.textMuted),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

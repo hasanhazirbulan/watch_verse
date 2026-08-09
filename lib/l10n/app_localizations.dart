@@ -746,6 +746,18 @@ abstract class AppLocalizations {
   /// **'Your name'**
   String get profileYourNameHint;
 
+  /// No description provided for @profileCharacterQuoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'If I were a movie/TV character, I\'d be...'**
+  String get profileCharacterQuoteHint;
+
+  /// No description provided for @profileAvatarBackgroundLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile background'**
+  String get profileAvatarBackgroundLabel;
+
   /// No description provided for @profileSaveNameError.
   ///
   /// In en, this message translates to:
@@ -977,6 +989,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try again'**
   String get homeRetryAction;
+
+  /// No description provided for @homeFindFriendsBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find friends on WatchVerse'**
+  String get homeFindFriendsBannerTitle;
+
+  /// No description provided for @homeFindFriendsBannerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow people to see what they\'re watching.'**
+  String get homeFindFriendsBannerBody;
+
+  /// No description provided for @homeFindFriendsBannerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Find'**
+  String get homeFindFriendsBannerAction;
 
   /// No description provided for @asyncErrorMessage.
   ///
@@ -1788,6 +1818,12 @@ abstract class AppLocalizations {
   /// **'Shows'**
   String get pubProfileShows;
 
+  /// No description provided for @pubProfileLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Lists'**
+  String get pubProfileLists;
+
   /// No description provided for @pubProfileDefaultUserName.
   ///
   /// In en, this message translates to:
@@ -1949,6 +1985,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Watch History'**
   String get homeWatchHistory;
+
+  /// No description provided for @homeWatchPolls.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Polls'**
+  String get homeWatchPolls;
 
   /// No description provided for @homeSettingsLabel.
   ///
@@ -2208,6 +2250,42 @@ abstract class AppLocalizations {
   /// **'Delete list'**
   String get listDetailDeleteMenuItem;
 
+  /// No description provided for @listDetailMakePublicMenuItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Make public'**
+  String get listDetailMakePublicMenuItem;
+
+  /// No description provided for @listDetailMakePrivateMenuItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Make private'**
+  String get listDetailMakePrivateMenuItem;
+
+  /// No description provided for @listDetailMadePublic.
+  ///
+  /// In en, this message translates to:
+  /// **'List is now public'**
+  String get listDetailMadePublic;
+
+  /// No description provided for @listDetailMadePrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'List is now private'**
+  String get listDetailMadePrivate;
+
+  /// No description provided for @listDetailFollow.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow'**
+  String get listDetailFollow;
+
+  /// No description provided for @listDetailFollowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Following'**
+  String get listDetailFollowing;
+
   /// No description provided for @listDetailEmptyTitle.
   ///
   /// In en, this message translates to:
@@ -2303,6 +2381,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Untitled'**
   String get listsUntitled;
+
+  /// No description provided for @listsTabMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get listsTabMine;
+
+  /// No description provided for @listsTabFollowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Following'**
+  String get listsTabFollowing;
+
+  /// No description provided for @listsFollowingEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not following any lists yet'**
+  String get listsFollowingEmptyTitle;
+
+  /// No description provided for @listsFollowingEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Public lists you follow from other users will show up here.'**
+  String get listsFollowingEmptySubtitle;
+
+  /// No description provided for @listsFollowingByLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'by {name}'**
+  String listsFollowingByLabel(String name);
 
   /// No description provided for @listsTitleSingular.
   ///
@@ -2669,6 +2777,474 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'People you block will appear here.'**
   String get blockedEmptySubtitle;
+
+  /// No description provided for @watchPollsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Polls'**
+  String get watchPollsTitle;
+
+  /// No description provided for @watchPollDefaultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What should we watch?'**
+  String get watchPollDefaultTitle;
+
+  /// No description provided for @watchPollClosedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'CLOSED'**
+  String get watchPollClosedLabel;
+
+  /// No description provided for @watchPollVoteCountSingular.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} vote'**
+  String watchPollVoteCountSingular(String count);
+
+  /// No description provided for @watchPollVoteCountPlural.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} votes'**
+  String watchPollVoteCountPlural(String count);
+
+  /// No description provided for @watchPollsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No polls yet'**
+  String get watchPollsEmptyTitle;
+
+  /// No description provided for @watchPollsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a poll to let friends vote on what to watch next.'**
+  String get watchPollsEmptySubtitle;
+
+  /// No description provided for @createWatchPollTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Watch Poll'**
+  String get createWatchPollTitle;
+
+  /// No description provided for @watchPollTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Poll title (optional)'**
+  String get watchPollTitleHint;
+
+  /// No description provided for @watchPollOptionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Options ({count}/{max})'**
+  String watchPollOptionsLabel(int count, int max);
+
+  /// No description provided for @watchPollSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search movies or shows to add'**
+  String get watchPollSearchHint;
+
+  /// No description provided for @watchPollInviteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite friends'**
+  String get watchPollInviteLabel;
+
+  /// No description provided for @watchPollInviteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional — anyone invited can vote. You can also just create it for yourself.'**
+  String get watchPollInviteSubtitle;
+
+  /// No description provided for @watchPollNoFriendsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow some friends to invite them to a poll.'**
+  String get watchPollNoFriendsYet;
+
+  /// No description provided for @watchPollCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Poll'**
+  String get watchPollCreateAction;
+
+  /// No description provided for @watchPollCloseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close this poll?'**
+  String get watchPollCloseTitle;
+
+  /// No description provided for @watchPollCloseContent.
+  ///
+  /// In en, this message translates to:
+  /// **'This locks in the current standings — no one will be able to vote after this.'**
+  String get watchPollCloseContent;
+
+  /// No description provided for @watchPollCloseConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Close poll'**
+  String get watchPollCloseConfirm;
+
+  /// No description provided for @watchPollCloseMenuItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Close poll'**
+  String get watchPollCloseMenuItem;
+
+  /// No description provided for @watchPollDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete poll?'**
+  String get watchPollDeleteTitle;
+
+  /// No description provided for @watchPollDeleteContent.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the poll for everyone invited.'**
+  String get watchPollDeleteContent;
+
+  /// No description provided for @watchPollDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get watchPollDeleteConfirm;
+
+  /// No description provided for @watchPollDeleteMenuItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete poll'**
+  String get watchPollDeleteMenuItem;
+
+  /// No description provided for @watchPollNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This poll no longer exists.'**
+  String get watchPollNotFound;
+
+  /// No description provided for @watchPollClosedBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This poll is closed — here\'s how it landed.'**
+  String get watchPollClosedBanner;
+
+  /// No description provided for @watchPollOptionVotesSingular.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} vote'**
+  String watchPollOptionVotesSingular(String count);
+
+  /// No description provided for @watchPollOptionVotesPlural.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} votes'**
+  String watchPollOptionVotesPlural(String count);
+
+  /// No description provided for @homeWatchVersePro.
+  ///
+  /// In en, this message translates to:
+  /// **'WatchVerse Pro'**
+  String get homeWatchVersePro;
+
+  /// No description provided for @proSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'WatchVerse Pro'**
+  String get proSheetTitle;
+
+  /// No description provided for @proSheetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock the full WatchVerse experience'**
+  String get proSheetSubtitle;
+
+  /// No description provided for @proFeatureStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced watch stats & charts'**
+  String get proFeatureStats;
+
+  /// No description provided for @proFeatureLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited custom lists'**
+  String get proFeatureLists;
+
+  /// No description provided for @proFeatureProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Exclusive profile themes'**
+  String get proFeatureProfile;
+
+  /// No description provided for @proFeatureExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export your data to CSV'**
+  String get proFeatureExport;
+
+  /// No description provided for @proFeatureGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily movie guessing game'**
+  String get proFeatureGame;
+
+  /// No description provided for @proMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get proMonthly;
+
+  /// No description provided for @proYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get proYearly;
+
+  /// No description provided for @proYearlySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save {percent}%'**
+  String proYearlySave(String percent);
+
+  /// No description provided for @proContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get proContinue;
+
+  /// No description provided for @proRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get proRestore;
+
+  /// No description provided for @proRestoreSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro restored!'**
+  String get proRestoreSuccess;
+
+  /// No description provided for @proRestoreFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'No previous purchase found for this account'**
+  String get proRestoreFailure;
+
+  /// No description provided for @proPurchaseFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase failed — please try again'**
+  String get proPurchaseFailure;
+
+  /// No description provided for @proNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro isn\'t available yet — check back soon'**
+  String get proNotConfigured;
+
+  /// No description provided for @proActiveBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re a Pro member'**
+  String get proActiveBadge;
+
+  /// No description provided for @proSignInToContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In to Continue'**
+  String get proSignInToContinue;
+
+  /// No description provided for @proSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in or create an account first to subscribe.'**
+  String get proSignInRequired;
+
+  /// No description provided for @proListLimitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Free accounts get 3 custom lists — upgrade to WatchVerse Pro for unlimited lists.'**
+  String get proListLimitReached;
+
+  /// No description provided for @proUnlockStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with Pro'**
+  String get proUnlockStats;
+
+  /// No description provided for @proUnlockProfileTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro theme'**
+  String get proUnlockProfileTheme;
+
+  /// No description provided for @proExporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing your export…'**
+  String get proExporting;
+
+  /// No description provided for @proExportAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Export my data (CSV)'**
+  String get proExportAction;
+
+  /// No description provided for @dailyGameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Movie Game'**
+  String get dailyGameTitle;
+
+  /// No description provided for @dailyGameDrawerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Movie Game'**
+  String get dailyGameDrawerLabel;
+
+  /// No description provided for @dailyGameSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a movie…'**
+  String get dailyGameSearchHint;
+
+  /// No description provided for @dailyGameGuessesLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} guesses left'**
+  String dailyGameGuessesLeft(String count);
+
+  /// No description provided for @dailyGameStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak {count}'**
+  String dailyGameStreak(String count);
+
+  /// No description provided for @dailyGameBestStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Best {count}'**
+  String dailyGameBestStreak(String count);
+
+  /// No description provided for @dailyGameClueDirector.
+  ///
+  /// In en, this message translates to:
+  /// **'Director'**
+  String get dailyGameClueDirector;
+
+  /// No description provided for @dailyGameClueStudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Studio'**
+  String get dailyGameClueStudio;
+
+  /// No description provided for @dailyGameClueYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get dailyGameClueYear;
+
+  /// No description provided for @dailyGameClueRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Box Office'**
+  String get dailyGameClueRevenue;
+
+  /// No description provided for @dailyGameClueRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get dailyGameClueRating;
+
+  /// No description provided for @dailyGameClueCertification.
+  ///
+  /// In en, this message translates to:
+  /// **'Rated'**
+  String get dailyGameClueCertification;
+
+  /// No description provided for @dailyGameClueCast.
+  ///
+  /// In en, this message translates to:
+  /// **'Cast'**
+  String get dailyGameClueCast;
+
+  /// No description provided for @dailyGameClueGenres.
+  ///
+  /// In en, this message translates to:
+  /// **'Genres'**
+  String get dailyGameClueGenres;
+
+  /// No description provided for @dailyGameHintUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Hint unlocked!'**
+  String get dailyGameHintUnlocked;
+
+  /// No description provided for @dailyGameShowHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Show hint'**
+  String get dailyGameShowHint;
+
+  /// No description provided for @dailyGameWinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You got it!'**
+  String get dailyGameWinTitle;
+
+  /// No description provided for @dailyGameLoseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of guesses'**
+  String get dailyGameLoseTitle;
+
+  /// No description provided for @dailyGameLoseSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s movie was {title}'**
+  String dailyGameLoseSubtitle(String title);
+
+  /// No description provided for @dailyGameShareResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Share result'**
+  String get dailyGameShareResult;
+
+  /// No description provided for @dailyGameRewatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewatch'**
+  String get dailyGameRewatch;
+
+  /// No description provided for @dailyGamePlayAgainTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Come back tomorrow for a new movie'**
+  String get dailyGamePlayAgainTomorrow;
+
+  /// No description provided for @dailyGameLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading today\'s movie…'**
+  String get dailyGameLoading;
+
+  /// No description provided for @dailyGameNoPool.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s puzzle isn\'t ready yet — check back soon'**
+  String get dailyGameNoPool;
+
+  /// No description provided for @dailyGameGuessedAlready.
+  ///
+  /// In en, this message translates to:
+  /// **'Already guessed'**
+  String get dailyGameGuessedAlready;
+
+  /// No description provided for @dailyGamePickAnotherDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a day'**
+  String get dailyGamePickAnotherDay;
 }
 
 class _AppLocalizationsDelegate

@@ -3,9 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
+import 'package:watch_verse/screens/blocked_users_screen.dart';
 import 'package:watch_verse/screens/edit_profile_screen.dart';
 import 'package:watch_verse/services/account_deletion_service.dart';
+import 'package:watch_verse/services/export_service.dart';
+import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/widgets/paywall_sheet.dart';
 
 /// App-level preferences plus account management (edit profile, delete
 /// account) — the drawer is the only other entry point into account actions,
@@ -19,6 +23,20 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _deleting = false;
+  bool _exporting = false;
+
+  Future<void> _exportData() async {
+    if (ProService.isConfigured && !ProService.instance.isPro) {
+      showPaywallSheet(context);
+      return;
+    }
+    setState(() => _exporting = true);
+    try {
+      await ExportService.instance.exportDiaryCsv();
+    } finally {
+      if (mounted) setState(() => _exporting = false);
+    }
+  }
 
   Future<void> _confirmDeleteAccount() async {
     final l10n = AppLocalizations.of(context)!;
@@ -97,6 +115,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
             label: l10n.profileEditProfileTitle,
             onTap: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const EditProfileScreen())),
+          ),
+          const SizedBox(height: 12),
+          _tile(
+            icon: Icons.block_rounded,
+            label: l10n.profileBlockedUsers,
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const BlockedUsersScreen())),
+          ),
+          const SizedBox(height: 12),
+          _tile(
+            icon: _exporting
+                ? Icons.hourglass_top_rounded
+                : Icons.file_download_rounded,
+            label: _exporting ? l10n.proExporting : l10n.proExportAction,
+            onTap: _exporting ? null : _exportData,
           ),
           const SizedBox(height: 12),
           _tile(

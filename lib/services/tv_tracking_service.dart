@@ -147,6 +147,18 @@ class TvTrackingService {
         );
   }
 
+  /// One-time read of the same timeline as [activityStream], for screens
+  /// that render a snapshot rather than watch it live (e.g. the stats
+  /// charts) — avoids holding an open Firestore listener (and its ongoing
+  /// read cost) for data that doesn't need to update in real time.
+  Future<List<Map<String, dynamic>>> activityOnce({int limit = 60}) async {
+    final col = _activityCol;
+    if (col == null) return [];
+    final snap =
+        await col.orderBy('at', descending: true).limit(limit).get();
+    return snap.docs.map((d) => d.data()).toList();
+  }
+
   // -------------------------------------------------------------- writes ----
 
   /// Adds a show to tracking without marking any episode (status: watchlist).
@@ -377,12 +389,14 @@ class TvTrackingService {
     }
   }
 
-  /// One-time backfill for shows tracked before `watchedMinutes`/`genres`
-  /// existed: recomputes watched minutes from scratch by re-fetching each
-  /// watched season's episode runtimes from TMDB and summing the ones
-  /// actually marked watched, and fills in genres from the show detail
-  /// endpoint if missing. Safe to call repeatedly (minutes are overwritten,
-  /// not incremented).
+  /// One-time backfill for shows tracked before `watchedMinutes`/`genres`/
+  /// `nextEpisodeAirDate` existed: recomputes watched minutes from scratch
+  /// by re-fetching each watched season's episode runtimes from TMDB and
+  /// summing the ones actually marked watched, and fills in genres +
+  /// next-episode air date from the show detail endpoint if either is
+  /// missing (the latter is what lets the episode-reminder notifications —
+  /// see scripts/notify/run.js — find this show at all). Safe to call
+  /// repeatedly (minutes are overwritten, not incremented).
   Future<void> backfillShowDetails(int showId) async {
     final ref = _showRef(showId);
     if (ref == null) return;
@@ -391,12 +405,17 @@ class TvTrackingService {
 
     final update = <String, dynamic>{};
 
-    if (((showSnap.data()?['genres'] as List?) ?? const []).isEmpty) {
+    final hasGenres =
+        ((showSnap.data()?['genres'] as List?) ?? const []).isNotEmpty;
+    final hasAirDate =
+        (showSnap.data()?['nextEpisodeAirDate'] as String? ?? '').isNotEmpty;
+    if (!hasGenres || !hasAirDate) {
       try {
         final show = await APIservices().getTvDetails(showId);
         if (show.genres.isNotEmpty) update['genres'] = show.genres;
+        update['nextEpisodeAirDate'] = show.nextEpisodeToAir?.airDate ?? '';
       } catch (_) {
-        // Leave genres unset; the rest of the backfill can still proceed.
+        // Leave both unset; the rest of the backfill can still proceed.
       }
     }
 

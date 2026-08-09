@@ -63,13 +63,21 @@ class SocialService {
     return out;
   }
 
-  Future<List<Map<String, dynamic>>> userWatchedMovies(String userId) async {
+  /// [limit] defaults to 30 for callers showing one user's whole rail (e.g.
+  /// [PublicProfileScreen]); friend fan-outs (see [friendsWatchedMovies])
+  /// pass a much smaller limit since most of a high per-friend cap gets
+  /// discarded after merging anyway — safe to lower only because of the
+  /// `orderBy` here, which guarantees a small limit still returns the
+  /// genuinely most-recent watches rather than an arbitrary 30.
+  Future<List<Map<String, dynamic>>> userWatchedMovies(String userId,
+      {int limit = 30}) async {
     try {
       final s = await _users
           .doc(userId)
           .collection('movies')
           .where('status', isEqualTo: 'watched')
-          .limit(30)
+          .orderBy('watchedAt', descending: true)
+          .limit(limit)
           .get();
       return s.docs.map((d) => d.data()).toList();
     } catch (_) {
@@ -91,10 +99,16 @@ class SocialService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> userShows(String userId) async {
+  /// See [userWatchedMovies] re: [limit] and why a small one is safe here.
+  Future<List<Map<String, dynamic>>> userShows(String userId,
+      {int limit = 30}) async {
     try {
-      final s =
-          await _users.doc(userId).collection('shows').limit(30).get();
+      final s = await _users
+          .doc(userId)
+          .collection('shows')
+          .orderBy('updatedAt', descending: true)
+          .limit(limit)
+          .get();
       return s.docs.map((d) => d.data()).toList();
     } catch (_) {
       return [];
@@ -152,7 +166,11 @@ class SocialService {
         final userSnap = await _users.doc(u).get();
         final name = (userSnap.data()?['name'] ?? '') as String;
         final photo = (userSnap.data()?['photoURL'] ?? '') as String;
-        final movies = await userWatchedMovies(u);
+        // Only a handful per friend — the merge below keeps just the top
+        // [limit] across everyone anyway, so fetching each friend's full 30
+        // here (like PublicProfileScreen does for one person) would mean
+        // reading hundreds of docs just to discard nearly all of them.
+        final movies = await userWatchedMovies(u, limit: 5);
         return movies
             .map((m) => {...m, 'actorName': name, 'actorPhoto': photo, 'actorUid': u})
             .toList();
@@ -167,7 +185,39 @@ class SocialService {
       if (ta is Timestamp && tb is Timestamp) return tb.compareTo(ta);
       return 0;
     });
-    return all.take(limit).toList();
+    return _groupByContent(all, limit);
+  }
+
+  /// Merges per-friend fan-out results that share the same content id into
+  /// one entry (so 3 friends watching the same movie renders as one card
+  /// tagged with all 3, not 3 duplicate cards) — `items` must already be
+  /// sorted newest-first; the first-seen doc per id becomes the
+  /// representative (poster/rating fields), and every contributor lands in
+  /// its `friends` list, in the same newest-first order.
+  List<Map<String, dynamic>> _groupByContent(
+      List<Map<String, dynamic>> items, int limit) {
+    final order = <int>[];
+    final representative = <int, Map<String, dynamic>>{};
+    final friends = <int, List<Map<String, dynamic>>>{};
+    for (final item in items) {
+      final id = (item['id'] ?? 0) as int;
+      final friend = {
+        'uid': item['actorUid'],
+        'name': item['actorName'],
+        'photo': item['actorPhoto'],
+      };
+      if (!representative.containsKey(id)) {
+        representative[id] = item;
+        friends[id] = [friend];
+        order.add(id);
+      } else {
+        friends[id]!.add(friend);
+      }
+    }
+    return [
+      for (final id in order.take(limit))
+        {...representative[id]!, 'friends': friends[id]!},
+    ];
   }
 
   /// Shows followed users are watching/have finished, newest-updated first,
@@ -183,7 +233,11 @@ class SocialService {
         final userSnap = await _users.doc(u).get();
         final name = (userSnap.data()?['name'] ?? '') as String;
         final photo = (userSnap.data()?['photoURL'] ?? '') as String;
-        final shows = (await userShows(u))
+        // A bit more headroom than the movies fetch (7 vs. 5): some of the
+        // most-recently-updated shows can be watchlist-only (watchedCount 0)
+        // and get filtered out below, so a slightly larger pull keeps a
+        // margin against under-filling this friend's slot in the merge.
+        final shows = (await userShows(u, limit: 7))
             .where((s) => ((s['watchedCount'] ?? 0) as num) > 0)
             .toList();
         return shows
@@ -200,7 +254,7 @@ class SocialService {
       if (ta is Timestamp && tb is Timestamp) return tb.compareTo(ta);
       return 0;
     });
-    return all.take(limit).toList();
+    return _groupByContent(all, limit);
   }
 
   // ---------------------------------------------------------------- writes --

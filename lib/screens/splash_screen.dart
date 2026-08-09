@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
           // Blur effect
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: Container(
-            color: Colors.black.withOpacity(0.6), // dark overlay over the blur
+            color: Colors.black.withValues(alpha: 0.6), // dark overlay over the blur
             child: Center(
               child: Image.asset(
                 'assets/images/logoW.png', // logo image

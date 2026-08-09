@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 
 class DatabaseService {
   DatabaseService._privateConstructor(); // Private constructor
@@ -29,7 +30,7 @@ class DatabaseService {
         // Other user fields
       });
     } catch (e) {
-      print('Error creating user: $e');
+      debugPrint('Error creating user: $e');
       // Error handling — e.g. show an error message to the user
     }
   }
@@ -51,7 +52,7 @@ class DatabaseService {
       // Return the fetched document
       return userSnapshot;
     } catch (e) {
-      print('Error fetching user data: $e');
+      debugPrint('Error fetching user data: $e');
       throw Exception('Failed to fetch user data');
     }
   }
@@ -62,7 +63,7 @@ class DatabaseService {
     try {
       await _firestore.collection('users').doc(uid).update(data);
     } catch (e) {
-      print('Error updating user: $e');
+      debugPrint('Error updating user: $e');
       // Error handling
     }
   }
@@ -72,7 +73,7 @@ class DatabaseService {
     try {
       await _firestore.collection('users').doc(uid).delete();
     } catch (e) {
-      print('Error deleting user: $e');
+      debugPrint('Error deleting user: $e');
       // Error handling
     }
   }
@@ -83,7 +84,7 @@ class DatabaseService {
     try {
       await _firestore.collection(collectionName).add(data);
     } catch (e) {
-      print('Error creating document: $e');
+      debugPrint('Error creating document: $e');
       // Error handling — e.g. show an error message to the user
     }
   }
@@ -94,7 +95,7 @@ class DatabaseService {
     try {
       return await _firestore.collection(collectionName).doc(documentId).get();
     } catch (e) {
-      print('Error reading document: $e');
+      debugPrint('Error reading document: $e');
       // Error handling
       rethrow;
     }
@@ -106,7 +107,7 @@ class DatabaseService {
     try {
       await _firestore.collection(collectionName).doc(documentId).update(data);
     } catch (e) {
-      print('Error updating document: $e');
+      debugPrint('Error updating document: $e');
       // Error handling
     }
   }
@@ -116,7 +117,7 @@ class DatabaseService {
     try {
       await _firestore.collection(collectionName).doc(documentId).delete();
     } catch (e) {
-      print('Error deleting document: $e');
+      debugPrint('Error deleting document: $e');
       // Error handling
     }
   }
@@ -127,7 +128,7 @@ class DatabaseService {
     try {
       return _firestore.collection(collectionName).snapshots();
     } catch (e) {
-      print('Error fetching documents: $e');
+      debugPrint('Error fetching documents: $e');
       // Error handling — e.g. return an empty Stream
       rethrow;
     }

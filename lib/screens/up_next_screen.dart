@@ -26,6 +26,16 @@ class _ShowBundle {
       this.nextUnwatched);
 }
 
+/// The TMDB-sourced half of a [_ShowBundle] — full show details plus every
+/// season's episodes, flattened. Cached per show id (see
+/// `_UpNextScreenState._tmdbCache`) since this rarely changes and is by far
+/// the most expensive part to (re-)fetch.
+class _ShowTmdbData {
+  final TvShow show;
+  final List<Episode> flat;
+  _ShowTmdbData(this.show, this.flat);
+}
+
 /// One row on the Upcoming tab: a show's next episode to air, or a
 /// watchlisted movie's release — whichever has a future-or-today date.
 class _UpcomingItem {
@@ -92,8 +102,18 @@ class _UpNextScreenState extends State<UpNextScreen> {
     ];
   }
 
-  // Memoize the heavy per-show episode fetch so it only re-runs when the set of
-  // tracked shows changes, not on every episode toggle.
+  // Per-show cache for the expensive part (full show details + every
+  // season's episode list from TMDB) — keyed by show id, not by the tracked
+  // list as a whole. Previously the whole bundle set was keyed by the
+  // *joined ids list*, so tracking one more show changed the key and
+  // silently re-fetched every already-tracked show's TMDB data too. Split
+  // out like this, adding/removing a show only ever fetches that one show;
+  // everyone else's cached entry is reused. The cheap per-user part
+  // (watched keys, last-watched-at) is re-read fresh every time — those are
+  // small Firestore reads, not TMDB calls, so re-reading them on every
+  // tracked-list change is fine.
+  final Map<int, Future<_ShowTmdbData>> _tmdbCache = {};
+
   String _idsKey = '';
   Future<List<_ShowBundle>>? _future;
 
@@ -101,23 +121,31 @@ class _UpNextScreenState extends State<UpNextScreen> {
     final key = ids.join(',');
     if (_future == null || key != _idsKey) {
       _idsKey = key;
-      _future = _load(ids);
+      _future = _loadBundles(ids);
     }
     return _future!;
   }
 
-  Future<List<_ShowBundle>> _load(List<int> ids) async {
+  Future<_ShowTmdbData> _loadTmdbData(int id) {
+    return _tmdbCache.putIfAbsent(id, () async {
+      final show = await _api.getTvDetails(id);
+      final seasonEps = await Future.wait(show.seasons.map((s) async {
+        try {
+          return await _api.getSeasonEpisodes(id, s.seasonNumber);
+        } catch (_) {
+          return <Episode>[];
+        }
+      }));
+      return _ShowTmdbData(show, [for (final eps in seasonEps) ...eps]);
+    });
+  }
+
+  Future<List<_ShowBundle>> _loadBundles(List<int> ids) async {
     final results = await Future.wait(ids.map((id) async {
       try {
-        final show = await _api.getTvDetails(id);
-        final seasonEps = await Future.wait(show.seasons.map((s) async {
-          try {
-            return await _api.getSeasonEpisodes(id, s.seasonNumber);
-          } catch (_) {
-            return <Episode>[];
-          }
-        }));
-        final flat = [for (final eps in seasonEps) ...eps];
+        final tmdb = await _loadTmdbData(id);
+        final show = tmdb.show;
+        final flat = tmdb.flat;
         final watched = await TvTrackingService.instance.watchedKeys(id);
         final watchedAiredCount =
             flat.where((e) => e.hasAired && watched.contains(e.key)).length;
@@ -191,9 +219,14 @@ class _UpNextScreenState extends State<UpNextScreen> {
       color: context.colors.primary,
       backgroundColor: context.colors.surfaceAlt,
       onRefresh: () async {
+        // A manual refresh means "check TMDB again" (new episode, updated
+        // air date, etc.) — the per-show cache exists to avoid *implicit*
+        // re-fetches on every tracked-list change, not to make an explicit
+        // pull-to-refresh a no-op, so it's cleared here too.
         setState(() {
           _idsKey = '';
           _future = null;
+          _tmdbCache.clear();
         });
         await _futureFor(ids);
       },

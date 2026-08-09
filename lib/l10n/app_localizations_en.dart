@@ -390,6 +390,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileYourNameHint => 'Your name';
 
   @override
+  String get profileCharacterQuoteHint =>
+      'If I were a movie/TV character, I\'d be...';
+
+  @override
+  String get profileAvatarBackgroundLabel => 'Profile background';
+
+  @override
   String profileSaveNameError(String error) {
     return 'Could not save name: $error';
   }
@@ -523,6 +530,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeRetryAction => 'Try again';
+
+  @override
+  String get homeFindFriendsBannerTitle => 'Find friends on WatchVerse';
+
+  @override
+  String get homeFindFriendsBannerBody =>
+      'Follow people to see what they\'re watching.';
+
+  @override
+  String get homeFindFriendsBannerAction => 'Find';
 
   @override
   String asyncErrorMessage(String error) {
@@ -974,6 +991,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pubProfileShows => 'Shows';
 
   @override
+  String get pubProfileLists => 'Lists';
+
+  @override
   String get pubProfileDefaultUserName => 'WatchVerse user';
 
   @override
@@ -1061,6 +1081,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeWatchHistory => 'Watch History';
+
+  @override
+  String get homeWatchPolls => 'Watch Polls';
 
   @override
   String get homeSettingsLabel => 'Settings';
@@ -1197,6 +1220,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listDetailDeleteMenuItem => 'Delete list';
 
   @override
+  String get listDetailMakePublicMenuItem => 'Make public';
+
+  @override
+  String get listDetailMakePrivateMenuItem => 'Make private';
+
+  @override
+  String get listDetailMadePublic => 'List is now public';
+
+  @override
+  String get listDetailMadePrivate => 'List is now private';
+
+  @override
+  String get listDetailFollow => 'Follow';
+
+  @override
+  String get listDetailFollowing => 'Following';
+
+  @override
   String get listDetailEmptyTitle => 'Empty list';
 
   @override
@@ -1245,6 +1286,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get listsUntitled => 'Untitled';
+
+  @override
+  String get listsTabMine => 'Mine';
+
+  @override
+  String get listsTabFollowing => 'Following';
+
+  @override
+  String get listsFollowingEmptyTitle => 'Not following any lists yet';
+
+  @override
+  String get listsFollowingEmptySubtitle =>
+      'Public lists you follow from other users will show up here.';
+
+  @override
+  String listsFollowingByLabel(String name) {
+    return 'by $name';
+  }
 
   @override
   String get listsTitleSingular => 'title';
@@ -1466,4 +1525,267 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get blockedEmptySubtitle => 'People you block will appear here.';
+
+  @override
+  String get watchPollsTitle => 'Watch Polls';
+
+  @override
+  String get watchPollDefaultTitle => 'What should we watch?';
+
+  @override
+  String get watchPollClosedLabel => 'CLOSED';
+
+  @override
+  String watchPollVoteCountSingular(String count) {
+    return '$count vote';
+  }
+
+  @override
+  String watchPollVoteCountPlural(String count) {
+    return '$count votes';
+  }
+
+  @override
+  String get watchPollsEmptyTitle => 'No polls yet';
+
+  @override
+  String get watchPollsEmptySubtitle =>
+      'Start a poll to let friends vote on what to watch next.';
+
+  @override
+  String get createWatchPollTitle => 'New Watch Poll';
+
+  @override
+  String get watchPollTitleHint => 'Poll title (optional)';
+
+  @override
+  String watchPollOptionsLabel(int count, int max) {
+    return 'Options ($count/$max)';
+  }
+
+  @override
+  String get watchPollSearchHint => 'Search movies or shows to add';
+
+  @override
+  String get watchPollInviteLabel => 'Invite friends';
+
+  @override
+  String get watchPollInviteSubtitle =>
+      'Optional — anyone invited can vote. You can also just create it for yourself.';
+
+  @override
+  String get watchPollNoFriendsYet =>
+      'Follow some friends to invite them to a poll.';
+
+  @override
+  String get watchPollCreateAction => 'Create Poll';
+
+  @override
+  String get watchPollCloseTitle => 'Close this poll?';
+
+  @override
+  String get watchPollCloseContent =>
+      'This locks in the current standings — no one will be able to vote after this.';
+
+  @override
+  String get watchPollCloseConfirm => 'Close poll';
+
+  @override
+  String get watchPollCloseMenuItem => 'Close poll';
+
+  @override
+  String get watchPollDeleteTitle => 'Delete poll?';
+
+  @override
+  String get watchPollDeleteContent =>
+      'This removes the poll for everyone invited.';
+
+  @override
+  String get watchPollDeleteConfirm => 'Delete';
+
+  @override
+  String get watchPollDeleteMenuItem => 'Delete poll';
+
+  @override
+  String get watchPollNotFound => 'This poll no longer exists.';
+
+  @override
+  String get watchPollClosedBanner =>
+      'This poll is closed — here\'s how it landed.';
+
+  @override
+  String watchPollOptionVotesSingular(String count) {
+    return '$count vote';
+  }
+
+  @override
+  String watchPollOptionVotesPlural(String count) {
+    return '$count votes';
+  }
+
+  @override
+  String get homeWatchVersePro => 'WatchVerse Pro';
+
+  @override
+  String get proSheetTitle => 'WatchVerse Pro';
+
+  @override
+  String get proSheetSubtitle => 'Unlock the full WatchVerse experience';
+
+  @override
+  String get proFeatureStats => 'Advanced watch stats & charts';
+
+  @override
+  String get proFeatureLists => 'Unlimited custom lists';
+
+  @override
+  String get proFeatureProfile => 'Exclusive profile themes';
+
+  @override
+  String get proFeatureExport => 'Export your data to CSV';
+
+  @override
+  String get proFeatureGame => 'Daily movie guessing game';
+
+  @override
+  String get proMonthly => 'Monthly';
+
+  @override
+  String get proYearly => 'Yearly';
+
+  @override
+  String proYearlySave(String percent) {
+    return 'Save $percent%';
+  }
+
+  @override
+  String get proContinue => 'Continue';
+
+  @override
+  String get proRestore => 'Restore purchases';
+
+  @override
+  String get proRestoreSuccess => 'Pro restored!';
+
+  @override
+  String get proRestoreFailure => 'No previous purchase found for this account';
+
+  @override
+  String get proPurchaseFailure => 'Purchase failed — please try again';
+
+  @override
+  String get proNotConfigured => 'Pro isn\'t available yet — check back soon';
+
+  @override
+  String get proActiveBadge => 'You\'re a Pro member';
+
+  @override
+  String get proSignInToContinue => 'Sign In to Continue';
+
+  @override
+  String get proSignInRequired =>
+      'Sign in or create an account first to subscribe.';
+
+  @override
+  String get proListLimitReached =>
+      'Free accounts get 3 custom lists — upgrade to WatchVerse Pro for unlimited lists.';
+
+  @override
+  String get proUnlockStats => 'Unlock with Pro';
+
+  @override
+  String get proUnlockProfileTheme => 'Pro theme';
+
+  @override
+  String get proExporting => 'Preparing your export…';
+
+  @override
+  String get proExportAction => 'Export my data (CSV)';
+
+  @override
+  String get dailyGameTitle => 'Daily Movie Game';
+
+  @override
+  String get dailyGameDrawerLabel => 'Daily Movie Game';
+
+  @override
+  String get dailyGameSearchHint => 'Search for a movie…';
+
+  @override
+  String dailyGameGuessesLeft(String count) {
+    return '$count guesses left';
+  }
+
+  @override
+  String dailyGameStreak(String count) {
+    return 'Streak $count';
+  }
+
+  @override
+  String dailyGameBestStreak(String count) {
+    return 'Best $count';
+  }
+
+  @override
+  String get dailyGameClueDirector => 'Director';
+
+  @override
+  String get dailyGameClueStudio => 'Studio';
+
+  @override
+  String get dailyGameClueYear => 'Year';
+
+  @override
+  String get dailyGameClueRevenue => 'Box Office';
+
+  @override
+  String get dailyGameClueRating => 'Rating';
+
+  @override
+  String get dailyGameClueCertification => 'Rated';
+
+  @override
+  String get dailyGameClueCast => 'Cast';
+
+  @override
+  String get dailyGameClueGenres => 'Genres';
+
+  @override
+  String get dailyGameHintUnlocked => 'Hint unlocked!';
+
+  @override
+  String get dailyGameShowHint => 'Show hint';
+
+  @override
+  String get dailyGameWinTitle => 'You got it!';
+
+  @override
+  String get dailyGameLoseTitle => 'Out of guesses';
+
+  @override
+  String dailyGameLoseSubtitle(String title) {
+    return 'Today\'s movie was $title';
+  }
+
+  @override
+  String get dailyGameShareResult => 'Share result';
+
+  @override
+  String get dailyGameRewatch => 'Rewatch';
+
+  @override
+  String get dailyGamePlayAgainTomorrow => 'Come back tomorrow for a new movie';
+
+  @override
+  String get dailyGameLoading => 'Loading today\'s movie…';
+
+  @override
+  String get dailyGameNoPool =>
+      'Today\'s puzzle isn\'t ready yet — check back soon';
+
+  @override
+  String get dailyGameGuessedAlready => 'Already guessed';
+
+  @override
+  String get dailyGamePickAnotherDay => 'Pick a day';
 }

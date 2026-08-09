@@ -11,6 +11,7 @@ import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/theme/avatar_backgrounds.dart';
 import 'package:watch_verse/utils/duration_format.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
@@ -23,13 +24,9 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _displayName = '';
-  String _photoURL = '';
-
   @override
   void initState() {
     super.initState();
-    _fetchUserData();
     _backfillTimeStatsOnce();
   }
 
@@ -52,22 +49,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await userRef.set({'timeStatsBackfilledV2': true}, SetOptions(merge: true));
   }
 
-  Future<void> _fetchUserData() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-    try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      if (!mounted) return;
-      setState(() {
-        _displayName = (doc.data()?['name'] ?? '') as String;
-        _photoURL = (doc.data()?['photoURL'] ?? '') as String;
-      });
-    } catch (_) {/* keep defaults */}
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -86,36 +67,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             // Kept deliberately tight: the header is not the content, and
             // every pixel it gives back is another row of posters above the
-            // fold.
-            CircleAvatar(
-              radius: 40,
-              backgroundColor: context.colors.surfaceAlt,
-              backgroundImage:
-                  _photoURL.isNotEmpty ? NetworkImage(_photoURL) : null,
-              child: _photoURL.isEmpty
-                  ? Text(
-                      (user.email ?? '?').substring(0, 1).toUpperCase(),
-                      style: const TextStyle(
-                          fontSize: 28, fontWeight: FontWeight.bold),
-                    )
-                  : null,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              _displayName.isEmpty ? l10n.profileAddYourName : _displayName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-            ),
+            // fold. Live-streamed (not a one-time fetch) because this tab
+            // stays mounted in the bottom nav's IndexedStack — edits made on
+            // EditProfileScreen (name/photo/background/character quote)
+            // wouldn't otherwise show up here until the app restarted.
+            _header(user, l10n),
             const SizedBox(height: 12),
             _followCounts(),
             const SizedBox(height: 16),
             _favoritesShowcase(),
             const SizedBox(height: 16),
-            _statsRow(),
-            const SizedBox(height: 12),
-            _timeStatsRow(),
+            _statsRail(),
             const SizedBox(height: 16),
             _recentTrays(),
           ],
@@ -124,6 +86,67 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+
+  Widget _header(User user, AppLocalizations l10n) {
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots(),
+      builder: (context, snap) {
+        final data = snap.data?.data();
+        final displayName = (data?['name'] ?? '') as String;
+        final photoURL = (data?['photoURL'] ?? '') as String;
+        final characterQuote = (data?['characterQuote'] ?? '') as String;
+        final avatarBg = ((data?['avatarBg'] ?? 0) as num).toInt();
+        return Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: avatarBackgroundFor(avatarBg),
+              ),
+              child: CircleAvatar(
+                radius: 40,
+                backgroundColor: context.colors.surfaceAlt,
+                backgroundImage:
+                    photoURL.isNotEmpty ? NetworkImage(photoURL) : null,
+                child: photoURL.isEmpty
+                    ? Text(
+                        (user.email ?? '?').substring(0, 1).toUpperCase(),
+                        style: const TextStyle(
+                            fontSize: 28, fontWeight: FontWeight.bold),
+                      )
+                    : null,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              displayName.isEmpty ? l10n.profileAddYourName : displayName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+            ),
+            if (characterQuote.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                characterQuote,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: context.colors.textSecondary,
+                    fontSize: 13,
+                    fontStyle: FontStyle.italic),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
 
   Widget _followCounts() {
     return StreamBuilder<Map<String, dynamic>?>(
@@ -173,103 +196,85 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _statsRow() {
-    return Row(
-      children: [
-        Expanded(
-          child: StreamBuilder<List<Map<String, dynamic>>>(
-            stream: MovieService.instance.watchedStream(),
-            builder: (context, snap) => _statTile(
-                Icons.movie_rounded, '${(snap.data ?? const []).length}',
-                AppLocalizations.of(context)!.profileFilms),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: StreamBuilder<List<Map<String, dynamic>>>(
-            stream: TvTrackingService.instance.trackedShowsStream(),
-            builder: (context, snap) => _statTile(Icons.live_tv_rounded,
-                '${(snap.data ?? const []).length}',
-                AppLocalizations.of(context)!.profileShows),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: StreamBuilder<List<Map<String, dynamic>>>(
-            stream: TvTrackingService.instance.trackedShowsStream(),
-            builder: (context, snap) {
-              final eps = (snap.data ?? const []).fold<int>(
-                  0, (acc, s) => acc + ((s['watchedCount'] ?? 0) as int));
-              return _statTile(Icons.check_circle_rounded, '$eps',
-                  AppLocalizations.of(context)!.profileEpisodes);
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Separate movie vs show time-spent stats. Movie minutes come from the
-  // per-watched-movie `runtime` field (resolved lazily the first time each
-  // movie is logged, see MovieService/_openLogSheet); show minutes come from
-  // the denormalized `watchedMinutes` counter TvTrackingService maintains
-  // alongside `watchedCount`. Both are best-effort: episodes/movies logged
-  // before this field existed, or missing runtime data from TMDB, simply
-  // don't contribute rather than blocking the stat.
-  // Tapping either tile opens WatchStatsScreen (genre/type breakdown +
-  // weekly/day-of-week charts) — the two tiles are the "headline number",
-  // the stats screen is the drill-down.
-  Widget _timeStatsRow() {
-    return GestureDetector(
-      onTap: () => Navigator.push(
-          context, MaterialPageRoute(builder: (_) => const WatchStatsScreen())),
-      child: Column(
+  // Films watched + episodes watched + movie/show time-spent, as one
+  // horizontally scrollable rail instead of a fixed row — keeps the "watched
+  // shows" count off the profile entirely (redundant with episodes/films)
+  // and stops every stat from fighting for space on one line. Movie minutes
+  // come from the per-watched-movie `runtime` field (resolved lazily the
+  // first time each movie is logged, see MovieService/_openLogSheet); show
+  // minutes come from the denormalized `watchedMinutes` counter
+  // TvTrackingService maintains alongside `watchedCount`. Both are
+  // best-effort: episodes/movies logged before this field existed, or
+  // missing runtime data from TMDB, simply don't contribute. The two
+  // time tiles open WatchStatsScreen (genre/type breakdown + charts) —
+  // they're the "headline number", the stats screen is the drill-down.
+  Widget _statsRail() {
+    final l10n = AppLocalizations.of(context)!;
+    void openStats() => Navigator.push(
+        context, MaterialPageRoute(builder: (_) => const WatchStatsScreen()));
+    return SizedBox(
+      height: 116,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: StreamBuilder<List<Map<String, dynamic>>>(
-                  stream: MovieService.instance.watchedStream(),
-                  builder: (context, snap) {
-                    final minutes = (snap.data ?? const []).fold<int>(0,
-                        (acc, m) => acc + ((m['runtime'] ?? 0) as num).toInt());
-                    return _statTile(
-                        Icons.movie_filter_rounded,
-                        formatWatchDuration(context, minutes),
-                        AppLocalizations.of(context)!.profileMovieTimeSpent);
-                  },
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: StreamBuilder<List<Map<String, dynamic>>>(
-                  stream: TvTrackingService.instance.trackedShowsStream(),
-                  builder: (context, snap) {
-                    final minutes = (snap.data ?? const []).fold<int>(
-                        0,
-                        (acc, s) =>
-                            acc + ((s['watchedMinutes'] ?? 0) as num).toInt());
-                    return _statTile(
-                        Icons.timer_rounded,
-                        formatWatchDuration(context, minutes),
-                        AppLocalizations.of(context)!.profileShowTimeSpent);
-                  },
-                ),
-              ),
-            ],
+          SizedBox(
+            width: 108,
+            child: StreamBuilder<List<Map<String, dynamic>>>(
+              stream: MovieService.instance.watchedStream(),
+              builder: (context, snap) => _statTile(
+                  Icons.movie_rounded, '${(snap.data ?? const []).length}',
+                  l10n.profileFilms),
+            ),
           ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(AppLocalizations.of(context)!.statsSeeDetails,
-                  style: TextStyle(
-                      color: context.colors.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700)),
-              Icon(Icons.chevron_right_rounded,
-                  size: 16, color: context.colors.primary),
-            ],
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 108,
+            child: StreamBuilder<List<Map<String, dynamic>>>(
+              stream: TvTrackingService.instance.trackedShowsStream(),
+              builder: (context, snap) {
+                final eps = (snap.data ?? const []).fold<int>(
+                    0, (acc, s) => acc + ((s['watchedCount'] ?? 0) as int));
+                return _statTile(
+                    Icons.check_circle_rounded, '$eps', l10n.profileEpisodes);
+              },
+            ),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 108,
+            child: GestureDetector(
+              onTap: openStats,
+              child: StreamBuilder<List<Map<String, dynamic>>>(
+                stream: MovieService.instance.watchedStream(),
+                builder: (context, snap) {
+                  final minutes = (snap.data ?? const []).fold<int>(0,
+                      (acc, m) => acc + ((m['runtime'] ?? 0) as num).toInt());
+                  return _statTile(
+                      Icons.movie_filter_rounded,
+                      formatWatchDuration(context, minutes),
+                      l10n.profileMovieTimeSpent);
+                },
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 108,
+            child: GestureDetector(
+              onTap: openStats,
+              child: StreamBuilder<List<Map<String, dynamic>>>(
+                stream: TvTrackingService.instance.trackedShowsStream(),
+                builder: (context, snap) {
+                  final minutes = (snap.data ?? const []).fold<int>(
+                      0,
+                      (acc, s) =>
+                          acc + ((s['watchedMinutes'] ?? 0) as num).toInt());
+                  return _statTile(Icons.timer_rounded,
+                      formatWatchDuration(context, minutes),
+                      l10n.profileShowTimeSpent);
+                },
+              ),
+            ),
           ),
         ],
       ),
@@ -278,20 +283,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _statTile(IconData icon, String value, String label) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: context.colors.primary, size: 22),
-          const SizedBox(height: 8),
+          Icon(icon, color: context.colors.primary, size: 20),
+          const SizedBox(height: 5),
           Text(value,
               style:
                   const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
           const SizedBox(height: 2),
           Text(label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style:
                   TextStyle(color: context.colors.textMuted, fontSize: 12)),
         ],

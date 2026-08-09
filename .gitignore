@@ -48,3 +48,5 @@ app.*.map.json
 # and fill it in; never commit secrets.json.
 secrets.json
 scripts/notify/node_modules/
+tool/.pool_cache.json
+.firebase/

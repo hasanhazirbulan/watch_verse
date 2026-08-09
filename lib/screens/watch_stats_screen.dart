@@ -1,22 +1,38 @@
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/services/movie_service.dart';
+import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/duration_format.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/widgets/paywall_sheet.dart';
 
 /// Drill-down from the profile's time-spent tiles: how watch time breaks
 /// down by type (movie/show) and genre, plus how it's trended over the last
 /// 8 weeks and across the days of the week. Everything here is derived from
 /// data already stored for the profile stat tiles — no new Firestore reads
-/// beyond a wider `activityStream` window for the two trend charts.
-class WatchStatsScreen extends StatelessWidget {
+/// beyond a wider activity-history window for the two trend charts. That
+/// window (up to 500 docs) is read once (not a live listener, see
+/// [TvTrackingService.activityOnce]) — this screen is a point-in-time
+/// report, not a dashboard that needs to reflect a watch marked while it's
+/// open.
+class WatchStatsScreen extends StatefulWidget {
   const WatchStatsScreen({super.key});
 
+  @override
+  State<WatchStatsScreen> createState() => _WatchStatsScreenState();
+}
+
+class _WatchStatsScreenState extends State<WatchStatsScreen> {
   static const _weeksShown = 8;
+
+  late final Future<List<Map<String, dynamic>>> _activityFuture =
+      TvTrackingService.instance.activityOnce(limit: 500);
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +45,8 @@ class WatchStatsScreen extends StatelessWidget {
           return StreamBuilder<List<Map<String, dynamic>>>(
             stream: TvTrackingService.instance.trackedShowsStream(),
             builder: (context, showSnap) {
-              return StreamBuilder<List<Map<String, dynamic>>>(
-                stream: TvTrackingService.instance.activityStream(limit: 500),
+              return FutureBuilder<List<Map<String, dynamic>>>(
+                future: _activityFuture,
                 builder: (context, activitySnap) {
                   final movies =
                       movieSnap.data ?? const <Map<String, dynamic>>[];
@@ -53,19 +69,29 @@ class WatchStatsScreen extends StatelessWidget {
                   final weekly = _weeklyMinutes(activity);
                   final byWeekday = _weekdayMinutes(activity);
 
-                  return ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-                    children: [
-                      _typeSection(context, l10n, movieMinutes, showMinutes),
-                      const SizedBox(height: 28),
-                      if (genreMinutes.isNotEmpty) ...[
-                        _genreSection(context, l10n, genreMinutes),
-                        const SizedBox(height: 28),
-                      ],
-                      _weeklySection(context, l10n, weekly),
-                      const SizedBox(height: 28),
-                      _weekdaySection(context, l10n, byWeekday),
-                    ],
+                  return StreamBuilder<bool>(
+                    stream: ProService.instance.isProStream,
+                    initialData: ProService.instance.isPro,
+                    builder: (context, proSnap) {
+                      final isPro = proSnap.data ?? false;
+                      return ListView(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                        children: [
+                          _typeSection(context, l10n, movieMinutes, showMinutes),
+                          const SizedBox(height: 28),
+                          if (genreMinutes.isNotEmpty) ...[
+                            _proGated(context, l10n, isPro,
+                                _genreSection(context, l10n, genreMinutes)),
+                            const SizedBox(height: 28),
+                          ],
+                          _proGated(context, l10n, isPro,
+                              _weeklySection(context, l10n, weekly)),
+                          const SizedBox(height: 28),
+                          _proGated(context, l10n, isPro,
+                              _weekdaySection(context, l10n, byWeekday)),
+                        ],
+                      );
+                    },
                   );
                 },
               );
@@ -159,6 +185,35 @@ class WatchStatsScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(color: context.colors.textSecondary)),
       ),
+    );
+  }
+
+  /// Wraps a Pro-only chart section: shown normally when [isPro], otherwise
+  /// blurred with an "Unlock with Pro" overlay that opens the paywall. The
+  /// real widget tree (and its data) is always built — only the pixels are
+  /// hidden — since blurring is far cheaper than maintaining a second,
+  /// data-free placeholder layout in sync with the real one.
+  Widget _proGated(
+      BuildContext context, AppLocalizations l10n, bool isPro, Widget child) {
+    if (isPro) return child;
+    return Stack(
+      children: [
+        IgnorePointer(
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: child,
+          ),
+        ),
+        Positioned.fill(
+          child: Center(
+            child: ElevatedButton.icon(
+              onPressed: () => showPaywallSheet(context),
+              icon: const Icon(Icons.lock_rounded, size: 18),
+              label: Text(l10n.proUnlockStats),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

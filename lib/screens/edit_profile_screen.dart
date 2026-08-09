@@ -5,7 +5,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
+import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/theme/avatar_backgrounds.dart';
+import 'package:watch_verse/widgets/paywall_sheet.dart';
 
 /// Dedicated profile-photo/name editor, reached from Settings and kept off
 /// the main profile view so that screen stays a read-only summary. Fetches
@@ -20,7 +23,10 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _characterQuoteController =
+      TextEditingController();
   String _photoURL = '';
+  int _avatarBg = 0;
   bool _loading = true;
   bool _uploadingPhoto = false;
   bool _saving = false;
@@ -42,7 +48,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (!mounted) return;
       setState(() {
         _nameController.text = (doc.data()?['name'] ?? '') as String;
+        _characterQuoteController.text =
+            (doc.data()?['characterQuote'] ?? '') as String;
         _photoURL = (doc.data()?['photoURL'] ?? '') as String;
+        _avatarBg = ((doc.data()?['avatarBg'] ?? 0) as num).toInt();
         _loading = false;
       });
     } catch (_) {
@@ -53,7 +62,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _characterQuoteController.dispose();
     super.dispose();
+  }
+
+  Future<void> _setAvatarBg(int index) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    if (isProBackground(index) && !ProService.instance.isPro) {
+      showPaywallSheet(context);
+      return;
+    }
+    setState(() => _avatarBg = index);
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      'avatarBg': index,
+    }, SetOptions(merge: true));
   }
 
   Future<void> _changePhoto() async {
@@ -98,6 +121,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     try {
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'name': _nameController.text.trim(),
+        'characterQuote': _characterQuoteController.text.trim(),
       }, SetOptions(merge: true));
       if (!mounted) return;
       Navigator.pop(context, true);
@@ -146,7 +170,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: context.colors.brandGradient,
+                            gradient: avatarBackgroundFor(_avatarBg),
                           ),
                           child: CircleAvatar(
                             radius: 52,
@@ -188,7 +212,70 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      l10n.profileAvatarBackgroundLabel,
+                      style: TextStyle(
+                          color: context.colors.textSecondary, fontSize: 13),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  StreamBuilder<bool>(
+                    stream: ProService.instance.isProStream,
+                    initialData: ProService.instance.isPro,
+                    builder: (context, proSnap) {
+                      final isPro = proSnap.data ?? false;
+                      return Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          for (var i = 0; i < avatarBackgrounds.length; i++)
+                            GestureDetector(
+                              onTap: () => _setAvatarBg(i),
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: avatarBackgrounds[i],
+                                      border: i == _avatarBg
+                                          ? Border.all(
+                                              color: context.colors.textPrimary,
+                                              width: 2.5)
+                                          : null,
+                                    ),
+                                  ),
+                                  if (isProBackground(i) && !isPro)
+                                    Positioned(
+                                      right: -2,
+                                      bottom: -2,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(2),
+                                        decoration: BoxDecoration(
+                                          color: context.colors.surface,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                              color: context.colors.background,
+                                              width: 1.5),
+                                        ),
+                                        child: Icon(Icons.lock_rounded,
+                                            size: 10,
+                                            color: context.colors.accent),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
                   TextField(
                     controller: _nameController,
                     style: const TextStyle(
@@ -197,6 +284,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     decoration: InputDecoration(
                       labelText: l10n.profileYourNameHint,
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: _characterQuoteController,
+                    maxLength: 60,
+                    style: const TextStyle(fontSize: 14),
+                    decoration: InputDecoration(
+                      labelText: l10n.profileCharacterQuoteHint,
                       border: const OutlineInputBorder(),
                     ),
                   ),

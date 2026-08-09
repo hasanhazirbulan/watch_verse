@@ -4,21 +4,26 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
-import 'package:watch_verse/screens/blocked_users_screen.dart';
+import 'package:watch_verse/screens/daily_game_screen.dart';
 import 'package:watch_verse/screens/discover_screen.dart';
 import 'package:watch_verse/screens/friends_activity_screen.dart';
 import 'package:watch_verse/screens/history_screen.dart';
 import 'package:watch_verse/screens/lists_screen.dart';
+import 'package:watch_verse/screens/search_screen.dart';
+import 'package:watch_verse/screens/watch_polls_screen.dart';
 import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/notification_service.dart';
+import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/friend_poster_card.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/widgets/paywall_sheet.dart';
 import 'package:watch_verse/widgets/quick_add_sheet.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -68,10 +73,31 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<List<Map<String, dynamic>>>? _friendsMoviesFuture;
   Future<List<Map<String, dynamic>>>? _friendsShowsFuture;
 
+  // One-time "find friends" prompt for accounts still following nobody —
+  // dismissible, and stays dismissed via SharedPreferences (same convention
+  // as ThemeController) so it never nags an account that intentionally
+  // closed it.
+  static const _friendBannerPrefsKey = 'find_friends_banner_dismissed';
+  bool _friendBannerDismissed = true; // starts hidden until the flag loads
+
   @override
   void initState() {
     super.initState();
     _initFutures();
+    _loadFriendBannerDismissed();
+  }
+
+  Future<void> _loadFriendBannerDismissed() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() =>
+        _friendBannerDismissed = prefs.getBool(_friendBannerPrefsKey) ?? false);
+  }
+
+  Future<void> _dismissFriendBanner() async {
+    setState(() => _friendBannerDismissed = true);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_friendBannerPrefsKey, true);
   }
 
   void _initFutures() {
@@ -153,6 +179,25 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 8),
+            _drawerItem(Icons.workspace_premium_rounded, l10n.homeWatchVersePro,
+                () {
+              _scaffoldKey.currentState?.closeDrawer();
+              if (ProService.instance.isPro) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.proActiveBadge)));
+                return;
+              }
+              showPaywallSheet(context);
+            }),
+            _drawerItem(Icons.theaters_rounded, l10n.dailyGameDrawerLabel, () {
+              _scaffoldKey.currentState?.closeDrawer();
+              if (!ProService.instance.isPro) {
+                showPaywallSheet(context);
+                return;
+              }
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const DailyGameScreen()));
+            }),
             _drawerItem(Icons.bookmarks_rounded, l10n.homeMyLists, () {
               _scaffoldKey.currentState?.closeDrawer();
               Navigator.push(context,
@@ -171,12 +216,10 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.push(context,
                   MaterialPageRoute(builder: (_) => const HistoryScreen()));
             }),
-            _drawerItem(Icons.block_rounded, l10n.profileBlockedUsers, () {
+            _drawerItem(Icons.how_to_vote_rounded, l10n.homeWatchPolls, () {
               _scaffoldKey.currentState?.closeDrawer();
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const BlockedUsersScreen()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const WatchPollsScreen()));
             }),
             _drawerItem(Icons.settings_rounded, l10n.homeSettingsLabel, () {
               _scaffoldKey.currentState?.closeDrawer();
@@ -246,6 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
+              _findFriendsBanner(),
               _genreChips(),
               _loadFailureBanner(),
               ..._tab == 0 ? _movieSlivers() : _tvSlivers(),
@@ -291,6 +335,72 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // One banner for the whole tab when its fetches failed, so a dead network
   // reads as an error with a way out instead of an app full of empty rails.
+  Widget _findFriendsBanner() {
+    if (_friendBannerDismissed) return const SliverToBoxAdapter();
+    return SliverToBoxAdapter(
+      child: StreamBuilder<Map<String, dynamic>?>(
+        stream: SocialService.instance.myStream(),
+        builder: (context, snap) {
+          final following =
+              ((snap.data?['following'] as List?) ?? const []).cast<String>();
+          if (snap.connectionState == ConnectionState.waiting ||
+              following.isNotEmpty) {
+            return const SizedBox.shrink();
+          }
+          final l10n = AppLocalizations.of(context)!;
+          return Container(
+            margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: context.colors.brandGradient,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.group_add_rounded,
+                    color: Colors.white, size: 26),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l10n.homeFindFriendsBannerTitle,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14)),
+                      const SizedBox(height: 2),
+                      Text(l10n.homeFindFriendsBannerBody,
+                          style: const TextStyle(
+                              color: Colors.white70, fontSize: 12.5)),
+                    ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              const SearchScreen(initialPeople: true))),
+                  child: Text(l10n.homeFindFriendsBannerAction,
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w700)),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded,
+                      color: Colors.white70, size: 18),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: _dismissFriendBanner,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _loadFailureBanner() {
     return SliverToBoxAdapter(
       child: FutureBuilder<Object?>(
@@ -494,10 +604,11 @@ class _HomeScreenState extends State<HomeScreen> {
           );
     final rating =
         (((isMovie ? m['rating'] : m['userRating']) ?? 0) as num).toDouble();
+    final friends =
+        ((m['friends'] as List?) ?? const []).cast<Map<String, dynamic>>();
     return FriendPosterCard(
       item: item,
-      friendName: (m['actorName'] ?? '') as String,
-      friendPhoto: (m['actorPhoto'] ?? '') as String,
+      friends: friends,
       rating: rating,
     );
   }

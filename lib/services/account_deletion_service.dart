@@ -143,20 +143,30 @@ class AccountDeletionService {
 
   /// Erases all of the signed-in user's data, then the account itself.
   ///
-  /// Order matters: Firestore and Storage first (they need a live auth token),
-  /// the auth record last. Throws [FirebaseAuthException] with code
-  /// `requires-recent-login` if the session is too old — the caller is
-  /// expected to prompt for re-authentication and try again.
+  /// Order matters, for two reasons. First, Firestore and Storage must run
+  /// before the Auth record (every delete is gated by `request.auth.uid`
+  /// still being valid). Second — and this is why the profile doc is deleted
+  /// *before* the subcollection purge below, not after — if this whole
+  /// sequence is interrupted partway (app killed, crash), the profile doc
+  /// being gone is an unambiguous "this account is mid-deletion" signal on
+  /// next sign-in. The previous order deleted the profile doc last, so an
+  /// interruption left a fully intact, normal-looking profile sitting on top
+  /// of empty subcollections — indistinguishable from real data loss, which
+  /// is exactly the confusing state a real interrupted deletion produced.
+  ///
+  /// Throws [FirebaseAuthException] with code `requires-recent-login` if the
+  /// session is too old — the caller is expected to prompt for
+  /// re-authentication and try again.
   Future<void> deleteAccount() async {
     final user = _auth.currentUser;
     if (user == null) return;
     final uid = user.uid;
 
     await _purgeComments(uid);
-    await _purgeFollowGraph(uid);
+    await _purgeFollowGraph(uid); // reads this user's own `following` field — must run before the profile doc is deleted
+    await _db.collection('users').doc(uid).delete();
     await _purgeStoredFiles(uid);
     await _purgeOwnData(uid);
-    await _db.collection('users').doc(uid).delete();
 
     await user.delete();
   }

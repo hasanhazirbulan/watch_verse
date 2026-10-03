@@ -163,6 +163,15 @@ class _PaywallSheetState extends State<_PaywallSheet> {
   Widget _legalFooter(BuildContext context, AppLocalizations l10n) {
     return Column(
       children: [
+        // Apple guideline 3.1.2: auto-renewable subscriptions must disclose
+        // length/price/renewal/cancellation terms visibly in the purchase
+        // flow itself, not just via a linked Terms of Use page.
+        Text(
+          l10n.proSubscriptionTerms,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: context.colors.textMuted, fontSize: 11.5),
+        ),
+        const SizedBox(height: 8),
         Text(
           l10n.proLegalFooter,
           textAlign: TextAlign.center,

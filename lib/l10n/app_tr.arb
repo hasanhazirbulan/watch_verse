@@ -503,6 +503,7 @@
   "proExporting": "Dışa aktarman hazırlanıyor…",
   "proExportAction": "Verilerimi dışa aktar (CSV)",
   "proLegalFooter": "Abone olarak Kullanım Koşulları'nı ve Gizlilik Politikası'nı kabul etmiş olursunuz.",
+  "proSubscriptionTerms": "Ödeme, satın alma onaylandığında Apple ID hesabınızdan tahsil edilir. Abonelikler, mevcut dönem bitmeden en az 24 saat önce otomatik yenileme kapatılmadığı sürece otomatik olarak yenilenir. Cihazınızda Ayarlar > [adınız] > Abonelikler bölümünden istediğiniz zaman yönetebilir veya iptal edebilirsiniz.",
   "dailyGameTitle": "Günlük Film Oyunu",
   "dailyGameDrawerLabel": "Günlük Film Oyunu",
   "dailyGameSearchHint": "Bir film ara…",

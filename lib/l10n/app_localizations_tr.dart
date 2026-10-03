@@ -1719,6 +1719,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Abone olarak Kullanım Koşulları\'nı ve Gizlilik Politikası\'nı kabul etmiş olursunuz.';
 
   @override
+  String get proSubscriptionTerms =>
+      'Ödeme, satın alma onaylandığında Apple ID hesabınızdan tahsil edilir. Abonelikler, mevcut dönem bitmeden en az 24 saat önce otomatik yenileme kapatılmadığı sürece otomatik olarak yenilenir. Cihazınızda Ayarlar > [adınız] > Abonelikler bölümünden istediğiniz zaman yönetebilir veya iptal edebilirsiniz.';
+
+  @override
   String get dailyGameTitle => 'Günlük Film Oyunu';
 
   @override

@@ -3108,6 +3108,12 @@ abstract class AppLocalizations {
   /// **'By subscribing you agree to our Terms of Service and Privacy Policy.'**
   String get proLegalFooter;
 
+  /// No description provided for @proSubscriptionTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment is charged to your Apple ID account at confirmation of purchase. Subscriptions renew automatically unless auto-renew is turned off at least 24 hours before the end of the current period. Manage or cancel anytime in Settings > [your name] > Subscriptions on your device.'**
+  String get proSubscriptionTerms;
+
   /// No description provided for @dailyGameTitle.
   ///
   /// In en, this message translates to:

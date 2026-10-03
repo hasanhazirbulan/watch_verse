@@ -7,6 +7,7 @@ import 'package:watch_verse/screens/blocked_users_screen.dart';
 import 'package:watch_verse/screens/edit_profile_screen.dart';
 import 'package:watch_verse/services/account_deletion_service.dart';
 import 'package:watch_verse/services/export_service.dart';
+import 'package:watch_verse/services/legal_links.dart';
 import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/widgets/paywall_sheet.dart';
@@ -144,6 +145,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Text(l10n.settingsAppInfoSection,
               style:
                   const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 12),
+          _tile(
+            icon: Icons.privacy_tip_rounded,
+            label: l10n.settingsPrivacyPolicy,
+            onTap: () => LegalLinks.open(LegalLinks.privacyPolicy),
+          ),
+          const SizedBox(height: 12),
+          _tile(
+            icon: Icons.description_rounded,
+            label: l10n.settingsTermsOfService,
+            onTap: () => LegalLinks.open(LegalLinks.termsOfService),
+          ),
           const SizedBox(height: 12),
           FutureBuilder<PackageInfo>(
             future: PackageInfo.fromPlatform(),

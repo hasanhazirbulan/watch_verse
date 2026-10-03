@@ -110,6 +110,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsAppInfoSection => 'Hakkında';
 
   @override
+  String get settingsPrivacyPolicy => 'Gizlilik Politikası';
+
+  @override
+  String get settingsTermsOfService => 'Kullanım Koşulları';
+
+  @override
   String get settingsNotificationsSection => 'Bildirimler';
 
   @override
@@ -1707,6 +1713,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get proExportAction => 'Verilerimi dışa aktar (CSV)';
+
+  @override
+  String get proLegalFooter =>
+      'Abone olarak Kullanım Koşulları\'nı ve Gizlilik Politikası\'nı kabul etmiş olursunuz.';
 
   @override
   String get dailyGameTitle => 'Günlük Film Oyunu';

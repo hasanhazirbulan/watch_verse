@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
+import 'package:watch_verse/services/legal_links.dart';
 import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 
@@ -151,9 +152,39 @@ class _PaywallSheetState extends State<_PaywallSheet> {
                 );
               },
             ),
+            const SizedBox(height: 14),
+            _legalFooter(context, l10n),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _legalFooter(BuildContext context, AppLocalizations l10n) {
+    return Column(
+      children: [
+        Text(
+          l10n.proLegalFooter,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: context.colors.textMuted, fontSize: 11.5),
+        ),
+        const SizedBox(height: 2),
+        Wrap(
+          alignment: WrapAlignment.center,
+          children: [
+            TextButton(
+              onPressed: () => LegalLinks.open(LegalLinks.termsOfService),
+              child: Text(l10n.settingsTermsOfService,
+                  style: const TextStyle(fontSize: 12)),
+            ),
+            TextButton(
+              onPressed: () => LegalLinks.open(LegalLinks.privacyPolicy),
+              child: Text(l10n.settingsPrivacyPolicy,
+                  style: const TextStyle(fontSize: 12)),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

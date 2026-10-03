@@ -109,6 +109,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAppInfoSection => 'About';
 
   @override
+  String get settingsPrivacyPolicy => 'Privacy Policy';
+
+  @override
+  String get settingsTermsOfService => 'Terms of Service';
+
+  @override
   String get settingsNotificationsSection => 'Notifications';
 
   @override
@@ -1701,6 +1707,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get proExportAction => 'Export my data (CSV)';
+
+  @override
+  String get proLegalFooter =>
+      'By subscribing you agree to our Terms of Service and Privacy Policy.';
 
   @override
   String get dailyGameTitle => 'Daily Movie Game';

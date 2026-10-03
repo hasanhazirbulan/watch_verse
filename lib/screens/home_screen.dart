@@ -189,12 +189,14 @@ class _HomeScreenState extends State<HomeScreen> {
               }
               showPaywallSheet(context);
             }),
+            // TEMPORARY: Pro gate removed — the WatchVerse Pro subscription
+            // products aren't finalized in App Store Connect yet, so no
+            // tester can ever pass the `isPro` check below to reach the
+            // game. Free for everyone until the subscription is live, then
+            // re-add the `if (!ProService.instance.isPro) { showPaywallSheet(...); return; }`
+            // guard that gated this before.
             _drawerItem(Icons.theaters_rounded, l10n.dailyGameDrawerLabel, () {
               _scaffoldKey.currentState?.closeDrawer();
-              if (!ProService.instance.isPro) {
-                showPaywallSheet(context);
-                return;
-              }
               Navigator.push(context,
                   MaterialPageRoute(builder: (_) => const DailyGameScreen()));
             }),

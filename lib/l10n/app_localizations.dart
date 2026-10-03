@@ -290,6 +290,18 @@ abstract class AppLocalizations {
   /// **'About'**
   String get settingsAppInfoSection;
 
+  /// No description provided for @settingsPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get settingsPrivacyPolicy;
+
+  /// No description provided for @settingsTermsOfService.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get settingsTermsOfService;
+
   /// No description provided for @settingsNotificationsSection.
   ///
   /// In en, this message translates to:
@@ -3089,6 +3101,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Export my data (CSV)'**
   String get proExportAction;
+
+  /// No description provided for @proLegalFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'By subscribing you agree to our Terms of Service and Privacy Policy.'**
+  String get proLegalFooter;
 
   /// No description provided for @dailyGameTitle.
   ///

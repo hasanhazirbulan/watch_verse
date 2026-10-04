@@ -1658,6 +1658,21 @@ class AppLocalizationsTr extends AppLocalizations {
   String get proFeatureGame => 'Günlük film tahmin oyunu';
 
   @override
+  String get proTierPro => 'Pro';
+
+  @override
+  String get proTierPatron => 'Patron';
+
+  @override
+  String get proFeatureEverythingInPro => 'Pro\'daki her şey, artı:';
+
+  @override
+  String get proFeatureBadge => 'Profilinde Patron rozeti';
+
+  @override
+  String get proFeatureEarlyAccess => 'Yeni özelliklere erken erişim';
+
+  @override
   String get proMonthly => 'Aylık';
 
   @override

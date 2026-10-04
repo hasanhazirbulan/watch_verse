@@ -3000,6 +3000,36 @@ abstract class AppLocalizations {
   /// **'Daily movie guessing game'**
   String get proFeatureGame;
 
+  /// No description provided for @proTierPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro'**
+  String get proTierPro;
+
+  /// No description provided for @proTierPatron.
+  ///
+  /// In en, this message translates to:
+  /// **'Patron'**
+  String get proTierPatron;
+
+  /// No description provided for @proFeatureEverythingInPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in Pro, plus:'**
+  String get proFeatureEverythingInPro;
+
+  /// No description provided for @proFeatureBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Patron badge on your profile'**
+  String get proFeatureBadge;
+
+  /// No description provided for @proFeatureEarlyAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Early access to new features'**
+  String get proFeatureEarlyAccess;
+
   /// No description provided for @proMonthly.
   ///
   /// In en, this message translates to:

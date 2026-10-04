@@ -1654,6 +1654,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proFeatureGame => 'Daily movie guessing game';
 
   @override
+  String get proTierPro => 'Pro';
+
+  @override
+  String get proTierPatron => 'Patron';
+
+  @override
+  String get proFeatureEverythingInPro => 'Everything in Pro, plus:';
+
+  @override
+  String get proFeatureBadge => 'Patron badge on your profile';
+
+  @override
+  String get proFeatureEarlyAccess => 'Early access to new features';
+
+  @override
   String get proMonthly => 'Monthly';
 
   @override

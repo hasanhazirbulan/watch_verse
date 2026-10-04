@@ -36,6 +36,20 @@ class _PaywallSheetState extends State<_PaywallSheet> {
       ProService.instance.fetchPackages();
   ProductDetails? _selected;
   bool _busy = false;
+  ProTier _tier = ProTier.pro;
+
+  static const _tierProductIds = {
+    ProTier.pro: {proMonthlyProductId, proYearlyProductId},
+    ProTier.patron: {patronMonthlyProductId, patronYearlyProductId},
+  };
+
+  void _selectTier(ProTier tier) {
+    if (tier == _tier) return;
+    setState(() {
+      _tier = tier;
+      _selected = null; // re-pick the yearly default for the new tier below
+    });
+  }
 
   // Guests (no Firebase account — see the "Continue as guest" login option)
   // can browse the paywall and see pricing same as everyone else, but can't
@@ -99,22 +113,33 @@ class _PaywallSheetState extends State<_PaywallSheet> {
             _handle(context),
             const SizedBox(height: 18),
             _header(context, l10n),
-            const SizedBox(height: 20),
-            _feature(context, Icons.bar_chart_rounded, l10n.proFeatureStats),
-            _feature(context, Icons.playlist_add_check_rounded, l10n.proFeatureLists),
-            _feature(context, Icons.palette_rounded, l10n.proFeatureProfile),
-            _feature(context, Icons.theaters_rounded, l10n.proFeatureGame),
+            const SizedBox(height: 18),
+            _tierToggle(context, l10n),
+            const SizedBox(height: 18),
+            if (_tier == ProTier.pro) ...[
+              _feature(context, Icons.bar_chart_rounded, l10n.proFeatureStats),
+              _feature(context, Icons.playlist_add_check_rounded, l10n.proFeatureLists),
+              _feature(context, Icons.theaters_rounded, l10n.proFeatureGame),
+            ] else ...[
+              _feature(context, Icons.check_circle_rounded, l10n.proFeatureEverythingInPro),
+              _feature(context, Icons.palette_rounded, l10n.proFeatureProfile),
+              _feature(context, Icons.military_tech_rounded, l10n.proFeatureBadge),
+              _feature(context, Icons.rocket_launch_rounded, l10n.proFeatureEarlyAccess),
+            ],
             const SizedBox(height: 22),
             FutureBuilder<List<ProductDetails>>(
               future: _packages,
               builder: (context, snap) {
-                final products = snap.data ?? const [];
+                final all = snap.data ?? const [];
                 if (snap.connectionState != ConnectionState.done) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 24),
                     child: Center(child: CircularProgressIndicator()),
                   );
                 }
+                final tierIds = _tierProductIds[_tier]!;
+                final products =
+                    all.where((p) => tierIds.contains(p.id)).toList();
                 if (products.isEmpty) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 12),
@@ -132,8 +157,8 @@ class _PaywallSheetState extends State<_PaywallSheet> {
                 // throws a runtime type error there. `where(...).firstOrNull`
                 // doesn't take a typed closure parameter, so it can't hit
                 // that mismatch.
-                final yearly =
-                    products.where((p) => p.id == proYearlyProductId);
+                final yearly = products.where((p) =>
+                    p.id == proYearlyProductId || p.id == patronYearlyProductId);
                 _selected ??= yearly.isNotEmpty ? yearly.first : products.first;
                 return Column(
                   children: [
@@ -235,6 +260,47 @@ class _PaywallSheetState extends State<_PaywallSheet> {
     );
   }
 
+  Widget _tierToggle(BuildContext context, AppLocalizations l10n) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: context.colors.surfaceAlt,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          _tierSegment(context, ProTier.pro, l10n.proTierPro),
+          _tierSegment(context, ProTier.patron, l10n.proTierPatron),
+        ],
+      ),
+    );
+  }
+
+  Widget _tierSegment(BuildContext context, ProTier tier, String label) {
+    final selected = _tier == tier;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _selectTier(tier),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            gradient: selected ? context.colors.brandGradient : null,
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: selected ? Colors.white : context.colors.textSecondary,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _feature(BuildContext context, IconData icon, String label) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -252,7 +318,8 @@ class _PaywallSheetState extends State<_PaywallSheet> {
 
   Widget _planTile(BuildContext context, ProductDetails product) {
     final selected = _selected?.id == product.id;
-    final isAnnual = product.id == proYearlyProductId;
+    final isAnnual =
+        product.id == proYearlyProductId || product.id == patronYearlyProductId;
     final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),

@@ -5,17 +5,34 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// App Store Connect subscription product IDs (Subscription Group
-/// "WatchVerse Pro"). Must match exactly what's entered in App Store Connect
-/// → Monetization → Subscriptions.
+/// "WatchVerse Pro", two tiers). Must match exactly what's entered in App
+/// Store Connect → Monetization → Subscriptions.
 const proMonthlyProductId = 'com.example.watchVerse.pro.monthly';
 const proYearlyProductId = 'com.example.watchVerse.pro.yearly';
-const _proProductIds = {proMonthlyProductId, proYearlyProductId};
+const patronMonthlyProductId = 'com.example.watchVerse.patron.monthly';
+const patronYearlyProductId = 'com.example.watchVerse.patron.yearly';
+const _proProductIds = {
+  proMonthlyProductId,
+  proYearlyProductId,
+  patronMonthlyProductId,
+  patronYearlyProductId,
+};
 
-const _proStatusPrefsKey = 'watchverse_pro_active';
+const _proTierPrefsKey = 'watchverse_pro_tier';
+// Legacy single-bool key from before the Pro/Patron split — read once as a
+// fallback for installs that already granted Pro under the old scheme.
+const _legacyProActivePrefsKey = 'watchverse_pro_active';
 
-/// WatchVerse Pro subscription status, backed directly by StoreKit via the
-/// official `in_app_purchase` plugin — no third-party service, no API key,
-/// no backend of ours. Apple is the only party in the loop.
+/// WatchVerse's two-tier subscription: **Pro** (unlimited lists, advanced
+/// stats, the daily game — the functional tier) and **Patron** (everything
+/// in Pro, plus profile themes, a Patron badge, and early access — the
+/// status/cosmetic tier), mirroring Letterboxd's Pro/Patron ladder. Both
+/// tiers live in one App Store Connect subscription group so StoreKit
+/// handles upgrade/downgrade proration natively.
+///
+/// Backed directly by StoreKit via the official `in_app_purchase` plugin —
+/// no third-party service, no API key, no backend of ours. Apple is the
+/// only party in the loop.
 ///
 /// Mirrors the app's existing pattern of exposing live state as a broadcast
 /// [Stream] (see `SocialService.myStream()`, auth state in `main.dart`) so
@@ -24,13 +41,28 @@ const _proStatusPrefsKey = 'watchverse_pro_active';
 /// state-management dependency.
 ///
 /// **Known limitation of a no-backend approach:** without server-side
-/// receipt validation, an already-granted Pro flag is never automatically
+/// receipt validation, an already-granted tier is never automatically
 /// revoked client-side when a subscription lapses — see the long comment on
 /// [_onPurchaseUpdates] for why iOS's restore flow can't safely be used to
 /// infer that either. This is the standard tradeoff a small app accepts to
 /// avoid a Cloud Function / server for receipt validation; it only means a
-/// churned subscriber quietly keeps Pro-gated UI unlocked, not that anything
-/// is charged twice or incorrectly.
+/// churned subscriber quietly keeps gated UI unlocked, not that anything is
+/// charged twice or incorrectly.
+enum ProTier { none, pro, patron }
+
+ProTier _tierOf(String productId) {
+  switch (productId) {
+    case patronMonthlyProductId:
+    case patronYearlyProductId:
+      return ProTier.patron;
+    case proMonthlyProductId:
+    case proYearlyProductId:
+      return ProTier.pro;
+    default:
+      return ProTier.none;
+  }
+}
+
 class ProService {
   ProService._();
   static final ProService instance = ProService._();
@@ -42,20 +74,30 @@ class ProService {
   /// isn't the case on some platform.
   static const bool isConfigured = true;
 
-  final _controller = StreamController<bool>.broadcast();
-  bool _isPro = false;
+  final _controller = StreamController<ProTier>.broadcast();
+  ProTier _tier = ProTier.none;
   bool _initialized = false;
   StreamSubscription<List<PurchaseDetails>>? _sub;
   List<ProductDetails> _products = const [];
 
-  /// Live Pro status. Emits immediately with the last known value to new
+  /// Live tier. Emits immediately with the last known value to new
   /// listeners (via a seeded broadcast), then again whenever it changes.
-  Stream<bool> get isProStream async* {
-    yield _isPro;
+  Stream<ProTier> get tierStream async* {
+    yield _tier;
     yield* _controller.stream;
   }
 
-  bool get isPro => _isPro;
+  /// Pro *or* Patron — the functional perks (lists, stats, the daily game)
+  /// are included at both tiers.
+  Stream<bool> get isProStream => tierStream.map((t) => t != ProTier.none);
+
+  /// Patron only — the status/cosmetic perks (profile themes, badge, early
+  /// access).
+  Stream<bool> get isPatronStream => tierStream.map((t) => t == ProTier.patron);
+
+  ProTier get tier => _tier;
+  bool get isPro => _tier != ProTier.none;
+  bool get isPatron => _tier == ProTier.patron;
 
   /// Call once at app start (from `main()`), after `Firebase.initializeApp`
   /// — Firebase isn't actually used here, but this keeps init ordering
@@ -67,7 +109,12 @@ class ProService {
     final prefs = await SharedPreferences.getInstance();
     // Seed from the last known state so the UI doesn't flash "locked" for
     // a subscriber before the StoreKit restore below finishes.
-    _isPro = prefs.getBool(_proStatusPrefsKey) ?? false;
+    final storedTier = prefs.getInt(_proTierPrefsKey);
+    if (storedTier != null) {
+      _tier = ProTier.values[storedTier.clamp(0, ProTier.values.length - 1)];
+    } else if (prefs.getBool(_legacyProActivePrefsKey) == true) {
+      _tier = ProTier.pro;
+    }
 
     final available = await InAppPurchase.instance.isAvailable();
     if (kDebugMode) debugPrint('ProService: isAvailable=$available');
@@ -106,46 +153,55 @@ class ProService {
     }
   }
 
-  /// Grants Pro the moment StoreKit reports a successful purchase or a
-  /// restored one for either product ID. Deliberately one-directional: a
-  /// batch with no purchased/restored event for our products just leaves
-  /// [_isPro] as-is rather than trying to infer a lapse from it — on iOS,
-  /// [InAppPurchase.restorePurchases] redelivers a subscription's original
-  /// transaction even after it's expired (that's a StoreKit1 restore
-  /// semantics quirk, not a bug here), so treating "not in this restore
-  /// batch" as "no longer entitled" would be actively wrong, not just
-  /// imprecise. Reliable expiry detection needs server-side receipt
-  /// validation (or StoreKit 2 entitlement APIs), which is out of scope for
-  /// a no-backend setup — an already-granted Pro flag simply isn't
-  /// auto-revoked client-side. Accepted tradeoff for a small subscription.
+  /// Grants a tier the moment StoreKit reports a successful purchase or a
+  /// restored one. Deliberately one-directional: a batch with no purchased/
+  /// restored event for our products just leaves [_tier] as-is rather than
+  /// trying to infer a lapse from it — on iOS, [InAppPurchase.restorePurchases]
+  /// redelivers a subscription's original transaction even after it's
+  /// expired (that's a StoreKit1 restore semantics quirk, not a bug here),
+  /// so treating "not in this restore batch" as "no longer entitled" would
+  /// be actively wrong, not just imprecise. Reliable expiry detection needs
+  /// server-side receipt validation (or StoreKit 2 entitlement APIs), which
+  /// is out of scope for a no-backend setup — an already-granted tier
+  /// simply isn't auto-revoked client-side. Accepted tradeoff for a small
+  /// subscription.
+  ///
+  /// If a batch contains both tiers (e.g. restoring a historical Pro
+  /// purchase alongside a current Patron one), the higher tier wins —
+  /// Patron already includes everything Pro does, so this can only ever
+  /// grant more, never less, than a single-product read would.
   void _onPurchaseUpdates(List<PurchaseDetails> updates) async {
+    var highest = ProTier.none;
     for (final purchase in updates) {
-      if (_proProductIds.contains(purchase.productID) &&
+      final tier = _tierOf(purchase.productID);
+      if (tier != ProTier.none &&
           (purchase.status == PurchaseStatus.purchased ||
               purchase.status == PurchaseStatus.restored)) {
-        await _setPro(true);
+        if (tier.index > highest.index) highest = tier;
       }
       if (purchase.pendingCompletePurchase) {
         await InAppPurchase.instance.completePurchase(purchase);
       }
     }
+    if (highest != ProTier.none) await _setTier(highest);
   }
 
-  Future<void> _setPro(bool value) async {
-    if (_isPro == value) return;
-    _isPro = value;
+  Future<void> _setTier(ProTier value) async {
+    if (_tier.index >= value.index) return;
+    _tier = value;
     _controller.add(value);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_proStatusPrefsKey, value);
+    await prefs.setInt(_proTierPrefsKey, value.index);
   }
 
-  /// Available subscription products (Monthly + Yearly), for the paywall
-  /// sheet to render and purchase from. Always re-queries StoreKit rather
-  /// than serving `_products` from a prior call: `initialize()`'s own fetch
-  /// happens once at app launch and — unlike the actual Apple purchase
-  /// sheet, which always re-validates at transaction time — would otherwise
-  /// keep showing whatever price was current at that moment for the rest of
-  /// the app session, even after a price change in App Store Connect.
+  /// Available subscription products (Pro + Patron, Monthly + Yearly), for
+  /// the paywall sheet to render and purchase from. Always re-queries
+  /// StoreKit rather than serving `_products` from a prior call:
+  /// `initialize()`'s own fetch happens once at app launch and — unlike the
+  /// actual Apple purchase sheet, which always re-validates at transaction
+  /// time — would otherwise keep showing whatever price was current at that
+  /// moment for the rest of the app session, even after a price change in
+  /// App Store Connect.
   Future<List<ProductDetails>> fetchPackages() async {
     await _loadProducts();
     return _products;
@@ -161,7 +217,7 @@ class ProService {
       // [_onPurchaseUpdates] once StoreKit reports the transaction — give it
       // a moment so the sheet can reflect the result before closing.
       await Future<void>.delayed(const Duration(milliseconds: 600));
-      return _isPro;
+      return _tierOf(product.id) != ProTier.none && isPro;
     } catch (_) {
       return false;
     }
@@ -171,7 +227,7 @@ class ProService {
     try {
       await InAppPurchase.instance.restorePurchases();
       await Future<void>.delayed(const Duration(milliseconds: 600));
-      return _isPro;
+      return isPro;
     } catch (_) {
       return false;
     }

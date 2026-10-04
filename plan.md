@@ -2,6 +2,66 @@
 
 This document lists the gaps and suggested improvements found while reviewing the codebase, prioritized roughly by importance. Each item can be tackled independently.
 
+## 🚧 IN PROGRESS (2026-10-04) — Pro/Patron tier split, resume here if interrupted
+
+Implementing the ASO report's recommendation to split the single flat Pro
+tier into **Pro** (functional — lists, stats, daily game, $1.99/mo ·
+$14.99/yr, unchanged) and **Patron** (everything in Pro + profile themes +
+badge + early access, $4.99/mo · $39.99/yr, new). Confirmed with the project
+owner before starting.
+
+**Done so far:**
+- `ios/Configuration.storekit` — added `patron.monthly`/`patron.yearly` to
+  the same subscription group as Pro, `groupNumber: 2` (StoreKit ranks them
+  above Pro's `groupNumber: 1` for native upgrade/downgrade proration).
+- `lib/services/pro_service.dart` — fully rewritten around a `ProTier {none,
+  pro, patron}` enum instead of a single `bool isPro`. New: `patronMonthlyProductId`
+  / `patronYearlyProductId` constants, `isPatron` / `isPatronStream` getters,
+  `isPro`/`isProStream` now mean "Pro or Patron" (Patron includes Pro's
+  perks). Persists the tier as an int (`watchverse_pro_tier`), with a
+  one-time fallback read of the old `watchverse_pro_active` bool key.
+- `lib/screens/edit_profile_screen.dart` — profile-theme gating switched
+  from `isPro`/`isProStream` to `isPatron`/`isPatronStream` (themes are now
+  Patron-exclusive, not Pro).
+
+**Still to do, in order:**
+1. **`lib/widgets/paywall_sheet.dart`** — still shows the OLD single-tier UI
+   (one feature list, one set of plan tiles calling `ProService.instance
+   .fetchPackages()` which now returns all 4 products mixed together). Needs
+   a tier toggle (Pro / Patron segmented control) that filters which 2
+   products show as plan tiles and which feature bullets display above them
+   ("Everything in Pro, plus:" framing for the Patron side). This is the
+   main remaining code change — **not started yet**.
+2. **New ARB strings** needed in `lib/l10n/app_en.arb` + `app_tr.arb`, then
+   `flutter gen-l10n`: tier labels ("Pro"/"Patron"), Patron's three
+   exclusive-feature bullets (everything-in-Pro note, Patron badge, early
+   access). Check whether `proFeatureProfile` ("Exclusive profile themes")
+   already covers the themes bullet or needs tier-specific rewording.
+3. **`dart analyze` + `flutter test`** — must stay clean, as every other
+   change this session has.
+4. **Create the two new subscription products in App Store Connect**
+   (`com.example.watchVerse.patron.monthly` / `.yearly`, same subscription
+   group as Pro, prices $4.99/$39.99) — this is the one piece that can't be
+   done from the repo; the project owner needs to do this in App Store
+   Connect → Monetization → Subscriptions, or ask Claude to attempt it via
+   the App Store Connect API (auth already working this session — see the
+   Xcode Cloud fix below for the JWT approach, `/tmp/asc_jwt.py`).
+5. **New TestFlight build** once the above is done and tested locally —
+   follow the existing pattern: bump `pubspec.yaml` version, `flutter build
+   ipa --release --dart-define-from-file=secrets.json`, `xcrun altool
+   --upload-app` with the API key at `~/.appstoreconnect/private_keys/`.
+6. Commit + push, then update this file's §09 session log and the roadmap
+   table in the (separately published, not in-repo) ASO artifact if it
+   still needs updating.
+
+**Why this matters if you're picking this up cold:** the app is
+mid-refactor — `pro_service.dart`'s public API already changed (anything
+checking the old single-tier shape would need `isPro` → still works, but
+`isPatron` is new and `paywall_sheet.dart` hasn't been updated to actually
+let a user purchase a Patron product yet, so Patron is currently
+unreachable from the UI even though the backend/StoreKit side is ready for
+it).
+
 ## 1. Security (High Priority)
 
 - [x] **Get API keys out of source code.** Done: `apiKey` in `lib/services/api_service.dart` and `_apiKey` in `lib/services/giphy_service.dart` now read from `String.fromEnvironment(...)`, supplied via `flutter run --dart-define-from-file=secrets.json` (see `secrets.example.json` and the README setup steps). `secrets.json` is gitignored.

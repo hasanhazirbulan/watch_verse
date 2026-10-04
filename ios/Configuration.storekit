@@ -65,6 +65,50 @@
           "subscriptionGroupID" : "09B0AE6C-90C0-40D9-BE61-1573C39A6245",
           "type" : "RecurringSubscription",
           "winbackOffers" : []
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "4.99",
+          "familyShareable" : true,
+          "groupNumber" : 2,
+          "internalID" : "7C1B9C2E-4C6B-4C2E-9C33-2B1E6F6A9B11",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Everything in Pro, plus profile themes, a Patron badge, and early access to new features — billed monthly",
+              "displayName" : "Patron Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.example.watchVerse.patron.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "WatchVerse Patron Monthly",
+          "subscriptionGroupID" : "09B0AE6C-90C0-40D9-BE61-1573C39A6245",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : []
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "39.99",
+          "familyShareable" : true,
+          "groupNumber" : 2,
+          "internalID" : "9A3D8E4F-5A7C-4D3F-8B22-3C2F7A8B0C44",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Everything in Pro, plus profile themes, a Patron badge, and early access to new features — billed yearly",
+              "displayName" : "Patron Yearly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.example.watchVerse.patron.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "WatchVerse Patron Yearly",
+          "subscriptionGroupID" : "09B0AE6C-90C0-40D9-BE61-1573C39A6245",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : []
         }
       ]
     }

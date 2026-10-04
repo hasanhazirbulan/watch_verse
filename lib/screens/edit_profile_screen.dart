@@ -69,7 +69,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _setAvatarBg(int index) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-    if (isProBackground(index) && !ProService.instance.isPro) {
+    if (isProBackground(index) && !ProService.instance.isPatron) {
       showPaywallSheet(context);
       return;
     }
@@ -223,8 +223,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   const SizedBox(height: 8),
                   StreamBuilder<bool>(
-                    stream: ProService.instance.isProStream,
-                    initialData: ProService.instance.isPro,
+                    stream: ProService.instance.isPatronStream,
+                    initialData: ProService.instance.isPatron,
                     builder: (context, proSnap) {
                       final isPro = proSnap.data ?? false;
                       return Wrap(

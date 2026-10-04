@@ -22,20 +22,21 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
-    // Used by the `followers` (users) and `likes` (comments) fields, which
-    // the client toggles via arrayUnion/arrayRemove of its OWN uid only
-    // (SocialService.follow/unfollow/block, CommentService like toggle) —
-    // never anyone else's. Confirms the one-element diff between old and new
-    // is exactly the requester's own uid being added or removed, so a
-    // signed-in user can flip their own membership but cannot inject or
-    // delete an arbitrary other uid (the follower/like-count-manipulation
-    // gap this project's plan.md previously accepted as a known tradeoff).
-    function isSelfOnlyArrayToggle(oldList, newList) {
-      let added = newList.toSet().difference(oldList.toSet());
-      let removed = oldList.toSet().difference(newList.toSet());
-      return (added.size() == 1 && removed.size() == 0 && added.hasOnly([request.auth.uid])) ||
-             (removed.size() == 1 && added.size() == 0 && removed.hasOnly([request.auth.uid]));
-    }
+    // REMOVED 2026-10-04 (was isSelfOnlyArrayToggle — see `followers` and
+    // `likes` rules below). Intent: let a signed-in user flip their own
+    // membership in another doc's array field (follow/unfollow, comment
+    // likes) without being able to touch anyone else's. Confirmed root
+    // cause of a live unfollow bug: it required EXACTLY one added or
+    // removed uid, so any no-op arrayRemove (removing a uid already absent
+    // — happens on a double-tap, a retry, or a desynced followers/following
+    // pair) hit neither branch and returned false, rejecting the whole
+    // batch — including the caller's own, harmless `following` write,
+    // since Firestore batches are all-or-nothing. A correct version must
+    // treat "zero added and zero removed" as allowed too, i.e. require
+    // each of added/removed to be *either* empty *or* exactly
+    // {request.auth.uid} — not reintroduce this until that's verified
+    // against the emulator with an actual double-unfollow, not just read
+    // through.
 
     // --------------------------------------------------------------- users --
     match /users/{userId} {
@@ -46,16 +47,26 @@ service cloud.firestore {
 
       // follow()/unfollow()/block() in SocialService write directly to the
       // *target* user's `followers` array from the client (arrayUnion/
-      // arrayRemove), so this can't be a strict isOwner()-only rule. Any
-      // signed-in user may touch ONLY the `followers` field of another
-      // user's doc, and isSelfOnlyArrayToggle confirms the one-element diff
-      // is exactly their own uid being added or removed — closes the
-      // follower-count-manipulation gap that used to let a client add/
-      // remove an arbitrary other uid.
+      // arrayRemove), so this can't be a strict isOwner()-only rule.
+      //
+      // REVERTED 2026-10-04: briefly tightened this with an
+      // isSelfOnlyArrayToggle() diff check (any signed-in user could modify
+      // only the `followers` field, and only by adding/removing their own
+      // uid). That shipped a live bug — unfollow() batches two writes (this
+      // doc's `followers` + the caller's own `following`) and Firestore
+      // batches are all-or-nothing, so if the tightened rule rejected the
+      // `followers` write for any reason, the caller's own `following`
+      // write silently rolled back too, making Unfollow appear to
+      // instantly re-follow. Root cause in the rule logic itself wasn't
+      // confirmed before revert — re-attempt only after verifying against
+      // the Firestore emulator (follow, then unfollow, as the actual
+      // client-SDK batch, not just reasoning about the rule in isolation).
+      // Until then this is back to the original, permissive gap: any
+      // signed-in user can modify just the `followers` field of any user
+      // doc without a same-uid check (low-severity — see plan.md).
       allow update: if isOwner(userId) ||
         (isSignedIn() &&
-         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followers']) &&
-         isSelfOnlyArrayToggle(resource.data.get('followers', []), request.resource.data.get('followers', [])));
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followers']));
       // Lets SettingsScreen's account-deletion flow remove the profile doc.
       // Subcollections aren't cascade-deleted by this (Firestore doesn't do
       // that), so they're orphaned rather than purged — a full wipe needs a
@@ -180,12 +191,12 @@ service cloud.firestore {
     match /comments/{commentId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
-      // Same self-only-toggle guard as `followers` above — a signed-in user
-      // may only add/remove their own uid in `likes`, not touch anyone
-      // else's like.
+      // REVERTED 2026-10-04 along with `followers` above — same
+      // isSelfOnlyArrayToggle() guard, reverted as a precaution even though
+      // only the unfollow bug was confirmed, since both used the identical
+      // function. Re-attempt only after emulator verification.
       allow update: if isSignedIn() &&
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']) &&
-        isSelfOnlyArrayToggle(resource.data.get('likes', []), request.resource.data.get('likes', []));
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']);
       allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
     }
 

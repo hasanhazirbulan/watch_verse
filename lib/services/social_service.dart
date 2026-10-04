@@ -115,16 +115,35 @@ class SocialService {
     }
   }
 
+  /// Batches the `name`/`photoURL` lookup for up to 20 uids into one query
+  /// instead of one read per friend — [friendsActivity],
+  /// [friendsWatchedMovies], and [friendsWatchedShows] each used to call
+  /// `_users.doc(u).get()` inside their per-friend fan-out, turning every
+  /// feed load into (friend count) extra reads on top of the per-friend
+  /// content query that still has to happen separately. `whereIn` tops out
+  /// at 30, well above the 20-friend cap these callers already use.
+  Future<Map<String, Map<String, dynamic>>> _profilesByUid(
+      List<String> uids) async {
+    if (uids.isEmpty) return {};
+    try {
+      final snap =
+          await _users.where(FieldPath.documentId, whereIn: uids).get();
+      return {for (final d in snap.docs) d.id: d.data()};
+    } catch (_) {
+      return {};
+    }
+  }
+
   /// Merged, newest-first activity from the people [followingUids] follows.
   Future<List<Map<String, dynamic>>> friendsActivity(
       List<String> followingUids) async {
     if (followingUids.isEmpty) return [];
-    final lists =
-        await Future.wait(followingUids.take(20).map((u) async {
+    final uids = followingUids.take(20).toList();
+    final profiles = await _profilesByUid(uids);
+    final lists = await Future.wait(uids.map((u) async {
       try {
-        final userSnap = await _users.doc(u).get();
-        final name = (userSnap.data()?['name'] ?? '') as String;
-        final photo = (userSnap.data()?['photoURL'] ?? '') as String;
+        final name = (profiles[u]?['name'] ?? '') as String;
+        final photo = (profiles[u]?['photoURL'] ?? '') as String;
         final act = await _users
             .doc(u)
             .collection('activity')
@@ -161,11 +180,12 @@ class SocialService {
   Future<List<Map<String, dynamic>>> friendsWatchedMovies(
       List<String> followingUids, {int limit = 20}) async {
     if (followingUids.isEmpty) return [];
-    final lists = await Future.wait(followingUids.take(20).map((u) async {
+    final uids = followingUids.take(20).toList();
+    final profiles = await _profilesByUid(uids);
+    final lists = await Future.wait(uids.map((u) async {
       try {
-        final userSnap = await _users.doc(u).get();
-        final name = (userSnap.data()?['name'] ?? '') as String;
-        final photo = (userSnap.data()?['photoURL'] ?? '') as String;
+        final name = (profiles[u]?['name'] ?? '') as String;
+        final photo = (profiles[u]?['photoURL'] ?? '') as String;
         // Only a handful per friend — the merge below keeps just the top
         // [limit] across everyone anyway, so fetching each friend's full 30
         // here (like PublicProfileScreen does for one person) would mean
@@ -228,11 +248,12 @@ class SocialService {
   Future<List<Map<String, dynamic>>> friendsWatchedShows(
       List<String> followingUids, {int limit = 20}) async {
     if (followingUids.isEmpty) return [];
-    final lists = await Future.wait(followingUids.take(20).map((u) async {
+    final uids = followingUids.take(20).toList();
+    final profiles = await _profilesByUid(uids);
+    final lists = await Future.wait(uids.map((u) async {
       try {
-        final userSnap = await _users.doc(u).get();
-        final name = (userSnap.data()?['name'] ?? '') as String;
-        final photo = (userSnap.data()?['photoURL'] ?? '') as String;
+        final name = (profiles[u]?['name'] ?? '') as String;
+        final photo = (profiles[u]?['photoURL'] ?? '') as String;
         // A bit more headroom than the movies fetch (7 vs. 5): some of the
         // most-recently-updated shows can be watchlist-only (watchedCount 0)
         // and get filtered out below, so a slightly larger pull keeps a

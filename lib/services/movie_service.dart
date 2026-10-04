@@ -174,6 +174,16 @@ class MovieService {
     return snap.docs.map((d) => {...d.data(), 'entryId': d.id}).toList();
   }
 
+  /// Every movie in this user's library (watchlist + watched), once — same
+  /// "point-in-time report" reasoning as [allDiaryEntriesOnce], used by
+  /// [ExportService] to build the full-library CSV export.
+  Future<List<Map<String, dynamic>>> allMoviesOnce() async {
+    final col = _col;
+    if (col == null) return [];
+    final snap = await col.get();
+    return snap.docs.map((d) => d.data()).toList();
+  }
+
   // --------------------------------------------------------------- writes ---
 
   Future<void> setStatus(Movie m, String status) async {

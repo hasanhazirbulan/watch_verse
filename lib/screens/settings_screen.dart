@@ -8,9 +8,7 @@ import 'package:watch_verse/screens/edit_profile_screen.dart';
 import 'package:watch_verse/services/account_deletion_service.dart';
 import 'package:watch_verse/services/export_service.dart';
 import 'package:watch_verse/services/legal_links.dart';
-import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
-import 'package:watch_verse/widgets/paywall_sheet.dart';
 
 /// App-level preferences plus account management (edit profile, delete
 /// account) — the drawer is the only other entry point into account actions,
@@ -27,13 +25,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _exporting = false;
 
   Future<void> _exportData() async {
-    if (ProService.isConfigured && !ProService.instance.isPro) {
-      showPaywallSheet(context);
-      return;
-    }
     setState(() => _exporting = true);
     try {
-      await ExportService.instance.exportDiaryCsv();
+      await ExportService.instance.exportAll();
     } finally {
       if (mounted) setState(() => _exporting = false);
     }

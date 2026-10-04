@@ -137,6 +137,15 @@ class TvTrackingService {
         );
   }
 
+  /// Every tracked show, once — used by [ExportService] to build the
+  /// full-library CSV export.
+  Future<List<Map<String, dynamic>>> allShowsOnce() async {
+    final col = _showsCol;
+    if (col == null) return [];
+    final snap = await col.get();
+    return snap.docs.map((d) => d.data()).toList();
+  }
+
   /// Live watch-history timeline, newest first. Ordered by `at` only, so it
   /// needs just a single-field index (created automatically by Firestore).
   Stream<List<Map<String, dynamic>>> activityStream({int limit = 60}) {

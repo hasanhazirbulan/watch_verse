@@ -103,7 +103,6 @@ class _PaywallSheetState extends State<_PaywallSheet> {
             _feature(context, Icons.bar_chart_rounded, l10n.proFeatureStats),
             _feature(context, Icons.playlist_add_check_rounded, l10n.proFeatureLists),
             _feature(context, Icons.palette_rounded, l10n.proFeatureProfile),
-            _feature(context, Icons.file_download_rounded, l10n.proFeatureExport),
             _feature(context, Icons.theaters_rounded, l10n.proFeatureGame),
             const SizedBox(height: 22),
             FutureBuilder<List<ProductDetails>>(

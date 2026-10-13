@@ -159,6 +159,28 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get settingsDeleteAccountIncomplete =>
+      'Hesap silme işlemin başladı ama tamamlanamadı. Tamamlamak için tekrar giriş yap.';
+
+  @override
+  String get accountDeletionFinishingTitle => 'Hesap silme tamamlanıyor';
+
+  @override
+  String get accountDeletionFinishingBody =>
+      'Bu hesabı silmek için daha önce yaptığın istek tamamlanmamış. Şimdi tamamlanıyor…';
+
+  @override
+  String accountDeletionResumeFailed(String error) {
+    return 'Hesabın silinmesi tamamlanamadı: $error';
+  }
+
+  @override
+  String get accountDeletionRetry => 'Tekrar dene';
+
+  @override
+  String get accountDeletionSignOut => 'Çıkış yap';
+
+  @override
   String get selectAvatarTitle => 'Avatar Seç';
 
   @override

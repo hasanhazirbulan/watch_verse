@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:watch_verse/screens/finish_deletion_screen.dart';
 import 'package:watch_verse/screens/home_screen.dart';
 import 'package:watch_verse/screens/up_next_screen.dart';
 import 'package:watch_verse/screens/watchlist_screen.dart';
 import 'package:watch_verse/screens/profile_screen.dart';
 import 'package:watch_verse/screens/search_screen.dart';
+import 'package:watch_verse/services/account_deletion_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 
 class MainScreen extends StatefulWidget {
@@ -23,6 +25,29 @@ class _MainScreenState extends State<MainScreen> {
   static const _navBarColor = Color(0xFF15171E);
 
   int _selectedIndex = 0;
+
+  /// Set when the profile carries a `deletionPending` marker from an
+  /// interrupted account deletion — the app is replaced by
+  /// [FinishDeletionScreen] so a half-purged account never shows up as a
+  /// normal one with an empty library.
+  bool _deletionPending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPendingDeletion();
+  }
+
+  Future<void> _checkPendingDeletion() async {
+    try {
+      final pending =
+          await AccountDeletionService.instance.hasPendingDeletion();
+      if (pending && mounted) setState(() => _deletionPending = true);
+    } catch (_) {
+      // Offline or a transient read error — don't block the app on this
+      // check; it runs again on the next launch/sign-in.
+    }
+  }
 
   // One Navigator per tab so detail pages push *inside* the tab — the bottom
   // navigation bar stays visible instead of being covered by a full-screen
@@ -68,6 +93,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_deletionPending) return const FinishDeletionScreen();
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {

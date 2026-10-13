@@ -67,6 +67,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       await AccountDeletionService.instance.deleteAccount();
       nav.pushNamedAndRemoveUntil('/login', (r) => false);
+    } on AccountDeletionIncompleteException {
+      // Deletion started (data may already be gone) but couldn't finish.
+      // Don't leave the user in a half-emptied account — sign out; the
+      // `deletionPending` marker makes the next sign-in finish the job.
+      try {
+        await FirebaseAuth.instance.signOut();
+      } catch (_) {}
+      nav.pushNamedAndRemoveUntil('/login', (r) => false);
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.settingsDeleteAccountIncomplete)),
+      );
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       setState(() => _deleting = false);

@@ -157,6 +157,28 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get settingsDeleteAccountIncomplete =>
+      'Your account deletion started but couldn\'t finish. Sign in again to complete it.';
+
+  @override
+  String get accountDeletionFinishingTitle => 'Finishing account deletion';
+
+  @override
+  String get accountDeletionFinishingBody =>
+      'An earlier request to delete this account didn\'t finish. Completing it now…';
+
+  @override
+  String accountDeletionResumeFailed(String error) {
+    return 'Couldn\'t finish deleting your account: $error';
+  }
+
+  @override
+  String get accountDeletionRetry => 'Try again';
+
+  @override
+  String get accountDeletionSignOut => 'Sign out';
+
+  @override
   String get selectAvatarTitle => 'Select an Avatar';
 
   @override

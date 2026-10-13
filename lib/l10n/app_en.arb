@@ -77,6 +77,19 @@
       }
     }
   },
+  "settingsDeleteAccountIncomplete": "Your account deletion started but couldn't finish. Sign in again to complete it.",
+  "accountDeletionFinishingTitle": "Finishing account deletion",
+  "accountDeletionFinishingBody": "An earlier request to delete this account didn't finish. Completing it now…",
+  "accountDeletionResumeFailed": "Couldn't finish deleting your account: {error}",
+  "@accountDeletionResumeFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDeletionRetry": "Try again",
+  "accountDeletionSignOut": "Sign out",
   "selectAvatarTitle": "Select an Avatar",
   "editNameTitle": "Edit Name",
   "enterNewNameHint": "Enter new name",

@@ -374,6 +374,42 @@ abstract class AppLocalizations {
   /// **'Could not delete account: {error}'**
   String settingsDeleteAccountError(String error);
 
+  /// No description provided for @settingsDeleteAccountIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account deletion started but couldn\'t finish. Sign in again to complete it.'**
+  String get settingsDeleteAccountIncomplete;
+
+  /// No description provided for @accountDeletionFinishingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Finishing account deletion'**
+  String get accountDeletionFinishingTitle;
+
+  /// No description provided for @accountDeletionFinishingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'An earlier request to delete this account didn\'t finish. Completing it now…'**
+  String get accountDeletionFinishingBody;
+
+  /// No description provided for @accountDeletionResumeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t finish deleting your account: {error}'**
+  String accountDeletionResumeFailed(String error);
+
+  /// No description provided for @accountDeletionRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get accountDeletionRetry;
+
+  /// No description provided for @accountDeletionSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get accountDeletionSignOut;
+
   /// No description provided for @selectAvatarTitle.
   ///
   /// In en, this message translates to:

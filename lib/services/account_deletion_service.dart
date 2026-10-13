@@ -30,9 +30,11 @@ class AccountDeletionService {
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
     FirebaseStorage? storage,
+    DateTime Function()? now,
   })  : _db = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance,
-        _storage = storage;
+        _storage = storage,
+        _now = now ?? DateTime.now;
 
   static final AccountDeletionService instance = AccountDeletionService._();
 
@@ -43,13 +45,21 @@ class AccountDeletionService {
     required FirebaseFirestore firestore,
     required FirebaseAuth auth,
     FirebaseStorage? storage,
+    DateTime Function()? now,
   }) =>
       AccountDeletionService._(
-          firestore: firestore, auth: auth, storage: storage);
+          firestore: firestore, auth: auth, storage: storage, now: now);
 
   final FirebaseFirestore _db;
   final FirebaseAuth _auth;
   final FirebaseStorage? _storage;
+  final DateTime Function() _now;
+
+  /// Test hook: runs after every subcollection is purged but before the
+  /// profile doc / Auth user are deleted. Throwing from it simulates the app
+  /// being killed at the worst possible moment.
+  @visibleForTesting
+  Future<void> Function()? debugInterruptAfterPurge;
 
   /// Firestore caps a write batch at 500 operations; stay under it.
   static const _batchSize = 400;
@@ -75,6 +85,8 @@ class AccountDeletionService {
     await _deleteAll(userRef.collection('diary'));
     await _deleteAll(userRef.collection('lists'));
     await _deleteAll(userRef.collection('pollAnswers'));
+    await _deleteAll(userRef.collection('followedLists'));
+    await _deleteAll(userRef.collection('gamePlays'));
 
     final shows = await userRef.collection('shows').get();
     for (final show in shows.docs) {
@@ -141,33 +153,147 @@ class AccountDeletionService {
     }
   }
 
+  /// How recent the last sign-in must be before [deleteAccount] will touch
+  /// anything. Firebase rejects `user.delete()` with `requires-recent-login`
+  /// once the sign-in is older than ~5 minutes; this is deliberately tighter
+  /// so the purge itself (which can take a while on a big library) still
+  /// finishes inside Firebase's window.
+  static const recentLoginWindow = Duration(minutes: 3);
+
+  /// Profile-doc fields marking an account as mid-deletion. Written (merged)
+  /// before anything is destroyed and only removed together with the doc.
+  static const pendingField = 'deletionPending';
+  static const pendingAtField = 'deletionRequestedAt';
+
+  /// Whether the signed-in user's last sign-in is recent enough for
+  /// `user.delete()` to succeed. Only a heuristic (device clock vs. server
+  /// timestamp) — [resumePendingDeletion] covers the case where it's wrong.
+  bool hasRecentLogin() {
+    final last = _auth.currentUser?.metadata.lastSignInTime;
+    if (last == null) return false;
+    return _now().toUtc().difference(last.toUtc()) < recentLoginWindow;
+  }
+
   /// Erases all of the signed-in user's data, then the account itself.
   ///
-  /// Order matters, for two reasons. First, Firestore and Storage must run
-  /// before the Auth record (every delete is gated by `request.auth.uid`
-  /// still being valid). Second — and this is why the profile doc is deleted
-  /// *before* the subcollection purge below, not after — if this whole
-  /// sequence is interrupted partway (app killed, crash), the profile doc
-  /// being gone is an unambiguous "this account is mid-deletion" signal on
-  /// next sign-in. The previous order deleted the profile doc last, so an
-  /// interruption left a fully intact, normal-looking profile sitting on top
-  /// of empty subcollections — indistinguishable from real data loss, which
-  /// is exactly the confusing state a real interrupted deletion produced.
+  /// Built so an interruption (app killed, network drop, stale session) can
+  /// never leave a live, normal-looking account on top of an empty library —
+  /// the state behind the unresolved "my data disappeared" report in
+  /// plan.md:
   ///
-  /// Throws [FirebaseAuthException] with code `requires-recent-login` if the
-  /// session is too old — the caller is expected to prompt for
-  /// re-authentication and try again.
+  ///  1. **Fail fast on a stale session.** If the last sign-in is outside
+  ///     [recentLoginWindow], throws [FirebaseAuthException] with code
+  ///     `requires-recent-login` *before any data is touched*. Previously
+  ///     this only surfaced at `user.delete()`, after the purge had run.
+  ///  2. **Mark the profile doc** `deletionPending: true` (merged, so the
+  ///     `following` list [_purgeFollowGraph] reads survives). From here on
+  ///     an interrupted run is recognisable: the app checks
+  ///     [hasPendingDeletion] on startup/sign-in and finishes the job via
+  ///     [resumePendingDeletion] instead of showing an empty library.
+  ///  3. Purge comments, follow graph, Storage and subcollections — every
+  ///     step is idempotent, so a resume can safely redo any of them.
+  ///  4. Delete the profile doc, then the Auth user. Firestore must go first
+  ///     (every delete is gated by `request.auth.uid` still being valid). If
+  ///     `user.delete()` still fails, a bare `deletionPending` doc (no
+  ///     personal data) is written back so the next sign-in resumes rather
+  ///     than finding a profile-less account.
+  ///
+  /// Throws [FirebaseAuthException] (`requires-recent-login`) when nothing
+  /// was touched — the caller should ask the user to sign in again — and
+  /// [AccountDeletionIncompleteException] when deletion started (data may
+  /// already be gone) but couldn't finish — the caller must sign the user
+  /// out; signing back in resumes it.
   Future<void> deleteAccount() async {
     final user = _auth.currentUser;
     if (user == null) return;
-    final uid = user.uid;
 
-    await _purgeComments(uid);
-    await _purgeFollowGraph(uid); // reads this user's own `following` field — must run before the profile doc is deleted
-    await _db.collection('users').doc(uid).delete();
-    await _purgeStoredFiles(uid);
-    await _purgeOwnData(uid);
+    if (!hasRecentLogin()) {
+      throw FirebaseAuthException(
+        code: 'requires-recent-login',
+        message: 'Deleting an account needs a sign-in from the last '
+            '${recentLoginWindow.inMinutes} minutes.',
+      );
+    }
 
-    await user.delete();
+    // Nothing has been destroyed yet, so a failure here leaves the account
+    // fully intact — let it propagate as-is.
+    await _markPending(user.uid, merge: true);
+
+    await _finish(user);
   }
+
+  /// Whether the signed-in user's profile doc carries the `deletionPending`
+  /// marker of a [deleteAccount] run that didn't complete.
+  Future<bool> hasPendingDeletion() async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+    final snap = await _db.collection('users').doc(user.uid).get();
+    return snap.data()?[pendingField] == true;
+  }
+
+  /// Finishes a deletion that [deleteAccount] started but didn't complete.
+  /// Returns false (and does nothing) when no deletion is pending.
+  ///
+  /// Deliberately skips the recent-login pre-check: the data is already
+  /// partly gone and the user confirmed the deletion, so purging the rest is
+  /// right either way. Only the final `user.delete()` may still need a fresh
+  /// sign-in, reported as [AccountDeletionIncompleteException].
+  Future<bool> resumePendingDeletion() async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+    if (!await hasPendingDeletion()) return false;
+    await _finish(user);
+    return true;
+  }
+
+  Future<void> _markPending(String uid, {required bool merge}) =>
+      _db.collection('users').doc(uid).set({
+        pendingField: true,
+        pendingAtField: FieldValue.serverTimestamp(),
+      }, SetOptions(merge: merge));
+
+  /// Steps 3–4 of [deleteAccount]. Runs only once the pending marker is set,
+  /// so every failure is surfaced as [AccountDeletionIncompleteException] —
+  /// the account must not be treated as intact afterwards.
+  Future<void> _finish(User user) async {
+    final uid = user.uid;
+    try {
+      await _purgeComments(uid);
+      await _purgeFollowGraph(uid); // reads this user's own `following` field — must run before the profile doc is deleted
+      await _purgeStoredFiles(uid);
+      await _purgeOwnData(uid);
+      await debugInterruptAfterPurge?.call();
+      // Last Firestore write: the marker goes away only together with the
+      // doc, once everything under it is already gone.
+      await _db.collection('users').doc(uid).delete();
+    } catch (e) {
+      throw AccountDeletionIncompleteException(e);
+    }
+
+    try {
+      await user.delete();
+    } catch (e) {
+      // The profile doc is gone but the account is not. Put back a bare
+      // marker so the next sign-in resumes instead of landing on an account
+      // with no profile at all. Best-effort: the caller is told the
+      // deletion didn't finish either way.
+      try {
+        await _markPending(uid, merge: false);
+      } catch (_) {}
+      throw AccountDeletionIncompleteException(e);
+    }
+  }
+}
+
+/// [AccountDeletionService] started erasing the account (the profile doc is
+/// marked `deletionPending`, and some data may already be gone) but couldn't
+/// finish. Don't keep using the account as if it were intact: sign the user
+/// out — signing back in resumes the deletion.
+class AccountDeletionIncompleteException implements Exception {
+  AccountDeletionIncompleteException(this.cause);
+
+  final Object cause;
+
+  @override
+  String toString() => 'AccountDeletionIncompleteException: $cause';
 }

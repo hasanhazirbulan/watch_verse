@@ -4,6 +4,7 @@ import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
+import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 
 enum _SortOrder { dateAdded, ratingHighToLow }
@@ -48,6 +49,14 @@ class _WatchedMoviesScreenState extends State<WatchedMoviesScreen> {
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: MovieService.instance.watchedStream(),
         builder: (context, snap) {
+          // Loading / failure used to fall straight through to the empty
+          // message, so the grid briefly (or, on error, permanently) claimed
+          // the user had no watched movies.
+          if (snap.hasError) return asyncErrorView(context, snap.error!);
+          if (snap.connectionState == ConnectionState.waiting &&
+              !snap.hasData) {
+            return asyncLoadingIndicator();
+          }
           final movies = [...snap.data ?? const <Map<String, dynamic>>[]];
           if (movies.isEmpty) {
             return Center(

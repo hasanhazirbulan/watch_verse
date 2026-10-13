@@ -132,9 +132,21 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(l10n.tvErrorLoadingShow(message),
-              textAlign: TextAlign.center,
-              style: TextStyle(color: context.colors.textSecondary)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(l10n.tvErrorLoadingShow(message),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: context.colors.textSecondary)),
+              const SizedBox(height: 12),
+              // Without this, a transient TMDB/network failure meant backing
+              // out and re-opening the show — the future was never retried.
+              TextButton(
+                onPressed: () => setState(() => _future = _load()),
+                child: Text(l10n.homeRetryAction),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -431,12 +443,17 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
                         size: 20,
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        label,
-                        style: TextStyle(
-                          color: tracked ? context.colors.primary : Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
+                      Flexible(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color:
+                                tracked ? context.colors.primary : Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                          ),
                         ),
                       ),
                     ],
@@ -927,7 +944,8 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (_) => EpisodeDetailScreen(show: show, episode: ep)),
+            builder: (_) => EpisodeDetailScreen(
+                show: show, episode: ep, openedFromShow: true)),
       ),
       child: Padding(
       padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),

@@ -4,6 +4,7 @@ import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/services/list_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
+import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/text_prompt.dart';
 
@@ -134,7 +135,14 @@ class ListDetailScreen extends StatelessWidget {
                 ),
             ],
           ),
-          body: items.isEmpty
+          // Loading and failures (e.g. a followed list its owner has since
+          // made private → permission-denied) used to render as "This list
+          // is empty".
+          body: snap.hasError
+              ? asyncErrorView(context, snap.error!)
+              : snap.connectionState == ConnectionState.waiting && !snap.hasData
+              ? asyncLoadingIndicator()
+              : items.isEmpty
               ? _empty(context)
               : GridView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),

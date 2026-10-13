@@ -56,9 +56,25 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<Object?> _movieFailure;
   late Future<Object?> _tvFailure;
 
-  // Genre chips (fetched once; don't reset on pull-to-refresh)
-  late final Future<List<Genre>> _movieGenres = _api.getGenres(MediaType.movie);
-  late final Future<List<Genre>> _tvGenres = _api.getGenres(MediaType.tv);
+  // Genre chips (fetched once; don't reset on pull-to-refresh — unless the
+  // fetch failed, see _initFutures: a failed first load used to hide the
+  // chip row for the rest of the session, since neither pull-to-refresh nor
+  // the Retry banner ever re-requested it).
+  late Future<List<Genre>> _movieGenres = _loadGenres(MediaType.movie);
+  late Future<List<Genre>> _tvGenres = _loadGenres(MediaType.tv);
+  bool _movieGenresFailed = false;
+  bool _tvGenresFailed = false;
+
+  Future<List<Genre>> _loadGenres(MediaType type) =>
+      _api.getGenres(type).catchError((Object e) {
+        debugPrint('WatchVerse: genre fetch failed → $e');
+        if (type == MediaType.movie) {
+          _movieGenresFailed = true;
+        } else {
+          _tvGenresFailed = true;
+        }
+        return <Genre>[];
+      });
 
   // "Because you watched X" — memoized per seed id so we don't refetch on
   // every stream tick.
@@ -101,6 +117,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _initFutures() {
+    if (_movieGenresFailed) {
+      _movieGenresFailed = false;
+      _movieGenres = _loadGenres(MediaType.movie);
+    }
+    if (_tvGenresFailed) {
+      _tvGenresFailed = false;
+      _tvGenres = _loadGenres(MediaType.tv);
+    }
     _nowPlaying = _api.getNowPlayingMovies();
     _trendingMovies = _api.getTrendingMovies();
     _upcoming = _api.getUpcomingMovies();

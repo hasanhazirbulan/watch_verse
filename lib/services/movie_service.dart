@@ -81,7 +81,12 @@ class MovieService {
     await _activityCol?.doc('movie-$id').delete();
   }
 
-  Map<String, dynamic> _meta(Movie m) => {
+  Map<String, dynamic> _meta(Movie m) => metaFor(m);
+
+  /// The metadata fields every movie doc carries — public so the
+  /// Letterboxd/IMDb importer (`LibraryImportService`) writes exactly the
+  /// same doc shape as the in-app write paths.
+  static Map<String, dynamic> metaFor(Movie m) => {
         'id': m.id,
         'title': m.title,
         'posterPath': m.posterPath,

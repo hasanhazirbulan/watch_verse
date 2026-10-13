@@ -1748,6 +1748,117 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proExportAction => 'Export my data (CSV)';
 
   @override
+  String get importDataAction => 'Import from Letterboxd or IMDb';
+
+  @override
+  String get importTitle => 'Import data';
+
+  @override
+  String get importIntro =>
+      'Bring your history over from Letterboxd or IMDb. Nothing already in WatchVerse is overwritten — your existing ratings and watched films are kept, and importing the same file again won\'t create duplicates.';
+
+  @override
+  String get importLetterboxdHeading => 'Letterboxd';
+
+  @override
+  String get importLetterboxdSteps =>
+      'On letterboxd.com, go to Settings → Import & Export → Export Your Data. Pick the .zip you get as is — or just its watched, ratings, diary and watchlist CSV files.';
+
+  @override
+  String get importImdbHeading => 'IMDb';
+
+  @override
+  String get importImdbSteps =>
+      'On imdb.com, open Your Ratings (and your Watchlist) and choose Export from the ⋯ menu. When it\'s ready, download the CSV from the Exports page.';
+
+  @override
+  String get importWhatHappens =>
+      'Watched and rated films are marked watched with their original dates, Letterboxd diary entries are kept, and watchlist films go to your watchlist. TV series from IMDb are added to My Shows without marking any episodes.';
+
+  @override
+  String get importPickFiles => 'Choose files';
+
+  @override
+  String get importPickHint => 'You can pick several files at once.';
+
+  @override
+  String get importReading => 'Reading files…';
+
+  @override
+  String importProgress(String done, String total) {
+    return 'Matching titles… $done / $total';
+  }
+
+  @override
+  String get importCancelling => 'Stopping…';
+
+  @override
+  String get importNothingFound =>
+      'No Letterboxd or IMDb data found in those files.';
+
+  @override
+  String importUnrecognizedFiles(String files) {
+    return 'Skipped (not a Letterboxd or IMDb export): $files';
+  }
+
+  @override
+  String get importDoneTitle => 'Import complete';
+
+  @override
+  String get importCancelledNote =>
+      'Import stopped. Everything matched so far is saved — import again anytime to finish; nothing will be duplicated.';
+
+  @override
+  String get importSummaryWatched => 'Films marked watched';
+
+  @override
+  String get importSummaryRatings => 'Ratings';
+
+  @override
+  String get importSummaryWatchlist => 'Added to watchlist';
+
+  @override
+  String get importSummaryShows => 'Shows added to My Shows';
+
+  @override
+  String get importSummaryDiary => 'Diary entries';
+
+  @override
+  String get importSummaryExisting => 'Already in your library';
+
+  @override
+  String get importSummarySkipped => 'Skipped rows (episodes, games, invalid)';
+
+  @override
+  String get importSummaryUnmatched => 'Not matched';
+
+  @override
+  String get importViewUnmatched => 'View unmatched titles';
+
+  @override
+  String get importUnmatchedHint =>
+      'These couldn\'t be matched confidently. Search for them to add them by hand.';
+
+  @override
+  String get importLookupFailed =>
+      'Lookup failed — importing again may fix this';
+
+  @override
+  String get importDone => 'Done';
+
+  @override
+  String get importMore => 'Import more';
+
+  @override
+  String importError(String error) {
+    return 'Import failed: $error';
+  }
+
+  @override
+  String get importSignInPrompt =>
+      'Sign in to import your Letterboxd or IMDb history.';
+
+  @override
   String get proLegalFooter =>
       'By subscribing you agree to our Terms of Service and Privacy Policy.';
 

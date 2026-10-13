@@ -3168,6 +3168,198 @@ abstract class AppLocalizations {
   /// **'Export my data (CSV)'**
   String get proExportAction;
 
+  /// No description provided for @importDataAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Letterboxd or IMDb'**
+  String get importDataAction;
+
+  /// No description provided for @importTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import data'**
+  String get importTitle;
+
+  /// No description provided for @importIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring your history over from Letterboxd or IMDb. Nothing already in WatchVerse is overwritten — your existing ratings and watched films are kept, and importing the same file again won\'t create duplicates.'**
+  String get importIntro;
+
+  /// No description provided for @importLetterboxdHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Letterboxd'**
+  String get importLetterboxdHeading;
+
+  /// No description provided for @importLetterboxdSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'On letterboxd.com, go to Settings → Import & Export → Export Your Data. Pick the .zip you get as is — or just its watched, ratings, diary and watchlist CSV files.'**
+  String get importLetterboxdSteps;
+
+  /// No description provided for @importImdbHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'IMDb'**
+  String get importImdbHeading;
+
+  /// No description provided for @importImdbSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'On imdb.com, open Your Ratings (and your Watchlist) and choose Export from the ⋯ menu. When it\'s ready, download the CSV from the Exports page.'**
+  String get importImdbSteps;
+
+  /// No description provided for @importWhatHappens.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched and rated films are marked watched with their original dates, Letterboxd diary entries are kept, and watchlist films go to your watchlist. TV series from IMDb are added to My Shows without marking any episodes.'**
+  String get importWhatHappens;
+
+  /// No description provided for @importPickFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose files'**
+  String get importPickFiles;
+
+  /// No description provided for @importPickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can pick several files at once.'**
+  String get importPickHint;
+
+  /// No description provided for @importReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading files…'**
+  String get importReading;
+
+  /// No description provided for @importProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Matching titles… {done} / {total}'**
+  String importProgress(String done, String total);
+
+  /// No description provided for @importCancelling.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopping…'**
+  String get importCancelling;
+
+  /// No description provided for @importNothingFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Letterboxd or IMDb data found in those files.'**
+  String get importNothingFound;
+
+  /// No description provided for @importUnrecognizedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped (not a Letterboxd or IMDb export): {files}'**
+  String importUnrecognizedFiles(String files);
+
+  /// No description provided for @importDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import complete'**
+  String get importDoneTitle;
+
+  /// No description provided for @importCancelledNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Import stopped. Everything matched so far is saved — import again anytime to finish; nothing will be duplicated.'**
+  String get importCancelledNote;
+
+  /// No description provided for @importSummaryWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Films marked watched'**
+  String get importSummaryWatched;
+
+  /// No description provided for @importSummaryRatings.
+  ///
+  /// In en, this message translates to:
+  /// **'Ratings'**
+  String get importSummaryRatings;
+
+  /// No description provided for @importSummaryWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to watchlist'**
+  String get importSummaryWatchlist;
+
+  /// No description provided for @importSummaryShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows added to My Shows'**
+  String get importSummaryShows;
+
+  /// No description provided for @importSummaryDiary.
+  ///
+  /// In en, this message translates to:
+  /// **'Diary entries'**
+  String get importSummaryDiary;
+
+  /// No description provided for @importSummaryExisting.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in your library'**
+  String get importSummaryExisting;
+
+  /// No description provided for @importSummarySkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped rows (episodes, games, invalid)'**
+  String get importSummarySkipped;
+
+  /// No description provided for @importSummaryUnmatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Not matched'**
+  String get importSummaryUnmatched;
+
+  /// No description provided for @importViewUnmatched.
+  ///
+  /// In en, this message translates to:
+  /// **'View unmatched titles'**
+  String get importViewUnmatched;
+
+  /// No description provided for @importUnmatchedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'These couldn\'t be matched confidently. Search for them to add them by hand.'**
+  String get importUnmatchedHint;
+
+  /// No description provided for @importLookupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Lookup failed — importing again may fix this'**
+  String get importLookupFailed;
+
+  /// No description provided for @importDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get importDone;
+
+  /// No description provided for @importMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Import more'**
+  String get importMore;
+
+  /// No description provided for @importError.
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed: {error}'**
+  String importError(String error);
+
+  /// No description provided for @importSignInPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to import your Letterboxd or IMDb history.'**
+  String get importSignInPrompt;
+
   /// No description provided for @proLegalFooter.
   ///
   /// In en, this message translates to:

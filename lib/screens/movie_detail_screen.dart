@@ -396,7 +396,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
           Expanded(
             child: Text(
               date.isNotEmpty
-                  ? l10n.movieReleasesOn(date)
+                  ? l10n.movieReleasesOn(formatTmdbDate(context, date))
                   : l10n.movieNotYetReleased,
               style: TextStyle(color: context.colors.textMuted, fontSize: 12),
             ),
@@ -773,6 +773,7 @@ class _DiarySheetState extends State<_DiarySheet> {
   late final TextEditingController _noteCtrl =
       TextEditingController(text: widget.initialNote);
   bool _saving = false;
+  bool _failed = false;
 
   @override
   void dispose() {
@@ -791,13 +792,24 @@ class _DiarySheetState extends State<_DiarySheet> {
   }
 
   Future<void> _save() async {
-    setState(() => _saving = true);
+    setState(() {
+      _saving = true;
+      _failed = false;
+    });
     final nav = Navigator.of(context);
     try {
       await widget.onSave(_rating, _noteCtrl.text.trim(), _date);
       nav.pop(true);
     } catch (_) {
-      if (mounted) setState(() => _saving = false);
+      // Used to just stop the spinner with no feedback. The error is shown
+      // inline rather than as a SnackBar: this sheet sits on the root
+      // navigator, so a SnackBar would render behind it.
+      if (mounted) {
+        setState(() {
+          _saving = false;
+          _failed = true;
+        });
+      }
     }
   }
 
@@ -902,6 +914,13 @@ class _DiarySheetState extends State<_DiarySheet> {
                 decoration: InputDecoration(hintText: l10n.movieDiaryNoteHint),
               ),
               const SizedBox(height: 18),
+              if (_failed) ...[
+                Text(l10n.errorGeneric,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                        fontSize: 13)),
+                const SizedBox(height: 10),
+              ],
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(

@@ -20,14 +20,22 @@ class _TvData {
   final List<CastMember> cast;
   final List<MediaItem> recommendations;
   final List<WatchProvider> providers;
-  final List<Episode> flat; // all trackable episodes, season/episode order
+  /// Seasons whose episode fetch failed — shown empty with a per-season
+  /// retry instead of failing the whole show page.
+  final Set<int> failedSeasons;
+  late List<Episode> flat; // all trackable episodes, season/episode order
 
   _TvData(this.show, this.episodesBySeason, this.cast, this.recommendations,
-      this.providers)
-      : flat = [
-          for (final season in show.seasons)
-            ...(episodesBySeason[season.seasonNumber] ?? const []),
-        ];
+      this.providers, this.failedSeasons) {
+    rebuildFlat();
+  }
+
+  void rebuildFlat() {
+    flat = [
+      for (final season in show.seasons)
+        ...(episodesBySeason[season.seasonNumber] ?? const []),
+    ];
+  }
 
   int get total => flat.length;
 }
@@ -44,6 +52,7 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
   final APIservices _api = APIservices();
   final TvTrackingService _tracking = TvTrackingService.instance;
   late Future<_TvData> _future;
+  final Set<int> _retryingSeasons = {};
 
   @override
   void initState() {
@@ -55,9 +64,17 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
     final show = await _api.getTvDetails(widget.seed.id);
     // Fetch episodes + secondary sections in parallel; secondary calls degrade
     // to empty lists so a single failure never blocks the whole screen.
+    // A failed season degrades to empty (with a per-season retry, like Up
+    // Next tolerates per-show failures) instead of failing the whole page.
+    final failedSeasons = <int>{};
     final seasonsF = Future.wait(show.seasons.map((s) async {
-      final eps = await _api.getSeasonEpisodes(show.id, s.seasonNumber);
-      return MapEntry(s.seasonNumber, eps);
+      try {
+        final eps = await _api.getSeasonEpisodes(show.id, s.seasonNumber);
+        return MapEntry(s.seasonNumber, eps);
+      } catch (_) {
+        failedSeasons.add(s.seasonNumber);
+        return MapEntry(s.seasonNumber, const <Episode>[]);
+      }
     }));
     final castF = _api
         .getCredits(MediaType.tv, show.id)
@@ -78,7 +95,21 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
       await castF,
       await recsF,
       await providersF,
+      failedSeasons,
     );
+  }
+
+  Future<void> _retrySeason(_TvData data, int seasonNumber) async {
+    setState(() => _retryingSeasons.add(seasonNumber));
+    try {
+      final eps = await _api.getSeasonEpisodes(data.show.id, seasonNumber);
+      data.episodesBySeason[seasonNumber] = eps;
+      data.failedSeasons.remove(seasonNumber);
+      data.rebuildFlat();
+    } catch (_) {
+      // Still failing — keep the retry row.
+    }
+    if (mounted) setState(() => _retryingSeasons.remove(seasonNumber));
   }
 
   @override
@@ -921,6 +952,8 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
                               : l10n.tvMarkSeasonWatched),
                         ),
                       ),
+                    if (data.failedSeasons.contains(season.seasonNumber))
+                      _seasonRetryRow(context, data, season.seasonNumber),
                     if (showsMoreComing) _moreEpisodesBanner(context),
                     ...eps.map((ep) => _episodeTile(context, data, ep, watched)),
                     const SizedBox(height: 8),
@@ -931,6 +964,32 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
           );
         },
         childCount: show.seasons.length,
+      ),
+    );
+  }
+
+  Widget _seasonRetryRow(BuildContext context, _TvData data, int seasonNumber) {
+    final l10n = AppLocalizations.of(context)!;
+    final retrying = _retryingSeasons.contains(seasonNumber);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 4, 8, 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(l10n.tvSeasonLoadFailed,
+                style:
+                    TextStyle(color: context.colors.textMuted, fontSize: 12.5)),
+          ),
+          TextButton(
+            onPressed: retrying ? null : () => _retrySeason(data, seasonNumber),
+            child: retrying
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2))
+                : Text(l10n.retryAction),
+          ),
+        ],
       ),
     );
   }
@@ -977,7 +1036,7 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
                 const SizedBox(height: 3),
                 Text(
                   [
-                    if (ep.airDate.isNotEmpty) ep.airDate,
+                    if (ep.airDate.isNotEmpty) formatTmdbDate(context, ep.airDate),
                     if (ep.runtime > 0) l10n.tvRuntimeMinutes(ep.runtime.toString()),
                     if (!ep.hasAired) l10n.tvNotAired,
                   ].join('  •  '),

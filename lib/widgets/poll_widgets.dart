@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
@@ -13,10 +14,16 @@ final Set<String> _votesInFlight = {};
 
 Future<void> _castVote(
     BuildContext context, String pollId, String category, String value) async {
-  final key = '$pollId/$category';
-  if (!_votesInFlight.add(key)) return;
   final messenger = ScaffoldMessenger.maybeOf(context);
   final l10n = AppLocalizations.of(context)!;
+  // Guests: PollService.vote is a silent no-op without a user, so the tap
+  // used to do nothing at all.
+  if (FirebaseAuth.instance.currentUser == null) {
+    messenger?.showSnackBar(SnackBar(content: Text(l10n.pollSignInToVote)));
+    return;
+  }
+  final key = '$pollId/$category';
+  if (!_votesInFlight.add(key)) return;
   try {
     await PollService.instance.vote(pollId, category, value);
   } catch (e) {

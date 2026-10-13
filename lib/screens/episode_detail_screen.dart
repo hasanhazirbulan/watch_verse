@@ -87,7 +87,7 @@ class _EpisodeDetailScreenState extends State<EpisodeDetailScreen> {
           const SizedBox(height: 8),
           Text(
             [
-              if (ep.airDate.isNotEmpty) ep.airDate,
+              if (ep.airDate.isNotEmpty) formatTmdbDate(context, ep.airDate),
               if (ep.runtime > 0) l10n.episodeRuntimeMinutes(ep.runtime),
               if (ep.voteAverage > 0)
                 l10n.episodeRatingStars(ep.voteAverage.toStringAsFixed(1)),
@@ -304,8 +304,17 @@ class _EpisodeDetailScreenState extends State<EpisodeDetailScreen> {
                 onPressed: () async {
                   final messenger = ScaffoldMessenger.of(context);
                   final focus = FocusScope.of(context);
-                  await _tracking.setEpisodeNote(show.id, ep.key,
-                      note: _noteController.text.trim());
+                  try {
+                    await _tracking.setEpisodeNote(show.id, ep.key,
+                        note: _noteController.text.trim());
+                  } catch (_) {
+                    // Used to throw unhandled and leave the user thinking
+                    // the note was saved; keep the typed text and say so.
+                    messenger.showSnackBar(
+                      SnackBar(content: Text(l10n.errorGeneric)),
+                    );
+                    return;
+                  }
                   focus.unfocus();
                   messenger.showSnackBar(
                     SnackBar(content: Text(l10n.episodeNoteSaved)),

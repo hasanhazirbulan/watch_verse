@@ -6,6 +6,21 @@ import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
 
+/// Formats a TMDB `YYYY-MM-DD` date string for display in the current locale
+/// (e.g. "Oct 13, 2026" / "13 Eki 2026"). Falls back to the raw string when
+/// it doesn't parse, so odd/partial TMDB dates still show something.
+String formatTmdbDate(BuildContext context, String raw) {
+  // Only full dates: DateTime.tryParse('2026') would turn a bare year into
+  // "Jan 1, 2026".
+  final parsed = RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(raw)
+      ? DateTime.tryParse(raw)
+      : null;
+  if (parsed == null) return raw;
+  // formatShortDate is yMMMd ("Oct 13, 2026"); formatMediumDate drops the
+  // year, which matters for back-catalogue air dates.
+  return MaterialLocalizations.of(context).formatShortDate(parsed);
+}
+
 /// Network image with a branded placeholder and smooth fade-in. Used for every
 /// poster/backdrop/still in the app so failures degrade gracefully.
 class TmdbImage extends StatelessWidget {

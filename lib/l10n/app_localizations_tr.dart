@@ -1965,4 +1965,16 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get dailyGamePickAnotherDay => 'Başka bir gün seç';
+
+  @override
+  String get pollSignInToVote => 'Oy vermek için giriş yap.';
+
+  @override
+  String get tvSeasonLoadFailed => 'Bu sezonun bölümleri yüklenemedi.';
+
+  @override
+  String get discoverLoadMoreFailed => 'Daha fazlası yüklenemedi.';
+
+  @override
+  String get retryAction => 'Tekrar dene';
 }

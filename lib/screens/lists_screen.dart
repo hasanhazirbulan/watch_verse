@@ -39,6 +39,12 @@ class _ListsScreenState extends State<ListsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.proListLimitReached)));
       showPaywallSheet(context);
+    } catch (_) {
+      // Any other failure (offline, permission) used to go unhandled with
+      // no feedback — the list just never appeared.
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
     }
   }
 

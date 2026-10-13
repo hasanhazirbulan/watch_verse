@@ -1254,5 +1254,9 @@
   "dailyGameRetry": "Try again",
   "dailyGameSignInPrompt": "Sign in to play the daily movie game.",
   "dailyGameGuessedAlready": "Already guessed",
-  "dailyGamePickAnotherDay": "Pick a day"
+  "dailyGamePickAnotherDay": "Pick a day",
+  "pollSignInToVote": "Sign in to vote.",
+  "tvSeasonLoadFailed": "Couldn't load this season's episodes.",
+  "discoverLoadMoreFailed": "Couldn't load more.",
+  "retryAction": "Retry"
 }

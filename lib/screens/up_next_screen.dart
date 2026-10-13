@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
@@ -81,6 +84,50 @@ class _UpNextScreenState extends State<UpNextScreen> {
   // instant the swipe is confirmed so the card doesn't reappear while the
   // Firestore delete + tracked-shows stream round-trip catches up.
   final Set<int> _hiddenShowIds = {};
+
+  // The tracked-shows stream used to be created inside build(), so every
+  // chip tap / tab switch handed StreamBuilder a new stream: it resubscribed
+  // to Firestore and flashed a spinner. Cached per uid as a broadcast stream
+  // (tabs re-listen to it), with the last snapshot replayed as initialData
+  // for a newly mounted listener (a broadcast stream doesn't replay).
+  String? _showsUid;
+  Stream<List<Map<String, dynamic>>>? _showsStream;
+  List<Map<String, dynamic>>? _lastShows;
+
+  ({Stream<List<Map<String, dynamic>>> stream,
+      List<Map<String, dynamic>>? initial}) _trackedShows() {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      // Guests: the service returns a single-subscription Stream.value([]),
+      // which can't be cached and re-listened to — hand out a fresh one each
+      // time, with [] as initialData so it never shows a spinner.
+      _showsUid = null;
+      _showsStream = null;
+      _lastShows = null;
+      return (stream: Stream.value(const []), initial: const []);
+    }
+    if (_showsStream == null || _showsUid != uid) {
+      _showsUid = uid;
+      _lastShows = null;
+      _showsStream = TvTrackingService.instance
+          .trackedShowsStream()
+          .transform(StreamTransformer<List<Map<String, dynamic>>,
+              List<Map<String, dynamic>>>.fromHandlers(
+            handleData: (shows, sink) {
+              _lastShows = shows;
+              sink.add(shows);
+            },
+            handleError: (e, st, sink) {
+              // Don't keep replaying a dead stream: the next build re-creates
+              // it (e.g. after a tab switch).
+              _showsStream = null;
+              sink.addError(e, st);
+            },
+          ))
+          .asBroadcastStream();
+    }
+    return (stream: _showsStream!, initial: _lastShows);
+  }
 
   List<String> get _showFilters {
     final l10n = AppLocalizations.of(context)!;
@@ -176,6 +223,7 @@ class _UpNextScreenState extends State<UpNextScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final tracked = _trackedShows();
     return Scaffold(
       appBar: AppBar(title: Text(l10n.upNextTitle)),
       body: Column(
@@ -196,7 +244,8 @@ class _UpNextScreenState extends State<UpNextScreen> {
             child: _tab == 2
                 ? _upcomingView()
                 : StreamListView<Map<String, dynamic>>(
-                    stream: TvTrackingService.instance.trackedShowsStream(),
+                    stream: tracked.stream,
+                    initialData: tracked.initial,
                     emptyBuilder: (_) => _empty(
                       Icons.playlist_add_check_circle_outlined,
                       l10n.upNextEmptyTitle,
@@ -309,8 +358,10 @@ class _UpNextScreenState extends State<UpNextScreen> {
   /// tabs doesn't re-fetch every show's episodes.
   Widget _upcomingView() {
     final l10n = AppLocalizations.of(context)!;
+    final tracked = _trackedShows();
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: TvTrackingService.instance.trackedShowsStream(),
+      stream: tracked.stream,
+      initialData: tracked.initial,
       builder: (context, showsSnap) {
         final shows = showsSnap.data ?? const <Map<String, dynamic>>[];
         final ids = shows

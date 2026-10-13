@@ -4,6 +4,27 @@ All notable changes to this project are documented here. Format loosely follows 
 
 ## [Unreleased]
 
+### Changed (2026-10-13)
+- Flutter 3.35.5 → 3.47.6 and every dependency upgraded to its latest major version. iOS plugins now build via Swift Package Manager (CocoaPods only installs Flutter itself) and the app uses the UIScene lifecycle. CI and Xcode Cloud pinned to 3.47.6.
+- Account deletion (`AccountDeletionService`) is now interruption-safe and resumable: it checks for a recent sign-in *before* touching any data, marks the profile `deletionPending`, purges everything (now including `followedLists` and `gamePlays`, previously missed), and if interrupted the app finishes the deletion on the next sign-in (`FinishDeletionScreen`) instead of leaving a live, half-empty account. Still client-side and non-atomic; uploaded images are not yet deleted (the shipped service has no Storage instance).
+- Privacy Policy, Terms of Service, README and in-app text corrected to match what the code actually does (see "Fixed" below).
+
+### Fixed (2026-10-13)
+- `firestore.rules`: the `followers`/`likes` count-manipulation gap is closed again, this time correctly — `onlyOwnUidToggled()` lets a non-owner add/remove only their own uid and allows no-op writes (double unfollow, retries). Deployed, with 24 emulator tests in `test/firestore_rules/`.
+- Daily game showed a blank screen forever on any load failure; it now shows a sign-in prompt for guests and an error with retry otherwise.
+- `main.dart` zone mismatch (`runZonedGuarded` wrapped only `runApp`) removed.
+- Privacy Policy: removed false claims that the push token is deleted when notifications are turned off (it is removed on sign-out), that images are deleted with the account, that reports contain no reporter identity, that Cloud Functions are in use, and that email/blocked list are strictly private (they are stored on the profile record any signed-in user's app can read); added Patron, group polls, followed lists, daily game data, public lists, analytics legal basis, resumable deletion, and the free CSV export.
+- Terms of Service: listed CSV export and the daily game as Pro features (export is free; the game is currently ungated), had no Patron tier, and claimed reported comments are auto-hidden (that Cloud Function isn't deployed).
+- In-app text: block confirmation claimed "you won't see their content" (only their comments are hidden, plus you unfollow them); episode note hint called the private note a "comment"; history empty state mentioned only episodes; delete-account dialog now lists what's deleted and that an App Store subscription isn't cancelled automatically; restore/active-subscription messages no longer say "Pro" for Patron subscribers. Turkish translation made consistently informal ("sen"), with terminology fixes ("başlık" → "yapım" for titles). Removed the unused `proFeatureExport` string and a duplicate `movieYourRating` key.
+
+### Added (2026-10-04)
+- **Patron** subscription tier above Pro (Pro: unlimited lists, advanced stats; Patron: Pro + exclusive profile themes), with a Pro/Patron toggle in the paywall sheet. Both tiers share one App Store subscription group.
+- Free, complete data export: Settings → "Export my data (CSV)" shares movies, shows, diary and lists as four CSV files. Previously a diary-only Pro feature.
+
+### Fixed (2026-10-04)
+- Unfollow instantly re-followed in production — caused by the 2026-10-03 rules change below, which was reverted.
+- Friends feed made one profile read per followed user per load; batched into a single query per call.
+
 ### Added (2026-10-03)
 - `docs/terms-of-service.html`, hosted and linked from Settings → About and the paywall sheet alongside the Privacy Policy (`lib/services/legal_links.dart`) — required for the WatchVerse Pro subscription under App Store guideline 3.1.2.
 - Explicit subscription-terms disclosure (renewal, pricing, cancellation) directly in the paywall sheet, also required by guideline 3.1.2.
@@ -11,9 +32,12 @@ All notable changes to this project are documented here. Format loosely follows 
 
 ### Fixed (2026-10-03)
 - `docs/privacy-policy.html` falsely claimed "no in-app purchases" after the Pro subscription had already shipped; corrected and added a payment-data section.
-- `firestore.rules`: `followers`/`likes` array fields let any signed-in user add/remove an arbitrary other uid, not just their own — tightened via `isSelfOnlyArrayToggle()`.
+- `firestore.rules`: `followers`/`likes` array fields let any signed-in user add/remove an arbitrary other uid, not just their own — tightened via `isSelfOnlyArrayToggle()`. **Reverted 2026-10-04** (it rejected no-op removals and broke unfollow); fixed properly on 2026-10-13.
 - `ios/Podfile`: pod-level `IPHONEOS_DEPLOYMENT_TARGET`s below 15.0 made Xcode 27 refuse to archive the project at all; clamped in `post_install`.
 - Daily movie game was unreachable by any tester — gated behind a Pro subscription that had no purchasable products yet in App Store Connect. Gate temporarily removed pending a confirmed-working subscription.
+
+### Added (2026-08-09)
+- WatchVerse Pro subscription (StoreKit via `in_app_purchase`, no backend) and the daily "guess the movie" game.
 
 ### Added
 - Light/dark/system theme toggle (Settings → Appearance), persisted across launches.

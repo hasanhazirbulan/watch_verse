@@ -78,6 +78,7 @@
     margin: 20px 0;
   }
   .callout p { margin: 0; }
+  .callout ul { margin: 8px 0 0; }
   footer {
     margin-top: 56px;
     padding-top: 22px;
@@ -92,7 +93,7 @@
 
 <header>
   <h1>Privacy Policy</h1>
-  <p class="meta">WatchVerse &middot; Last updated: 3 October 2026</p>
+  <p class="meta">WatchVerse &middot; Last updated: 13 October 2026</p>
 </header>
 
 <p class="lead">
@@ -131,36 +132,45 @@
   <li><strong>Password</strong> — handled entirely by Google Firebase
       Authentication. It is stored as a salted hash on Google's systems; the
       app never receives or stores your plain password.</li>
-  <li><strong>Display name and profile photo</strong> — optional, and only if
-      you add them.</li>
+  <li><strong>Display name, profile photo, profile background and the
+      &ldquo;If I were a movie/TV character&rdquo; line</strong> — optional,
+      and only if you add them.</li>
   <li><strong>Account creation date.</strong></li>
 </ul>
 
 <h3>Library and viewing data</h3>
 <ul>
-  <li>Movies and shows you mark as <em>To Watch</em> or <em>Watched</em>, and
-      the up-to-three films you pick as favourites.</li>
+  <li>Movies and shows you mark as <em>To Watch</em>, <em>Watched</em> or
+      favourite, and the up-to-three films you showcase on your profile.</li>
   <li>Star ratings you give.</li>
   <li>Diary entries: the date you watched something, plus any note you write.</li>
-  <li>Custom lists you create.</li>
+  <li>Custom lists you create, and other users' public lists you follow.</li>
   <li>Per-episode watched marks and private episode notes.</li>
   <li>Your answers to the post-watch &ldquo;How was it?&rdquo; poll (rating,
       platform, emotion, favourite character).</li>
+  <li>Your daily movie game results.</li>
 </ul>
 
 <h3>Social data</h3>
 <ul>
   <li>Who you follow, and who follows you.</li>
   <li>Users you have blocked.</li>
-  <li>Comments you post on titles, and likes you give to comments.</li>
+  <li>Comments you post on titles (including any photo or GIF you attach), and
+      likes you give to comments.</li>
+  <li>&ldquo;What should we watch?&rdquo; group polls you create or are
+      invited to, and your votes in them.</li>
   <li>Content reports you submit for moderation.</li>
 </ul>
 
 <h3>Technical data</h3>
 <ul>
   <li><strong>Push notification token</strong> — a device identifier issued by
-      Firebase Cloud Messaging, stored only if you allow notifications. It is
-      deleted from your profile when you turn notifications off.</li>
+      Firebase Cloud Messaging, stored on your profile while you are signed in
+      on a device where you allowed notifications. It is removed from your
+      profile when you sign out. Your notification on/off choices from
+      Settings are stored on your profile too. WatchVerse does not currently
+      send push notifications; the token is stored so they can be delivered
+      once that feature is switched on.</li>
   <li>Google Firebase records standard technical information such as IP address
       and timestamps when the app connects to its servers.</li>
   <li><strong>App usage data (Firebase Analytics)</strong> — which screens you
@@ -174,23 +184,25 @@
       fixed. Also not linked to your account.</li>
 </ul>
 
-<h3>Payment data (WatchVerse Pro)</h3>
+<h3>Payment data (WatchVerse Pro and Patron)</h3>
 <ul>
-  <li>WatchVerse offers an optional <strong>WatchVerse Pro</strong>
-      subscription, purchased entirely through Apple's In-App Purchase
-      (StoreKit) system. Your payment card details are handled by Apple and
-      are never seen, received, or stored by WatchVerse.</li>
-  <li>We only ever learn whether your Apple ID currently holds an active
-      Pro entitlement &mdash; stored on your device, not on our servers
-      &mdash; so that Pro features unlock. No purchase history, billing
-      address, or card information reaches us.</li>
+  <li>WatchVerse offers optional <strong>Pro</strong> and
+      <strong>Patron</strong> subscriptions, purchased entirely through
+      Apple's In-App Purchase (StoreKit) system. Your payment card details are
+      handled by Apple and are never seen, received, or stored by
+      WatchVerse.</li>
+  <li>The app only learns which subscription tier StoreKit reports for your
+      Apple ID, and stores that on your device &mdash; not on our servers and
+      not on your WatchVerse account &mdash; so that subscriber features
+      unlock. No purchase history, billing address, or card information
+      reaches us.</li>
 </ul>
 
 <div class="callout">
   <p>
     <strong>We do not collect</strong> your contacts, your location, your
-    photos beyond a profile picture you deliberately choose, or your
-    device's advertising identifier.
+    photos beyond a profile picture or comment image you deliberately choose,
+    or your device's advertising identifier.
   </p>
 </div>
 
@@ -209,37 +221,66 @@
   </thead>
   <tbody>
     <tr>
-      <td>Display name and profile photo</td>
-      <td>Diary entries and their notes</td>
+      <td>Display name, profile photo, profile background and character
+          line</td>
+      <td>Your diary (see the note below about the latest diary note)</td>
     </tr>
     <tr>
-      <td>Movies and shows you have watched</td>
-      <td>Custom lists</td>
+      <td>Movies and shows in your library, with your ratings</td>
+      <td>Custom lists (unless you make one public)</td>
     </tr>
     <tr>
-      <td>Your favourite films</td>
-      <td>Private per-episode notes</td>
+      <td>Your favourite and showcased films</td>
+      <td>Per-episode watched marks and private episode notes</td>
     </tr>
     <tr>
       <td>Your watch activity timeline</td>
-      <td>Your individual poll answers</td>
+      <td>Your individual post-watch poll answers</td>
     </tr>
     <tr>
-      <td>Comments you post</td>
-      <td>Your email address</td>
+      <td>Comments you post, and the images attached to them</td>
+      <td>Public lists you follow</td>
     </tr>
     <tr>
       <td>Your follower and following lists</td>
-      <td>Your blocked-users list</td>
+      <td>Your daily game results</td>
+    </tr>
+    <tr>
+      <td>Custom lists you choose to make public</td>
+      <td></td>
     </tr>
   </tbody>
 </table>
 </div>
 
 <p>
-  Poll results are shown to everyone only as anonymous aggregate percentages —
-  other users see that, for example, 62% of voters chose &ldquo;Wow&rdquo;, but
-  never who voted for what.
+  <strong>&ldquo;What should we watch?&rdquo; group polls</strong> are visible
+  only to the people invited to them, and those members can see who voted for
+  which option.
+</p>
+
+<p>
+  <strong>Stored on your profile record but not shown in the app.</strong>
+  Your email address, your blocked-users list, your push notification token
+  and your notification settings are currently stored on the same profile
+  record as your display name. The app never displays them to anyone, but the
+  database rules allow any signed-in user's app to read that record, so they
+  are not technically restricted to you alone. Likewise, when you log a movie
+  with a diary note, the most recent note is also copied onto that movie's
+  library record, which other signed-in users' apps can read even though the
+  app does not show it to them.
+</p>
+
+<p>
+  <strong>Images.</strong> Profile photos and images attached to comments are
+  stored at links that anyone who has the link can open, including people
+  without a WatchVerse account.
+</p>
+
+<p>
+  Post-watch poll results are shown to everyone only as anonymous aggregate
+  percentages — other users see that, for example, 62% of voters chose
+  &ldquo;Wow&rdquo;, but never who voted for what.
 </p>
 
 <h2>4. Why we process it, and on what legal basis</h2>
@@ -257,6 +298,9 @@
   <li><strong>To keep the service safe</strong> (handling content reports,
       blocking abuse) — our legitimate interest in a functioning service
       (GDPR art. 6(1)(f)) and the legitimate-interest basis in KVKK art. 5/2-f.</li>
+  <li><strong>To understand app usage and fix crashes</strong> (Firebase
+      Analytics and Crashlytics) — our legitimate interest in a working,
+      improving app, on the same bases as above.</li>
 </ul>
 
 <p>
@@ -279,10 +323,10 @@
   <tbody>
     <tr>
       <td><strong>Google Firebase</strong><br>(Authentication, Firestore,
-          Storage, Cloud Messaging, Cloud Functions, Analytics,
-          Crashlytics)</td>
-      <td>Hosts the account system, database, profile images, push
-          notifications, app-usage analytics, and crash reporting</td>
+          Storage, Cloud Messaging, Analytics, Crashlytics)</td>
+      <td>Hosts the account system, database, profile and comment images,
+          push notification tokens, app-usage analytics, and crash
+          reporting</td>
       <td>All account, library, and social data described above, plus
           anonymous usage and crash data not linked to your account</td>
     </tr>
@@ -298,13 +342,19 @@
       <td>Your device's IP address and the GIF search terms you type</td>
     </tr>
     <tr>
+      <td><strong>Websites you link in comments</strong></td>
+      <td>Showing a GIF or image someone added to a comment by link</td>
+      <td>When a comment contains an image link, your device loads it
+          directly from that website, which sees your IP address</td>
+    </tr>
+    <tr>
       <td><strong>Apple / Google</strong></td>
       <td>App distribution and push delivery</td>
       <td>Standard app-store and notification-delivery data</td>
     </tr>
     <tr>
       <td><strong>Apple (In-App Purchase / StoreKit)</strong></td>
-      <td>Processes WatchVerse Pro subscription payments</td>
+      <td>Processes Pro and Patron subscription payments</td>
       <td>Your payment and billing details, handled entirely by Apple under
           its own privacy policy &mdash; WatchVerse never receives them</td>
     </tr>
@@ -324,10 +374,14 @@
 <ul>
   <li><strong>Account and library data</strong> — kept until you delete your
       account.</li>
-  <li><strong>Push notification token</strong> — deleted as soon as you
-      disable notifications.</li>
+  <li><strong>Push notification token</strong> — removed from your profile
+      when you sign out, and deleted with your account.</li>
   <li><strong>Comments</strong> — kept until you delete them individually, or
       until you delete your account.</li>
+  <li><strong>Uploaded images</strong> (profile picture, comment images) —
+      replacing your profile picture overwrites the old one, but deleting a
+      comment or your account does not currently delete the image file. Email
+      us and we will delete them.</li>
   <li><strong>Aggregate poll counts</strong> — kept indefinitely, but they
       contain no identifier and cannot be traced back to you.</li>
 </ul>
@@ -336,32 +390,48 @@
 
 <p>
   You can delete your account yourself: open <strong>Settings &rarr; Delete
-  account</strong> in the app. No email request and no waiting period is
-  required. Deletion is immediate and permanent, and it removes:
+  Account</strong> in the app. No email request and no waiting period is
+  required. For security, the app asks you to sign in again first if your
+  last sign-in was more than a few minutes ago. Deletion starts immediately
+  and is permanent. If it is interrupted (for example, the app is closed or
+  the connection drops), the account is marked for deletion and the app
+  finishes deleting it the next time you sign in, instead of letting you keep
+  using a partly deleted account. It removes:
 </p>
 
 <ul>
   <li>your profile, display name and account record;</li>
   <li>your movie and show library, including favourites and ratings;</li>
   <li>your activity timeline, diary entries and their notes;</li>
-  <li>your custom lists and your private per-episode notes;</li>
-  <li>your individual poll answers;</li>
+  <li>your custom lists, the lists you follow, and your private per-episode
+      notes and watched marks;</li>
+  <li>your individual poll answers and your daily game results;</li>
   <li>every comment you have posted, and your likes on other people's
       comments;</li>
-  <li>your profile picture and any images you attached to comments;</li>
   <li>your entry in the follower lists of people you followed;</li>
   <li>your login credentials.</li>
 </ul>
 
 <div class="callout">
-  <p>
-    <strong>One exception.</strong> If you have used the report button to flag
-    someone else's comment, that moderation record is kept. It contains only
-    the reported comment and a timestamp, and it is retained on
-    legitimate-interest grounds so that abuse reports survive the reporter
-    closing their account. Aggregate poll percentages also remain, but they
-    carry no identifier and cannot be traced back to you.
-  </p>
+  <p><strong>What in-app deletion does not currently remove:</strong></p>
+  <ul>
+    <li><strong>Uploaded images.</strong> Your profile picture and any images
+        you uploaded to comments stay in storage after the account is deleted.
+        Email us and we will delete them.</li>
+    <li><strong>Moderation reports.</strong> If you have used the report
+        button to flag someone else's comment, that record is kept. It
+        contains the reported comment's ID, your account ID and a timestamp,
+        and it is retained on legitimate-interest grounds so that abuse
+        reports survive the reporter closing their account.</li>
+    <li><strong>Other people's follow lists.</strong> Your account ID (not your
+        name or email) can remain in the &ldquo;following&rdquo; list of users
+        who followed you.</li>
+    <li><strong>Group polls.</strong> &ldquo;What should we watch?&rdquo; polls
+        you created (including your display name as creator) or voted in
+        remain visible to their other members.</li>
+    <li><strong>Aggregate post-watch poll percentages.</strong> These carry no
+        identifier and cannot be traced back to you.</li>
+  </ul>
 </div>
 
 <h2>8. Your rights</h2>
@@ -374,7 +444,9 @@
 <ul>
   <li>learn whether your personal data is being processed, and request
       information about it;</li>
-  <li>obtain a copy of the data we hold about you;</li>
+  <li>obtain a copy of the data we hold about you &mdash; you can also export
+      your movies, shows, diary entries and lists yourself, free, as CSV files
+      from <strong>Settings &rarr; Export my data (CSV)</strong>;</li>
   <li>have inaccurate or incomplete data corrected;</li>
   <li>have your data deleted, and request that third parties to whom it was
       transferred are informed;</li>

@@ -18,16 +18,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get emailHint => 'E-posta';
 
   @override
-  String get emailRequired => 'Lütfen e-posta adresinizi girin';
+  String get emailRequired => 'Lütfen e-posta adresini gir';
 
   @override
-  String get emailInvalid => 'Geçerli bir e-posta adresi girin';
+  String get emailInvalid => 'Geçerli bir e-posta adresi gir';
 
   @override
   String get passwordHint => 'Şifre';
 
   @override
-  String get passwordRequiredLogin => 'Lütfen şifrenizi girin';
+  String get passwordRequiredLogin => 'Lütfen şifreni gir';
 
   @override
   String get logIn => 'Giriş Yap';
@@ -36,7 +36,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get continueAsGuest => 'Misafir olarak devam et';
 
   @override
-  String get noAccountPrompt => 'Hesabınız yok mu?';
+  String get noAccountPrompt => 'Hesabın yok mu?';
 
   @override
   String get register => 'Kayıt Ol';
@@ -66,13 +66,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get usernameHint => 'Kullanıcı adı';
 
   @override
-  String get usernameRequired => 'Lütfen bir kullanıcı adı girin';
+  String get usernameRequired => 'Lütfen bir kullanıcı adı gir';
 
   @override
   String get confirmPasswordHint => 'Şifreyi onayla';
 
   @override
-  String get passwordRequiredRegister => 'Lütfen bir şifre girin';
+  String get passwordRequiredRegister => 'Lütfen bir şifre gir';
 
   @override
   String get passwordTooShort => 'En az 6 karakter olmalı';
@@ -84,7 +84,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get createAccountButton => 'Hesap Oluştur';
 
   @override
-  String get alreadyHaveAccountPrompt => 'Zaten hesabınız var mı?';
+  String get alreadyHaveAccountPrompt => 'Zaten hesabın var mı?';
 
   @override
   String get logInLowercase => 'Giriş yap';
@@ -131,6 +131,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsNotifySharedWatch => 'Ortak içerik eşleşmesi';
 
   @override
+  String get settingsNotificationsNotLive =>
+      'Anlık bildirimler henüz gönderilmiyor. Buradaki tercihlerin kaydedilir ve bildirimler başladığında geçerli olur.';
+
+  @override
   String settingsAppVersion(String version) {
     return 'Sürüm $version';
   }
@@ -144,7 +148,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get settingsDeleteAccountConfirmBody =>
-      'Bu işlem geri alınamaz. Hesabın ve giriş bilgilerin kalıcı olarak silinecek.';
+      'Bu işlem geri alınamaz. Hesabın, giriş bilgilerin, kütüphanen, listelerin, günlüğün ve yorumların kalıcı olarak silinecek. App Store aboneliğin otomatik olarak iptal edilmez — cihazının abonelik ayarlarından ayrıca iptal etmelisin.';
 
   @override
   String get settingsDeleteAccountAction => 'Sil';
@@ -187,7 +191,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editNameTitle => 'Adı Düzenle';
 
   @override
-  String get enterNewNameHint => 'Yeni adı girin';
+  String get enterNewNameHint => 'Yeni adı gir';
 
   @override
   String get cancel => 'İptal';
@@ -242,13 +246,13 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get tvOverviewTitle => 'Genel Bakış';
+  String get tvOverviewTitle => 'Özet';
 
   @override
   String get tvSeasonsTitle => 'Sezonlar';
 
   @override
-  String get tvMoreLikeThisTitle => 'Bunlara Benzer';
+  String get tvMoreLikeThisTitle => 'Buna Benzer';
 
   @override
   String get tvAddToListTooltip => 'Listeye ekle';
@@ -280,7 +284,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String tvMarkPreviousQuestion(String episodesPhrase) {
-    return 'İleri atladınız. $episodesPhrase de izlendi olarak işaretlensin mi?';
+    return 'İleri atladın. $episodesPhrase de izlendi olarak işaretlensin mi?';
   }
 
   @override
@@ -301,7 +305,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String tvFinishedShow(String name) {
-    return '🎉 $name dizisini bitirdiniz!';
+    return '🎉 $name dizisini bitirdin!';
   }
 
   @override
@@ -321,7 +325,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get tvRemoveButton => 'Kaldır';
 
   @override
-  String get tvYourProgress => 'İlerlemeniz';
+  String get tvYourProgress => 'İlerlemen';
 
   @override
   String tvProgressFraction(String watched, String total) {
@@ -334,10 +338,10 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get tvYourRating => 'Puanınız';
+  String get tvYourRating => 'Puanın';
 
   @override
-  String get movieYourRating => 'Puanınız';
+  String get movieYourRating => 'Puanın';
 
   @override
   String get movieCannotMarkUnreleased => 'Bu film henüz vizyona girmedi.';
@@ -417,7 +421,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get profileEditProfileTitle => 'Profili Düzenle';
 
   @override
-  String get profileYourNameHint => 'Adınız';
+  String get profileYourNameHint => 'Adın';
 
   @override
   String get profileCharacterQuoteHint => 'Bir film/dizi karakteri olsaydım...';
@@ -431,13 +435,13 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get profileSignInPrompt => 'Profilinizi görmek için giriş yapın.';
+  String get profileSignInPrompt => 'Profilini görmek için giriş yap.';
 
   @override
   String get profileTitle => 'Profil';
 
   @override
-  String get profileAddYourName => 'Adınızı ekleyin';
+  String get profileAddYourName => 'Adını ekle';
 
   @override
   String get profileFriendsActivity => 'Arkadaş Etkinliği';
@@ -473,12 +477,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String profileDurationCompact(String hours, String minutes) {
-    return '${hours}s ${minutes}d';
+    return '${hours}sa ${minutes}dk';
   }
 
   @override
   String profileDurationDaysHours(String days, String hours) {
-    return '${days}g ${hours}s';
+    return '${days}g ${hours}sa';
   }
 
   @override
@@ -487,7 +491,7 @@ class AppLocalizationsTr extends AppLocalizations {
     String days,
     String hours,
   ) {
-    return '${months}a ${days}g ${hours}s';
+    return '${months}ay ${days}g ${hours}sa';
   }
 
   @override
@@ -507,7 +511,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String profileYourYear(String year) {
-    return '$year Yılınız';
+    return '$year Yılın';
   }
 
   @override
@@ -593,7 +597,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get movieWatched => 'İzlendi';
 
   @override
-  String get movieYourDiary => 'Günlüğünüz';
+  String get movieYourDiary => 'Günlüğün';
 
   @override
   String get movieLogAction => 'Kaydet';
@@ -603,7 +607,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get movieDiaryEmpty =>
-      'Henüz kayıt yok. Günlüğünüze başlamak için bir izleme kaydedin — tekrar izlemelerinizi kendi tarihleriyle kaydedebilirsiniz.';
+      'Henüz kayıt yok. Günlüğüne başlamak için bir izleme kaydet — tekrar izlemelerini kendi tarihleriyle kaydedebilirsin.';
 
   @override
   String movieLogSheetTitle(String action, String title) {
@@ -620,7 +624,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get movieDiaryNote => 'Günlük notu';
 
   @override
-  String get movieDiaryNoteHint => 'Ne düşündünüz?';
+  String get movieDiaryNoteHint => 'Ne düşündün?';
 
   @override
   String get movieSaveRewatch => 'Tekrar izlemeyi kaydet';
@@ -751,7 +755,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get upNextEmptySubtitle =>
-      'Bir diziyi takip edin ve bölümleri izlendi olarak işaretleyin — bir sonraki izleyeceğiniz bölüm burada görünecek.';
+      'Bir diziyi takip et ve bölümleri izlendi olarak işaretle — sıradaki izleyeceğin bölüm burada görünecek.';
 
   @override
   String get upNextNoShowsTitle => 'Burada dizi yok';
@@ -783,14 +787,14 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String upNextAllCaughtUpSnackbar(String name) {
-    return '🎉 $name dizisinde güncelsiniz!';
+    return '🎉 $name dizisinde güncelsin!';
   }
 
   @override
   String get upNextMarkWatched => 'İzlendi';
 
   @override
-  String get upNextAllCaughtUp => 'Güncelsiniz';
+  String get upNextAllCaughtUp => 'Güncelsin';
 
   @override
   String get upNextNewEpisodeToday => 'Bugün yeni bölüm';
@@ -811,13 +815,14 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get upNextAllCaughtUpEmptySubtitle =>
-      'İzlenecek yeni bölüm yok — sıradaki bölümler için Yaklaşan sekmesine bakabilirsiniz.';
+      'İzlenecek yeni bölüm yok — sıradaki bölümler için Yaklaşan sekmesine bakabilirsin.';
 
   @override
   String get upNextSwipeStopLabel => 'Bırak';
 
   @override
-  String get upNextStopWatchingTitle => 'Bu diziyi izlemeyi bırak?';
+  String get upNextStopWatchingTitle =>
+      'Bu diziyi izlemeyi bırakmak istiyor musun?';
 
   @override
   String upNextStopWatchingContent(String name) {
@@ -855,18 +860,18 @@ class AppLocalizationsTr extends AppLocalizations {
   String get detailWatchTrailer => 'Fragmanı İzle';
 
   @override
-  String get discoverLoadErrorTitle => 'Başlıklar yüklenemedi';
+  String get discoverLoadErrorTitle => 'İçerikler yüklenemedi';
 
   @override
   String get discoverLoadErrorSubtitle =>
-      'Bağlantınızı kontrol edin ve yenilemek için aşağı çekin.';
+      'Bağlantını kontrol et ve yenilemek için aşağı çek.';
 
   @override
   String get discoverEmptyTitle => 'Burada bir şey yok';
 
   @override
   String discoverEmptySubtitle(String genre) {
-    return '$genre türünde başlık bulunamadı.';
+    return '$genre türünde yapım bulunamadı.';
   }
 
   @override
@@ -882,7 +887,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commentWCommentsLabel => 'Yorumlar';
 
   @override
-  String get commentWSpoilersHint => 'İçerik spoiler barındırabilir';
+  String get commentWSpoilersHint => 'Spoiler içerebilir';
 
   @override
   String get commentWDelete => 'Sil';
@@ -898,11 +903,11 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get commentWReportedSnackbar =>
-      'Bildirildi. Bildirdiğiniz için teşekkürler.';
+      'Şikayet edildi. Bildirdiğin için teşekkürler.';
 
   @override
   String get commentWBlockedSnackbar =>
-      'Engellendi. İçeriklerini artık görmeyeceksiniz.';
+      'Engellendi. Yorumları gizlendi ve takibi bıraktın.';
 
   @override
   String get commentWJustNow => 'şimdi';
@@ -955,17 +960,17 @@ class AppLocalizationsTr extends AppLocalizations {
   String get episodeMarkAsWatchedLabel => 'İzlendi olarak işaretle';
 
   @override
-  String get episodeYourRatingTitle => 'Puanınız';
+  String get episodeYourRatingTitle => 'Puanın';
 
   @override
-  String get episodeYourNotesTitle => 'Notlarınız';
+  String get episodeYourNotesTitle => 'Notların';
 
   @override
   String get episodeNotesPrivateHint =>
-      'Gizli — bunu yalnızca siz görebilirsiniz.';
+      'Gizli — bunu yalnızca sen görebilirsin.';
 
   @override
-  String get episodeNoteHint => 'Bu bölüm hakkında bir not yazın…';
+  String get episodeNoteHint => 'Bu bölüm hakkında bir not yaz…';
 
   @override
   String get episodeNoteSaved => 'Not kaydedildi';
@@ -1003,13 +1008,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commentsAddCommentHint => 'Yorum ekle…';
 
   @override
-  String get commentsSignInHint => 'Sohbete katılmak için giriş yapın.';
+  String get commentsSignInHint => 'Sohbete katılmak için giriş yap.';
 
   @override
   String get commentsEmptyTitle => 'Henüz yorum yok';
 
   @override
-  String get commentsEmptySubtitle => 'Düşüncelerinizi paylaşan ilk kişi olun.';
+  String get commentsEmptySubtitle => 'Düşüncelerini ilk paylaşan sen ol.';
 
   @override
   String get pubProfileFavoriteFilms => 'Favori Filmler';
@@ -1036,10 +1041,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get pubProfileFollowers => 'Takipçiler';
 
   @override
-  String get pubProfileFollowing => 'Takip edilenler';
+  String get pubProfileFollowing => 'Takip Edilenler';
 
   @override
-  String get pubProfileAddedToList => 'Listenize eklendi';
+  String get pubProfileAddedToList => 'Listene eklendi';
 
   @override
   String get searchFilterAll => 'Film ve Dizi';
@@ -1072,13 +1077,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get searchFindFriendsSubtitle =>
-      'İsimle kişi arayın ve ne izlediklerini görmek için takip edin.';
+      'İsimle kişi ara ve ne izlediklerini görmek için takip et.';
 
   @override
-  String get searchFindNextWatchTitle => 'Bir sonraki izleyeceğinizi bulun';
+  String get searchFindNextWatchTitle => 'Sıradaki izleyeceğini bul';
 
   @override
-  String get searchFindNextWatchSubtitle => 'Film ve dizilerde arama yapın.';
+  String get searchFindNextWatchSubtitle => 'Film ve dizilerde arama yap.';
 
   @override
   String get searchNoOneFoundTitle => 'Kimse bulunamadı';
@@ -1227,7 +1232,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String homeBecauseYouWatched(String title) {
-    return '$title izlediğiniz için';
+    return '$title izlediğin için';
   }
 
   @override
@@ -1271,7 +1276,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get listDetailEmptySubtitle =>
-      'Herhangi bir film veya diziyi açın ve \"Listeye ekle\"ye dokunun.';
+      'Herhangi bir film veya diziyi aç ve \"Listeye ekle\"ye dokun.';
 
   @override
   String get personKnownForTitle => 'Bilinen Yapımlar';
@@ -1301,18 +1306,17 @@ class AppLocalizationsTr extends AppLocalizations {
   String get listsTitle => 'Listelerim';
 
   @override
-  String get listsSignInTitle => 'Liste oluşturmak için giriş yapın';
+  String get listsSignInTitle => 'Liste oluşturmak için giriş yap';
 
   @override
   String get listsSignInSubtitle =>
-      '\"2026\'da izle\" gibi kendi koleksiyonlarınızı oluşturun.';
+      '\"2026\'da izle\" gibi kendi koleksiyonlarını oluştur.';
 
   @override
   String get listsEmptyTitle => 'Henüz liste yok';
 
   @override
-  String get listsEmptySubtitle =>
-      'İlk listenizi oluşturmak için +\'ya dokunun.';
+  String get listsEmptySubtitle => 'İlk listeni oluşturmak için +\'ya dokun.';
 
   @override
   String get listsUntitled => 'Adsız';
@@ -1324,11 +1328,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get listsTabFollowing => 'Takip Ettiklerim';
 
   @override
-  String get listsFollowingEmptyTitle => 'Henüz takip ettiğiniz liste yok';
+  String get listsFollowingEmptyTitle => 'Henüz takip ettiğin liste yok';
 
   @override
   String get listsFollowingEmptySubtitle =>
-      'Başka kullanıcılardan takip ettiğiniz herkese açık listeler burada görünecek.';
+      'Başka kullanıcılardan takip ettiğin herkese açık listeler burada görünecek.';
 
   @override
   String listsFollowingByLabel(String name) {
@@ -1336,14 +1340,14 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get listsTitleSingular => 'başlık';
+  String get listsTitleSingular => 'yapım';
 
   @override
-  String get listsTitlePlural => 'başlık';
+  String get listsTitlePlural => 'yapım';
 
   @override
   String get listsCardEmptySubtitle =>
-      'Boş — herhangi bir film veya diziden başlık ekleyin.';
+      'Boş — herhangi bir film veya diziden yapım ekle.';
 
   @override
   String get mediaTypeTv => 'Dizi';
@@ -1358,20 +1362,20 @@ class AppLocalizationsTr extends AppLocalizations {
   String get addToListNewListButton => 'Yeni liste';
 
   @override
-  String get addToListSignInMessage => 'Liste oluşturmak için giriş yapın.';
+  String get addToListSignInMessage => 'Liste oluşturmak için giriş yap.';
 
   @override
   String get addToListEmptyMessage =>
-      'Henüz liste yok — bir tane oluşturmak için \"Yeni liste\"ye dokunun.';
+      'Henüz liste yok — bir tane oluşturmak için \"Yeni liste\"ye dokun.';
 
   @override
   String get addToListUntitled => 'Adsız';
 
   @override
-  String get addToListTitleSingular => 'başlık';
+  String get addToListTitleSingular => 'yapım';
 
   @override
-  String get addToListTitlePlural => 'başlık';
+  String get addToListTitlePlural => 'yapım';
 
   @override
   String get addToListCreateTitle => 'Yeni liste';
@@ -1408,7 +1412,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get historyEmptySubtitle =>
-      'İzlendi olarak işaretlediğiniz bölümler burada görünür.';
+      'İzlendi olarak işaretlediğin filmler ve bölümler burada görünür.';
 
   @override
   String get historyAgoNow => 'şimdi';
@@ -1455,7 +1459,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String watchlistYourRating(String rating) {
-    return 'Puanınız: $rating';
+    return 'Puanın: $rating';
   }
 
   @override
@@ -1476,14 +1480,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get gifLoadErrorTitle => 'GIF\'ler yüklenemedi';
 
   @override
-  String get gifLoadErrorSubtitle =>
-      'Bağlantınızı kontrol edip tekrar deneyin.';
+  String get gifLoadErrorSubtitle => 'Bağlantını kontrol edip tekrar dene.';
 
   @override
   String get gifEmptyTitle => 'GIF bulunamadı';
 
   @override
-  String get gifEmptySubtitle => 'Farklı bir arama deneyin.';
+  String get gifEmptySubtitle => 'Farklı bir arama dene.';
 
   @override
   String get friendsActivityTitle => 'Arkadaş Etkinliği';
@@ -1493,14 +1496,14 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get friendsNoFriendsSubtitle =>
-      'Ne izlediklerini görmek için Arkadaş Bul\'dan kişileri takip edin.';
+      'Ne izlediklerini görmek için Arkadaş Bul\'dan kişileri takip et.';
 
   @override
   String get friendsQuietTitle => 'Şimdilik sessiz';
 
   @override
   String get friendsQuietSubtitle =>
-      'Arkadaşlarınızın son zamanlarda etkinliği yok.';
+      'Arkadaşlarının son zamanlarda etkinliği yok.';
 
   @override
   String get friendsSomeoneFallback => 'Biri';
@@ -1556,7 +1559,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get blockedEmptyTitle => 'Engellenen kullanıcı yok';
 
   @override
-  String get blockedEmptySubtitle => 'Engellediğiniz kişiler burada görünür.';
+  String get blockedEmptySubtitle => 'Engellediğin kişiler burada görünür.';
 
   @override
   String get watchPollsTitle => 'İzleme Oylamaları';
@@ -1582,7 +1585,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get watchPollsEmptySubtitle =>
-      'Arkadaşlarınızın sıradaki bölüm/film için oy vermesi için bir oylama başlatın.';
+      'Ne izleneceğine arkadaşlarının oy vermesi için bir oylama başlat.';
 
   @override
   String get createWatchPollTitle => 'Yeni Oylama';
@@ -1596,18 +1599,18 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get watchPollSearchHint => 'Eklemek için film veya dizi arayın';
+  String get watchPollSearchHint => 'Eklemek için film veya dizi ara';
 
   @override
   String get watchPollInviteLabel => 'Arkadaşları davet et';
 
   @override
   String get watchPollInviteSubtitle =>
-      'İsteğe bağlı — davet edilen herkes oy verebilir. Sadece kendiniz için de oluşturabilirsiniz.';
+      'İsteğe bağlı — davet edilen herkes oy verebilir. Sadece kendin için de oluşturabilirsin.';
 
   @override
   String get watchPollNoFriendsYet =>
-      'Oylamaya davet etmek için önce birkaç arkadaş takip edin.';
+      'Oylamaya davet etmek için önce birkaç arkadaşı takip et.';
 
   @override
   String get watchPollCreateAction => 'Oylama Oluştur';
@@ -1674,9 +1677,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get proFeatureProfile => 'Özel profil temaları';
 
   @override
-  String get proFeatureExport => 'Verilerini CSV olarak dışa aktar';
-
-  @override
   String get proFeatureGame => 'Günlük film tahmin oyunu';
 
   @override
@@ -1712,21 +1712,22 @@ class AppLocalizationsTr extends AppLocalizations {
   String get proRestore => 'Satın alımları geri yükle';
 
   @override
-  String get proRestoreSuccess => 'Pro geri yüklendi!';
+  String get proRestoreSuccess => 'Abonelik geri yüklendi!';
 
   @override
   String get proRestoreFailure =>
-      'Bu hesap için önceki bir satın alma bulunamadı';
+      'Bu Apple ID için önceki bir satın alma bulunamadı';
 
   @override
   String get proPurchaseFailure =>
-      'Satın alma başarısız oldu — lütfen tekrar deneyin';
+      'Satın alma başarısız oldu — lütfen tekrar dene';
 
   @override
-  String get proNotConfigured => 'Pro henüz kullanıma açık değil — yakında';
+  String get proNotConfigured =>
+      'Pro henüz kullanıma açık değil — daha sonra tekrar bak';
 
   @override
-  String get proActiveBadge => 'Pro üyesin';
+  String get proActiveBadge => 'WatchVerse aboneliğin aktif';
 
   @override
   String get proSignInToContinue => 'Devam Etmek İçin Giriş Yap';
@@ -1743,7 +1744,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get proUnlockStats => 'Pro ile kilidi aç';
 
   @override
-  String get proUnlockProfileTheme => 'Pro tema';
+  String get proUnlockProfileTheme => 'Patron teması';
 
   @override
   String get proExporting => 'Dışa aktarman hazırlanıyor…';
@@ -1753,11 +1754,11 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get proLegalFooter =>
-      'Abone olarak Kullanım Koşulları\'nı ve Gizlilik Politikası\'nı kabul etmiş olursunuz.';
+      'Abone olarak Kullanım Koşulları\'nı ve Gizlilik Politikası\'nı kabul etmiş olursun.';
 
   @override
   String get proSubscriptionTerms =>
-      'Ödeme, satın alma onaylandığında Apple ID hesabınızdan tahsil edilir. Abonelikler, mevcut dönem bitmeden en az 24 saat önce otomatik yenileme kapatılmadığı sürece otomatik olarak yenilenir. Cihazınızda Ayarlar > [adınız] > Abonelikler bölümünden istediğiniz zaman yönetebilir veya iptal edebilirsiniz.';
+      'Ödeme, satın alma onaylandığında Apple ID hesabından tahsil edilir. Abonelikler, mevcut dönem bitmeden en az 24 saat önce otomatik yenileme kapatılmadığı sürece otomatik olarak yenilenir. Cihazında Ayarlar > [adın] > Abonelikler bölümünden istediğin zaman yönetebilir veya iptal edebilirsin.';
 
   @override
   String get dailyGameTitle => 'Günlük Film Oyunu';
@@ -1837,7 +1838,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dailyGameLoading => 'Bugünün filmi yükleniyor…';
 
   @override
-  String get dailyGameNoPool => 'Bugünün bulmacası henüz hazır değil — yakında';
+  String get dailyGameNoPool =>
+      'Bugünün bulmacası henüz hazır değil — daha sonra tekrar bak';
 
   @override
   String get dailyGameRetry => 'Tekrar dene';

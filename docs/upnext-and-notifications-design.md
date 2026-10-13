@@ -6,6 +6,13 @@ yeniden düzenlenmesi, (2) yeni bir bildirim sistemi (yeni bölüm hatırlatmala
 teknik implementasyon (veri modeli + tetikleyici mantığı) olarak anlatılıyor.
 Referans verilen dosya/satırlar mevcut koddan alınmıştır, tahmini değildir.
 
+> **Durum (2026-10-13):** Bölüm 2'nin istemci tarafı (FCM token kaydı,
+> Ayarlar'daki bildirim anahtarları, bildirime dokununca yönlendirme) uygulamada
+> mevcut. Bildirimleri gerçekten **gönderen** Cloud Functions
+> (`functions/src/index.ts`) ise **deploy edilmedi** — proje ücretsiz Spark
+> planında ve Cloud Functions çalıştıramıyor. Yani şu an hiçbir anlık bildirim
+> gönderilmiyor. Ayrıntı: `plan.md` → "Notifications".
+
 ---
 
 ## Bölüm 1 — "Sırada" Sekmesi Yeniden Düzenlemesi

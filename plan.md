@@ -116,6 +116,14 @@ Picked up after a long gap. Found: `pubspec.yaml` had an uncommitted `+16` versi
 - [x] **Live production bug: unfollow instantly re-followed.** Root cause and revert — see item 1 and item 67 above.
 - [x] **Data export made free and complete**, per the ASO report's #1 "Now" item: `ExportService.exportAll()` replaces `exportDiaryCsv()` — now shares movies, shows, diary, and lists as four CSVs in one action (`MovieService.allMoviesOnce()` / `TvTrackingService.allShowsOnce()` added to support it). Removed the Pro gate in `SettingsScreen._exportData()` and the now-false "Export your data to CSV" Pro-feature bullet in the paywall sheet — a library should always be the user's to take elsewhere, not a subscription perk, especially in a category that's twice in 2026 validated the fear this answers.
 
+## 10. Session — 2026-10-13
+
+- [x] **Flutter 3.35.5 → 3.47.6 + every dependency to latest major** (commit `8380d41`). Flutter auto-migrated the iOS project to Swift Package Manager plugins and the UIScene lifecycle; CocoaPods now only installs Flutter itself (`flutter run` warns the Podfile is "non-standard" — harmless; full `pod deintegrate` is optional cleanup). First SPM build clones the whole firebase-ios-sdk repo (~1.5 GB), slow once, cached after.
+- [x] **Zone mismatch in `main.dart`** — `runZonedGuarded` wrapped only `runApp`; removed (PlatformDispatcher.onError already covers async errors).
+- [x] **Daily game blank screen (owner never got it to load once).** `_loadMystery()` had no error handling, so any failure left the screen stuck forever; guests (no Firebase account) always failed because `gameConfig` is sign-in-only. Now: guests see a sign-in prompt, failures show error + retry and `debugPrint` the cause. **Root cause for signed-in users NOT confirmed** — check whether `gameConfig/dailyMoviePool` was ever seeded (`tool/seed_daily_game_pool.js`); if it's missing the screen now says "puzzle isn't ready".
+- [ ] **"App won't open / crashes" on the owner's phone — not reproduced.** Simulator debug build launches fine on 3.47.6. Check Crashlytics for the real stack trace before trusting a release.
+- [ ] Build `1.0.0+19` archived (`build/ios/ipa`); upload + "Add for Review" (with the two Patron subscriptions) left to the owner — Claude Code's permission classifier blocks using the ASC API key.
+
 ---
 
 **Note:** This list reflects observations based on the current state of the codebase; final prioritization and scope are up to the project owner.

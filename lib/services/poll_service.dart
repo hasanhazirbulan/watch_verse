@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 /// Cross-user "how was it?" poll (platform watched on / emotion felt /
 /// favorite character), shown right after a movie or episode is marked
@@ -17,11 +18,21 @@ import 'package:firebase_auth/firebase_auth.dart';
 /// keys) can never break a write — the UI already has the cast list in
 /// memory to turn an id back into a label.
 class PollService {
-  PollService._();
+  PollService._({FirebaseFirestore? firestore, FirebaseAuth? auth})
+      : _db = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance;
   static final PollService instance = PollService._();
 
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-  String? get _uid => FirebaseAuth.instance.currentUser?.uid;
+  /// Test-only factory: inject a fake Firestore/Auth instead of touching
+  /// real backends.
+  @visibleForTesting
+  factory PollService.test(
+          {required FirebaseFirestore firestore, required FirebaseAuth auth}) =>
+      PollService._(firestore: firestore, auth: auth);
+
+  final FirebaseFirestore _db;
+  final FirebaseAuth _auth;
+  String? get _uid => _auth.currentUser?.uid;
 
   static const emotionOptions = [
     'happy',
@@ -92,28 +103,32 @@ class PollService {
     final answerRef = _answerRef(pollId);
     if (answerRef == null) return;
 
-    final answerSnap = await answerRef.get();
-    final previous = answerSnap.data()?[category] as String?;
-    if (previous == value) return;
-
     final pollRef = _pollRef(pollId);
     final countsField = '${category}Counts';
     final totalField = '${category}Total';
 
-    if (previous != null) {
-      await pollRef.set({
-        countsField: {previous: FieldValue.increment(-1)},
-      }, SetOptions(merge: true));
-    }
-    await pollRef.set({
-      countsField: {value: FieldValue.increment(1)},
-      if (previous == null) totalField: FieldValue.increment(1),
-      'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    // One transaction, so the "previous answer" read and the count/answer
+    // writes can't interleave with another vote: as separate awaited
+    // writes, two quick taps both read `previous == null` and each bumped
+    // the total (and left the first pick's count incremented for good).
+    await _db.runTransaction((tx) async {
+      final answerSnap = await tx.get(answerRef);
+      final previous = answerSnap.data()?[category] as String?;
+      if (previous == value) return;
 
-    await answerRef.set({
-      category: value,
-      'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+      tx.set(pollRef, {
+        countsField: {
+          ?previous: FieldValue.increment(-1),
+          value: FieldValue.increment(1),
+        },
+        if (previous == null) totalField: FieldValue.increment(1),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      tx.set(answerRef, {
+        category: value,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    });
   }
 }

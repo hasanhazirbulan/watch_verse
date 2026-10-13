@@ -34,8 +34,22 @@ class NotificationService {
 
   final _messaging = FirebaseMessaging.instance;
   final _localNotifications = FlutterLocalNotificationsPlugin();
-  bool _initialized = false;
   GlobalKey<NavigatorState>? _navigatorKey;
+
+  /// The account the FCM token is currently registered for (null when
+  /// signed out). Token registration runs once per *uid*, not once per
+  /// process: a single `_initialized` flag meant a second account signing
+  /// in during the same session (without the sign-out path that reset it)
+  /// never got its token saved. Also read at refresh time by the
+  /// onTokenRefresh listener, so refreshes go to whoever is signed in now
+  /// rather than the uid captured when the listener was attached.
+  String? _uid;
+
+  /// Permission prompt, local-notification setup and the FCM listeners are
+  /// process-wide and run exactly once. They used to re-run on every
+  /// re-initialize, attaching another set of listeners each time — every
+  /// foreground push was then shown once per sign-in this session.
+  bool _setUp = false;
 
   static const _androidChannel = AndroidNotificationChannel(
     'watchverse_default',
@@ -50,43 +64,53 @@ class NotificationService {
       kIsWeb || Platform.isAndroid || Platform.isIOS || Platform.isMacOS;
 
   /// Requests permission, registers the FCM token for [uid], and starts
-  /// listening for foreground/background messages. Safe to call once per
-  /// signed-in session (e.g. from [AuthWrapper] once a user is available).
+  /// listening for foreground/background messages. Safe to call repeatedly
+  /// (e.g. from [AuthWrapper]'s build); does work only when [uid] changes.
   /// [navigatorKey] is used to route a tapped notification to the relevant
   /// screen (see [_handleTap]) without needing a BuildContext at the call
   /// site — pass the same key the app's root `MaterialApp` uses.
   Future<void> initialize(String uid,
       {GlobalKey<NavigatorState>? navigatorKey}) async {
     _navigatorKey = navigatorKey;
-    if (_initialized || !_isSupportedPlatform) return;
-    _initialized = true;
+    // Called from AuthWrapper's build, i.e. on every rebuild — only act when
+    // the signed-in account actually changed.
+    if (uid == _uid || !_isSupportedPlatform) return;
+    _uid = uid;
 
     try {
-      await _messaging.requestPermission(
-          alert: true, badge: true, sound: true);
+      if (!_setUp) {
+        _setUp = true;
+        await _messaging.requestPermission(
+            alert: true, badge: true, sound: true);
 
-      await _localNotifications
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(_androidChannel);
-      await _localNotifications.initialize(
-        settings: const InitializationSettings(
-          android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-          iOS: DarwinInitializationSettings(),
-        ),
-      );
+        await _localNotifications
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>()
+            ?.createNotificationChannel(_androidChannel);
+        await _localNotifications.initialize(
+          settings: const InitializationSettings(
+            android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+            iOS: DarwinInitializationSettings(),
+          ),
+        );
+
+        _messaging.onTokenRefresh.listen((_) {
+          final current = _uid;
+          if (current != null) _saveToken(current);
+        });
+
+        FirebaseMessaging.onBackgroundMessage(
+            firebaseMessagingBackgroundHandler);
+        FirebaseMessaging.onMessage.listen(_showForegroundNotification);
+
+        // Tapped while backgrounded, and tapped from a cold start
+        // respectively.
+        FirebaseMessaging.onMessageOpenedApp.listen(_handleTap);
+        final initial = await _messaging.getInitialMessage();
+        if (initial != null) _handleTap(initial);
+      }
 
       await _saveToken(uid);
-      _messaging.onTokenRefresh.listen((_) => _saveToken(uid));
-
-      FirebaseMessaging.onBackgroundMessage(
-          firebaseMessagingBackgroundHandler);
-      FirebaseMessaging.onMessage.listen(_showForegroundNotification);
-
-      // Tapped while backgrounded, and tapped from a cold start respectively.
-      FirebaseMessaging.onMessageOpenedApp.listen(_handleTap);
-      final initial = await _messaging.getInitialMessage();
-      if (initial != null) _handleTap(initial);
     } catch (e) {
       // Permission denied, unsupported simulator, etc. — the app should
       // keep working without push; just don't retry until the next launch.
@@ -95,13 +119,22 @@ class NotificationService {
   }
 
   Future<void> _saveToken(String uid) async {
-    final token = await _messaging.getToken();
-    if (token == null) return;
     try {
+      // Inside the try: this also runs from the onTokenRefresh listener,
+      // where a getToken() failure (APNs not ready, offline) would otherwise
+      // surface as an uncaught async error.
+      final token = await _messaging.getToken();
+      if (token == null) return;
       await FirebaseFirestore.instance
           .collection('users')
           .doc(uid)
-          .update({'fcmToken': token});
+          .update({
+            'fcmToken': token,
+            // Older builds stored the sign-up email on this world-readable
+            // doc (DatabaseService.createUser); nothing reads it, so drop it
+            // on the owner's next sign-in. A no-op once it's gone.
+            'email': FieldValue.delete(),
+          });
     } catch (e) {
       debugPrint('Could not save FCM token: $e');
     }
@@ -175,7 +208,7 @@ class NotificationService {
   /// Clears the stored token on sign-out so a stale token doesn't linger on
   /// the user doc (best-effort — a `finally`-style cleanup, not critical).
   Future<void> clearToken(String uid) async {
-    _initialized = false;
+    _uid = null;
     try {
       await FirebaseFirestore.instance
           .collection('users')

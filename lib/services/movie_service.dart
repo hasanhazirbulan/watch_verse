@@ -225,18 +225,16 @@ class MovieService {
       _upsert(m, {'rating': rating});
 
   /// Diary entry: marks watched and stores rating + note in one go.
-  Future<void> saveDiary(Movie m, {double? rating, String? note}) async {
-    await _upsert(m, {
-      'status': 'watched',
-      'watchedAt': FieldValue.serverTimestamp(),
-      if (rating != null) 'rating': rating,
-      if (note != null) 'note': note,
-    });
-    await _logWatched(m, rating);
-  }
+  ///
+  /// The note is a *private* diary field, but `users/{uid}/movies/{id}` is
+  /// readable by every signed-in user (public profiles) — so this goes
+  /// through [logWatch], which keeps the note in the owner-only `diary`
+  /// collection and never on the movie doc.
+  Future<void> saveDiary(Movie m, {double? rating, String? note}) =>
+      logWatch(m, rating: rating, note: note);
 
   /// Logs a (re)watch: appends a dated diary entry AND keeps the movie doc's
-  /// status/rating/note in sync with this latest watch. Enables rewatches —
+  /// status/rating in sync with this latest watch. Enables rewatches —
   /// each call adds another entry rather than overwriting.
   Future<void> logWatch(Movie m,
       {double? rating, String? note, DateTime? watchedOn}) async {
@@ -256,7 +254,9 @@ class MovieService {
       'status': 'watched',
       'watchedAt': Timestamp.fromDate(when),
       if (rating != null) 'rating': rating,
-      if (note != null) 'note': note.trim(),
+      // The note stays in the private diary entry above only — see
+      // [saveDiary] for why it must not sit on the movie doc.
+      'note': FieldValue.delete(),
     });
     await _logWatched(m, rating);
   }

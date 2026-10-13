@@ -36,7 +36,11 @@ class AccountDeletionService {
         _storage = storage,
         _now = now ?? DateTime.now;
 
-  static final AccountDeletionService instance = AccountDeletionService._();
+  /// Production instance. Storage must be wired in here: `_storage` is
+  /// nullable only so tests can skip the file steps, and leaving it null in
+  /// production silently skipped deleting profile/comment images.
+  static final AccountDeletionService instance =
+      AccountDeletionService._(storage: FirebaseStorage.instance);
 
   /// Test-only factory. [storage] is nullable so Firestore-level purging can
   /// be verified without a Storage fake — pass null to skip the file steps.
@@ -80,6 +84,17 @@ class AccountDeletionService {
   Future<void> _purgeOwnData(String uid) async {
     final userRef = _db.collection('users').doc(uid);
 
+    // Episode notes can outlive their show doc (removeShow() only deletes
+    // `watched`), and a subcollection under a missing parent doc never shows
+    // up in `shows.get()` below. Collect show ids from the activity timeline
+    // *before* it is deleted so those orphaned notes are still found.
+    final showIds = <String>{};
+    final activity = await userRef.collection('activity').get();
+    for (final doc in activity.docs) {
+      final showId = doc.data()['showId'];
+      if (showId is num) showIds.add(showId.toInt().toString());
+    }
+
     await _deleteAll(userRef.collection('movies'));
     await _deleteAll(userRef.collection('activity'));
     await _deleteAll(userRef.collection('diary'));
@@ -89,9 +104,11 @@ class AccountDeletionService {
     await _deleteAll(userRef.collection('gamePlays'));
 
     final shows = await userRef.collection('shows').get();
-    for (final show in shows.docs) {
-      await _deleteAll(show.reference.collection('watched'));
-      await _deleteAll(show.reference.collection('notes'));
+    showIds.addAll(shows.docs.map((d) => d.id));
+    for (final showId in showIds) {
+      final show = userRef.collection('shows').doc(showId);
+      await _deleteAll(show.collection('watched'));
+      await _deleteAll(show.collection('notes'));
     }
     await _deleteAll(userRef.collection('shows'));
   }
@@ -124,9 +141,48 @@ class AccountDeletionService {
         (me.data()?['following'] as List?)?.cast<String>() ?? const <String>[];
 
     for (final targetUid in following) {
-      await _db.collection('users').doc(targetUid).set({
-        'followers': FieldValue.arrayRemove([uid]),
-      }, SetOptions(merge: true));
+      // update(), not set(merge): if the followed user already deleted their
+      // own account, set(merge) would *create* their doc, which the rules
+      // only allow for the owner — the resulting permission-denied used to
+      // abort every deletion (and every resume) of anyone who followed them.
+      try {
+        await _db.collection('users').doc(targetUid).update({
+          'followers': FieldValue.arrayRemove([uid]),
+        });
+      } on FirebaseException catch (e) {
+        if (e.code != 'not-found') rethrow;
+      }
+    }
+  }
+
+  /// "What should we watch?" polls: deletes the ones this user created
+  /// (they carry `creatorName`) and withdraws their votes from the rest.
+  /// The rules only let a non-creator touch `options`, so this user's uid
+  /// stays in other creators' `memberUids` — the same kind of residue as
+  /// the `following` arrays described on the class.
+  Future<void> _purgeWatchPolls(String uid) async {
+    final polls = await _db
+        .collection('watchPolls')
+        .where('memberUids', arrayContains: uid)
+        .get();
+    for (final doc in polls.docs) {
+      final data = doc.data();
+      if (data['creatorUid'] == uid) {
+        await doc.reference.delete();
+        continue;
+      }
+      final options = Map<String, dynamic>.from(data['options'] as Map? ?? {});
+      var changed = false;
+      for (final key in options.keys.toList()) {
+        final opt = options[key];
+        if (opt is! Map) continue;
+        final votes = List<Object?>.from(opt['votes'] as List? ?? const []);
+        if (votes.remove(uid)) {
+          options[key] = {...opt, 'votes': votes};
+          changed = true;
+        }
+      }
+      if (changed) await doc.reference.update({'options': options});
     }
   }
 
@@ -260,6 +316,7 @@ class AccountDeletionService {
     try {
       await _purgeComments(uid);
       await _purgeFollowGraph(uid); // reads this user's own `following` field — must run before the profile doc is deleted
+      await _purgeWatchPolls(uid);
       await _purgeStoredFiles(uid);
       await _purgeOwnData(uid);
       await debugInterruptAfterPurge?.call();

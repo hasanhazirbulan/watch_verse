@@ -141,4 +141,34 @@ void main() {
     expect((await movieDoc()).exists, isFalse);
     expect((await activityDoc()).exists, isFalse);
   });
+
+  test('logWatch keeps the note in the private diary, not on the movie doc',
+      () async {
+    // users/{uid}/movies/{id} is readable by any signed-in user; a note
+    // copied there by an older build is removed on the next log.
+    await firestore
+        .collection('users')
+        .doc(uid)
+        .collection('movies')
+        .doc('${movie.id}')
+        .set({'note': 'old private note'});
+
+    await service.logWatch(movie, rating: 4, note: ' loved it ');
+
+    final data = (await movieDoc()).data()!;
+    expect(data.containsKey('note'), isFalse);
+    expect(data['rating'], 4);
+    final diary = await firestore
+        .collection('users')
+        .doc(uid)
+        .collection('diary')
+        .get();
+    expect(diary.docs.single.data()['note'], 'loved it');
+  });
+
+  test('saveDiary does not copy the note onto the movie doc', () async {
+    await service.saveDiary(movie, rating: 3, note: 'secret');
+
+    expect((await movieDoc()).data()!.containsKey('note'), isFalse);
+  });
 }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:watch_verse/models/game_clue_movie.dart';
 import 'package:watch_verse/services/api_service.dart';
 
@@ -23,14 +24,26 @@ const dailyGameRewatchDays = 7;
 /// `daysSinceReference % pool.length` — so the puzzle rotates at midnight EST
 /// for everyone without a cron job or webhook.
 class DailyGameService {
-  DailyGameService._({FirebaseFirestore? firestore, FirebaseAuth? auth})
+  DailyGameService._(
+      {FirebaseFirestore? firestore, FirebaseAuth? auth, APIservices? api})
       : _db = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+        _auth = auth ?? FirebaseAuth.instance,
+        _api = api ?? APIservices();
   static final DailyGameService instance = DailyGameService._();
+
+  /// Test-only factory: inject a fake Firestore/Auth (and optionally a stub
+  /// TMDB client) instead of touching real backends.
+  @visibleForTesting
+  factory DailyGameService.test({
+    required FirebaseFirestore firestore,
+    required FirebaseAuth auth,
+    APIservices? api,
+  }) =>
+      DailyGameService._(firestore: firestore, auth: auth, api: api);
 
   final FirebaseFirestore _db;
   final FirebaseAuth _auth;
-  final APIservices _api = APIservices();
+  final APIservices _api;
 
   String? get _uid => _auth.currentUser?.uid;
 
@@ -68,19 +81,46 @@ class DailyGameService {
 
   List<int>? _poolCache;
 
+  /// The movie-ID pool from `gameConfig/dailyMoviePool.movieIds`.
+  ///
+  /// Read errors (permission, offline with nothing cached) propagate so the
+  /// screen can offer a retry. A missing doc/field yields an empty pool
+  /// (the screen's "puzzle isn't ready" state) and is *not* cached — it used
+  /// to be, so a retry after seeding kept saying "not ready" until the app
+  /// was restarted. Entries are parsed leniently: ints, whole doubles and
+  /// numeric strings are accepted, anything else (null, a map, "abc",
+  /// 0/negative) is skipped instead of one bad element throwing a TypeError
+  /// for everyone. A `movieIds` that isn't a list at all is a seeding bug
+  /// and throws a [FormatException] rather than looking "not ready".
   Future<List<int>> _pool() async {
-    if (_poolCache != null) return _poolCache!;
+    final cached = _poolCache;
+    if (cached != null) return cached;
     final doc =
         await _db.collection('gameConfig').doc('dailyMoviePool').get();
-    final ids = (doc.data()?['movieIds'] as List<dynamic>? ?? [])
-        .map((e) => (e as num).toInt())
-        .toList();
-    _poolCache = ids;
+    final raw = doc.data()?['movieIds'];
+    if (raw == null) return const [];
+    if (raw is! List) {
+      throw FormatException(
+          'gameConfig/dailyMoviePool.movieIds must be a list of TMDB ids, '
+          'got ${raw.runtimeType}');
+    }
+    final ids = <int>[];
+    for (final e in raw) {
+      final id = switch (e) {
+        int v => v,
+        double v when v.isFinite && v == v.truncateToDouble() => v.toInt(),
+        String v => int.tryParse(v.trim()),
+        _ => null,
+      };
+      if (id != null && id > 0) ids.add(id);
+    }
+    if (ids.isNotEmpty) _poolCache = ids;
     return ids;
   }
 
   /// The mystery movie for [daysAgo] (0 = today, 1 = yesterday, ...), fully
-  /// resolved with all 8 clue attributes.
+  /// resolved with all 8 clue attributes. Null when the pool is empty
+  /// (unseeded); throws when the pool can't be read or TMDB fails.
   Future<GameClueMovie?> mysteryMovieForDaysAgo(int daysAgo) async {
     final pool = await _pool();
     if (pool.isEmpty) return null;

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/services/api_service.dart';
 
@@ -11,12 +14,46 @@ import 'package:watch_verse/services/api_service.dart';
 ///   users/{uid}/shows/{showId}/watched/{key}   -> one doc per watched episode
 ///                                                 (key = "s2e5")
 class TvTrackingService {
-  TvTrackingService._();
+  TvTrackingService._({FirebaseFirestore? firestore, FirebaseAuth? auth})
+      : _db = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance;
   static final TvTrackingService instance = TvTrackingService._();
 
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  /// Test-only factory: inject a fake Firestore/Auth instead of touching
+  /// real backends.
+  @visibleForTesting
+  factory TvTrackingService.test(
+          {required FirebaseFirestore firestore, required FirebaseAuth auth}) =>
+      TvTrackingService._(firestore: firestore, auth: auth);
 
-  String? get _uid => FirebaseAuth.instance.currentUser?.uid;
+  final FirebaseFirestore _db;
+  final FirebaseAuth _auth;
+
+  String? get _uid => _auth.currentUser?.uid;
+
+  /// Per-show lock around the read-modify-write in [setEpisodeWatched],
+  /// [setSeasonWatched] and [markEpisodesWatched]. Each reads the watched
+  /// set, then writes `watchedCount` and a `watchedMinutes` *increment*
+  /// based on it; two of them racing (a double tap, or tapping a second
+  /// episode before the first write lands) both saw the same stale set and
+  /// both incremented — inflating watched minutes and logging duplicate
+  /// history entries. Held only until the batch is handed to Firestore
+  /// (`commit()` called, not awaited): the next read already sees that
+  /// pending local write, so offline taps don't queue behind a server ack.
+  final _showLocks = <int, Future<void>>{};
+
+  Future<void Function()> _lockShow(int showId) async {
+    final previous = _showLocks[showId];
+    final done = Completer<void>();
+    _showLocks[showId] = done.future;
+    if (previous != null) await previous;
+    return () {
+      if (identical(_showLocks[showId], done.future)) {
+        _showLocks.remove(showId);
+      }
+      done.complete();
+    };
+  }
 
   CollectionReference<Map<String, dynamic>>? get _showsCol {
     final uid = _uid;
@@ -232,29 +269,36 @@ class TvTrackingService {
   Future<void> markEpisodesWatched(TvShow show, List<Episode> episodes) async {
     final ref = _showRef(show.id);
     if (ref == null || episodes.isEmpty) return;
-    final current = await watchedKeys(show.id);
-    final batch = _db.batch();
-    var minutesDelta = 0;
-    for (final ep in episodes) {
-      if (!current.contains(ep.key)) {
-        batch.set(ref.collection('watched').doc(ep.key), {
-          'season': ep.seasonNumber,
-          'episode': ep.episodeNumber,
-          'watchedAt': FieldValue.serverTimestamp(),
-        });
-        current.add(ep.key);
-        minutesDelta += ep.runtime;
+    final unlock = await _lockShow(show.id);
+    final Future<void> commit;
+    try {
+      final current = await watchedKeys(show.id);
+      final batch = _db.batch();
+      var minutesDelta = 0;
+      for (final ep in episodes) {
+        if (!current.contains(ep.key)) {
+          batch.set(ref.collection('watched').doc(ep.key), {
+            'season': ep.seasonNumber,
+            'episode': ep.episodeNumber,
+            'watchedAt': FieldValue.serverTimestamp(),
+          });
+          current.add(ep.key);
+          minutesDelta += ep.runtime;
+        }
       }
+      batch.set(ref, {
+        ..._metadata(show),
+        'watchedCount': current.length,
+        if (minutesDelta > 0)
+          'watchedMinutes': FieldValue.increment(minutesDelta),
+        'status': _statusFor(current.length, show.numberOfEpisodes),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      commit = batch.commit();
+    } finally {
+      unlock();
     }
-    batch.set(ref, {
-      ..._metadata(show),
-      'watchedCount': current.length,
-      if (minutesDelta > 0)
-        'watchedMinutes': FieldValue.increment(minutesDelta),
-      'status': _statusFor(current.length, show.numberOfEpisodes),
-      'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
-    await batch.commit();
+    await commit;
   }
 
   /// Removes a show and all of its watched-episode records.
@@ -276,13 +320,34 @@ class TvTrackingService {
   /// Uses a plain batch (like [setSeasonWatched]/[markEpisodesWatched])
   /// instead of a transaction: `runTransaction` always forces a server
   /// round-trip before resolving, which is what made each single-episode tap
-  /// feel laggy compared to the batch-based season/catch-up actions.
+  /// feel laggy compared to the batch-based season/catch-up actions. Races
+  /// between taps on the same show are handled by [_lockShow] instead.
   Future<void> setEpisodeWatched(
       TvShow show, Episode episode, bool watched) async {
     final ref = _showRef(show.id);
     if (ref == null) return;
     final epRef = ref.collection('watched').doc(episode.key);
 
+    final unlock = await _lockShow(show.id);
+    final pending = <Future<void>>[];
+    try {
+      await _setEpisodeWatchedLocked(
+          ref, epRef, show, episode, watched, pending);
+    } finally {
+      unlock();
+    }
+    await Future.wait(pending);
+  }
+
+  /// Body of [setEpisodeWatched], run under [_lockShow]. Writes are started
+  /// (applied locally) but not awaited — they're collected in [pending].
+  Future<void> _setEpisodeWatchedLocked(
+      DocumentReference<Map<String, dynamic>> ref,
+      DocumentReference<Map<String, dynamic>> epRef,
+      TvShow show,
+      Episode episode,
+      bool watched,
+      List<Future<void>> pending) async {
     final current = await watchedKeys(show.id);
     final already = current.contains(episode.key);
     final changed = watched != already;
@@ -313,12 +378,13 @@ class TvTrackingService {
       'status': _statusFor(count, show.numberOfEpisodes),
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
-    await batch.commit();
+    pending.add(batch.commit());
 
     // Mirror the change into the watch-history timeline.
     final epRefKey = 'ep-${show.id}-${episode.key}';
-    if (watched) {
-      await _activityCol?.add({
+    final activity = _activityCol;
+    if (watched && activity != null) {
+      pending.add(activity.add({
         'kind': 'episode',
         'ref': epRefKey,
         'showId': show.id,
@@ -329,19 +395,19 @@ class TvTrackingService {
         'episodeName': episode.name,
         if (episode.runtime > 0) 'runtime': episode.runtime,
         'at': FieldValue.serverTimestamp(),
-      });
-    } else {
-      await _deleteActivity(epRefKey);
+      }));
+    } else if (!watched) {
+      pending.addAll(await _deleteActivity(epRefKey));
     }
   }
 
-  Future<void> _deleteActivity(String ref) async {
+  /// Starts deleting every activity entry for [ref] and returns the pending
+  /// deletes instead of awaiting them (see [_lockShow]).
+  Future<List<Future<void>>> _deleteActivity(String ref) async {
     final col = _activityCol;
-    if (col == null) return;
+    if (col == null) return const [];
     final q = await col.where('ref', isEqualTo: ref).get();
-    for (final doc in q.docs) {
-      await doc.reference.delete();
-    }
+    return [for (final doc in q.docs) doc.reference.delete()];
   }
 
   /// Marks/unmarks every episode of a season in one batch.
@@ -350,6 +416,24 @@ class TvTrackingService {
     final ref = _showRef(show.id);
     if (ref == null || episodes.isEmpty) return;
 
+    final unlock = await _lockShow(show.id);
+    final pending = <Future<void>>[];
+    try {
+      await _setSeasonWatchedLocked(ref, show, episodes, watched, pending);
+    } finally {
+      unlock();
+    }
+    await Future.wait(pending);
+  }
+
+  /// Body of [setSeasonWatched], run under [_lockShow] — same pattern as
+  /// [_setEpisodeWatchedLocked].
+  Future<void> _setSeasonWatchedLocked(
+      DocumentReference<Map<String, dynamic>> ref,
+      TvShow show,
+      List<Episode> episodes,
+      bool watched,
+      List<Future<void>> pending) async {
     final current = await watchedKeys(show.id);
     final batch = _db.batch();
     var minutesDelta = 0;
@@ -381,13 +465,14 @@ class TvTrackingService {
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
 
-    await batch.commit();
+    pending.add(batch.commit());
 
     // Log a single season-level entry in the watch history.
     final seasonNumber = episodes.first.seasonNumber;
     final seasonRef = 'season-${show.id}-$seasonNumber';
-    if (watched) {
-      await _activityCol?.add({
+    final activity = _activityCol;
+    if (watched && activity != null) {
+      pending.add(activity.add({
         'kind': 'season',
         'ref': seasonRef,
         'showId': show.id,
@@ -397,9 +482,9 @@ class TvTrackingService {
         'count': episodes.length,
         'runtime': episodes.fold<int>(0, (acc, e) => acc + e.runtime),
         'at': FieldValue.serverTimestamp(),
-      });
-    } else {
-      await _deleteActivity(seasonRef);
+      }));
+    } else if (!watched) {
+      pending.addAll(await _deleteActivity(seasonRef));
     }
   }
 

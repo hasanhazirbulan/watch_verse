@@ -533,6 +533,8 @@
   "dailyGamePlayAgainTomorrow": "Yeni film için yarın tekrar gel",
   "dailyGameLoading": "Bugünün filmi yükleniyor…",
   "dailyGameNoPool": "Bugünün bulmacası henüz hazır değil — yakında",
+  "dailyGameRetry": "Tekrar dene",
+  "dailyGameSignInPrompt": "Günlük film oyununu oynamak için giriş yap.",
   "dailyGameGuessedAlready": "Zaten tahmin edildi",
   "dailyGamePickAnotherDay": "Başka bir gün seç"
 }

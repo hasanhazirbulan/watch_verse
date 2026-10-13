@@ -3288,6 +3288,18 @@ abstract class AppLocalizations {
   /// **'Today\'s puzzle isn\'t ready yet — check back soon'**
   String get dailyGameNoPool;
 
+  /// No description provided for @dailyGameRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get dailyGameRetry;
+
+  /// No description provided for @dailyGameSignInPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to play the daily movie game.'**
+  String get dailyGameSignInPrompt;
+
   /// No description provided for @dailyGameGuessedAlready.
   ///
   /// In en, this message translates to:

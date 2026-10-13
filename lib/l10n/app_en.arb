@@ -1195,6 +1195,8 @@
   "dailyGamePlayAgainTomorrow": "Come back tomorrow for a new movie",
   "dailyGameLoading": "Loading today's movie…",
   "dailyGameNoPool": "Today's puzzle isn't ready yet — check back soon",
+  "dailyGameRetry": "Try again",
+  "dailyGameSignInPrompt": "Sign in to play the daily movie game.",
   "dailyGameGuessedAlready": "Already guessed",
   "dailyGamePickAnotherDay": "Pick a day"
 }

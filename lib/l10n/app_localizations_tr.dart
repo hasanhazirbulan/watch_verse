@@ -1818,6 +1818,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dailyGameNoPool => 'Bugünün bulmacası henüz hazır değil — yakında';
 
   @override
+  String get dailyGameRetry => 'Tekrar dene';
+
+  @override
+  String get dailyGameSignInPrompt =>
+      'Günlük film oyununu oynamak için giriş yap.';
+
+  @override
   String get dailyGameGuessedAlready => 'Zaten tahmin edildi';
 
   @override

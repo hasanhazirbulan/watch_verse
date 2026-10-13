@@ -1813,6 +1813,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Today\'s puzzle isn\'t ready yet — check back soon';
 
   @override
+  String get dailyGameRetry => 'Try again';
+
+  @override
+  String get dailyGameSignInPrompt => 'Sign in to play the daily movie game.';
+
+  @override
   String get dailyGameGuessedAlready => 'Already guessed';
 
   @override

@@ -51,11 +51,10 @@ void main() async {
     return true;
   };
 
-  runZonedGuarded(
-    () => runApp(const MyApp()),
-    (error, stack) =>
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true),
-  );
+  // No runZonedGuarded: PlatformDispatcher.onError above already catches
+  // uncaught async errors, and wrapping only runApp in a new zone made it run
+  // in a different zone than ensureInitialized (Flutter's "Zone mismatch").
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

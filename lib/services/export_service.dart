@@ -96,7 +96,7 @@ class ExportService {
   }
 
   Future<XFile> _csvFile(List<List<dynamic>> rows, String name) async {
-    final csv = const ListToCsvConverter().convert(rows);
+    final csv = Csv().encode(rows);
     final bytes = Uint8List.fromList(utf8.encode(csv));
     return XFile.fromData(bytes, name: name, mimeType: 'text/csv');
   }

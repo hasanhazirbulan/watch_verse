@@ -8,7 +8,7 @@ set -x
 # runs `pod install`, so the archive fails immediately looking for files that
 # don't exist yet. Pinned to the same Flutter version as
 # .github/workflows/ci.yml for consistency.
-git clone https://github.com/flutter/flutter.git -b 3.35.5 "$HOME/flutter" --depth 1
+git clone https://github.com/flutter/flutter.git -b 3.47.6 "$HOME/flutter" --depth 1
 export PATH="$PATH:$HOME/flutter/bin"
 
 flutter precache --ios

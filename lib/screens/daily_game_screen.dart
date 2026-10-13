@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
@@ -38,15 +39,21 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
   List<MediaItem> _searchResults = [];
   bool _searching = false;
 
+  // Guests have no Firebase account, and both the movie pool
+  // (gameConfig) and progress (gamePlays) are sign-in-only in
+  // firestore.rules — loading would just fail with permission-denied.
+  final bool _isGuest = FirebaseAuth.instance.currentUser == null;
+
   int _daysAgo = 0;
   GameClueMovie? _mystery;
   bool _loadingMystery = true;
+  bool _mysteryFailed = false;
   final Map<int, GameClueMovie> _guessCache = {};
 
   @override
   void initState() {
     super.initState();
-    _loadMystery();
+    if (!_isGuest) _loadMystery();
   }
 
   @override
@@ -59,14 +66,26 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
   Future<void> _loadMystery() async {
     setState(() {
       _loadingMystery = true;
+      _mysteryFailed = false;
       _mystery = null;
     });
-    final m = await DailyGameService.instance.mysteryMovieForDaysAgo(_daysAgo);
-    if (!mounted) return;
-    setState(() {
-      _mystery = m;
-      _loadingMystery = false;
-    });
+    try {
+      final m = await DailyGameService.instance.mysteryMovieForDaysAgo(_daysAgo);
+      if (!mounted) return;
+      setState(() {
+        _mystery = m;
+        _loadingMystery = false;
+      });
+    } catch (e, st) {
+      // Without this the screen sat on an endless blank/loading state with no
+      // hint why (pool doc unreadable, TMDB down, offline...).
+      debugPrint('DailyGame: failed to load mystery movie: $e\n$st');
+      if (!mounted) return;
+      setState(() {
+        _loadingMystery = false;
+        _mysteryFailed = true;
+      });
+    }
   }
 
   void _selectDay(int daysAgo) {
@@ -241,11 +260,48 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
           ),
         ],
       ),
-      body: _loadingMystery
-          ? const Center(child: CircularProgressIndicator())
-          : _mystery == null
-              ? _emptyPool(context, l10n)
-              : _game(context, l10n, _mystery!),
+      body: _isGuest
+          ? _signInPrompt(context, l10n)
+          : _loadingMystery
+              ? const Center(child: CircularProgressIndicator())
+              : _mysteryFailed
+                  ? _loadError(context, l10n)
+                  : _mystery == null
+                      ? _emptyPool(context, l10n)
+                      : _game(context, l10n, _mystery!),
+    );
+  }
+
+  Widget _signInPrompt(BuildContext context, AppLocalizations l10n) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(l10n.dailyGameSignInPrompt,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: context.colors.textSecondary)),
+      ),
+    );
+  }
+
+  Widget _loadError(BuildContext context, AppLocalizations l10n) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(l10n.errorGeneric,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: context.colors.textSecondary)),
+            const SizedBox(height: 12),
+            TextButton.icon(
+              onPressed: _loadMystery,
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text(l10n.dailyGameRetry),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

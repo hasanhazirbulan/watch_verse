@@ -8,6 +8,7 @@ import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/theme/avatar_backgrounds.dart';
+import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/paywall_sheet.dart';
 
 /// Dedicated profile-photo/name editor, reached from Settings and kept off
@@ -27,7 +28,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       TextEditingController();
   String _photoURL = '';
   int _avatarBg = 0;
-  bool _loading = true;
+  // Guests (reachable via Settings) have nothing to load — starting at true
+  // with no user left them on an endless spinner.
+  bool _loading = FirebaseAuth.instance.currentUser != null;
+  // Set when the initial profile read fails. The form is NOT shown then:
+  // its empty fields would overwrite the real name/quote on Save.
+  Object? _loadError;
   bool _uploadingPhoto = false;
   bool _saving = false;
 
@@ -40,6 +46,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _fetchUserData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
+    if (_loadError != null) {
+      setState(() {
+        _loadError = null;
+        _loading = true;
+      });
+    }
     try {
       final doc = await FirebaseFirestore.instance
           .collection('users')
@@ -54,8 +66,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _avatarBg = ((doc.data()?['avatarBg'] ?? 0) as num).toInt();
         _loading = false;
       });
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadError = e;
+        });
+      }
     }
   }
 
@@ -88,7 +105,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         maxWidth: 600,
         imageQuality: 80,
       );
-      if (picked == null) return;
+      if (picked == null || !mounted) return;
       setState(() => _uploadingPhoto = true);
       final ref = FirebaseStorage.instance.ref(
         'profile_images/${user.uid}.jpg',
@@ -144,7 +161,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         title: Text(l10n.profileEditProfileTitle),
         actions: [
           TextButton(
-            onPressed: _saving ? null : _save,
+            onPressed: _saving || _loading || _loadError != null || user == null
+                ? null
+                : _save,
             child: Text(
               l10n.save,
               style: TextStyle(
@@ -155,8 +174,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
         ],
       ),
-      body: _loading
+      body: user == null
+          ? Center(child: Text(l10n.profileSignInPrompt))
+          : _loading
           ? const Center(child: CircularProgressIndicator())
+          : _loadError != null
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                asyncErrorView(context, _loadError!),
+                TextButton(
+                  onPressed: _fetchUserData,
+                  child: Text(l10n.homeRetryAction),
+                ),
+              ],
+            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -182,7 +214,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 ? const CircularProgressIndicator()
                                 : (_photoURL.isEmpty
                                       ? Text(
-                                          (user?.email ?? '?')
+                                          (user.email ?? '?')
                                               .substring(0, 1)
                                               .toUpperCase(),
                                           style: const TextStyle(
@@ -301,7 +333,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      user?.email ?? '',
+                      user.email ?? '',
                       style: TextStyle(color: context.colors.textSecondary),
                     ),
                   ),

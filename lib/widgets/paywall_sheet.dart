@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -37,6 +39,64 @@ class _PaywallSheetState extends State<_PaywallSheet> {
   ProductDetails? _selected;
   bool _busy = false;
   ProTier _tier = ProTier.pro;
+
+  /// Product whose StoreKit purchase this sheet started and is waiting on.
+  String? _pendingProductId;
+  StreamSubscription<List<PurchaseDetails>>? _purchaseSub;
+
+  @override
+  void initState() {
+    super.initState();
+    // The outcome of a purchase arrives here, not from buyNonConsumable():
+    // that call returns as soon as Apple's sheet is *shown*. Entitlement
+    // itself is still granted by ProService's own listener — this one only
+    // drives the sheet's spinner / close / error message.
+    _purchaseSub = InAppPurchase.instance.purchaseStream
+        .listen(_onPurchaseUpdates, onError: (Object _) {
+      if (mounted && _pendingProductId != null) _purchaseFailed();
+    });
+  }
+
+  @override
+  void dispose() {
+    _purchaseSub?.cancel();
+    super.dispose();
+  }
+
+  void _onPurchaseUpdates(List<PurchaseDetails> updates) {
+    final pending = _pendingProductId;
+    if (!mounted || pending == null) return;
+    for (final p in updates.where((u) => u.productID == pending)) {
+      switch (p.status) {
+        case PurchaseStatus.purchased:
+        case PurchaseStatus.restored:
+          _pendingProductId = null;
+          Navigator.pop(context);
+          return;
+        case PurchaseStatus.canceled:
+          // User backed out of Apple's sheet — not an error.
+          _pendingProductId = null;
+          setState(() => _busy = false);
+          return;
+        case PurchaseStatus.error:
+          _purchaseFailed();
+          return;
+        case PurchaseStatus.pending:
+          // Ask to Buy / deferred: Apple shows its own UI; the tier is
+          // granted via ProService whenever it's approved. Stop spinning.
+          _pendingProductId = null;
+          setState(() => _busy = false);
+          return;
+      }
+    }
+  }
+
+  void _purchaseFailed() {
+    _pendingProductId = null;
+    setState(() => _busy = false);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(AppLocalizations.of(context)!.proPurchaseFailure)));
+  }
 
   static const _tierProductIds = {
     ProTier.pro: {proMonthlyProductId, proYearlyProductId},
@@ -78,15 +138,21 @@ class _PaywallSheetState extends State<_PaywallSheet> {
     final product = _selected;
     if (product == null || _busy) return;
     setState(() => _busy = true);
-    final ok = await ProService.instance.purchase(product);
-    if (!mounted) return;
-    setState(() => _busy = false);
-    if (ok) {
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.proPurchaseFailure)));
+    // Not ProService.purchase(): it judges success 600ms after Apple's sheet
+    // merely *opens*, so a real buyer was shown "purchase failed" while
+    // still confirming, and the sheet never closed once they had. The
+    // result is now taken from purchaseStream (see _onPurchaseUpdates).
+    _pendingProductId = product.id;
+    bool started;
+    try {
+      started = await InAppPurchase.instance.buyNonConsumable(
+          purchaseParam: PurchaseParam(productDetails: product));
+    } catch (e) {
+      debugPrint('Paywall: buyNonConsumable threw: $e');
+      started = false;
     }
+    if (!mounted) return;
+    if (!started && _pendingProductId == product.id) _purchaseFailed();
   }
 
   Future<void> _restore(AppLocalizations l10n) async {
@@ -103,8 +169,11 @@ class _PaywallSheetState extends State<_PaywallSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Scrollable: header + toggle + features + plans + CTA + legal text is
+    // taller than an iPhone SE screen (and most phones at large text), and a
+    // bare Column overflowed, pushing the buy/restore buttons off-screen.
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,

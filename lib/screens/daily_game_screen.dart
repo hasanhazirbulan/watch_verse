@@ -21,6 +21,15 @@ class _Clue {
   const _Clue(this.label, this.value, this.match);
 }
 
+/// How many hints are unlocked after [guessCount] guesses. A hint unlocks at
+/// each threshold in [dailyGameHintUnlockGuesses] and *stays* unlocked — the
+/// old check only offered a hint while the count was exactly 5 or 8, so an
+/// unused hint vanished on the next guess, and revealing it hid the banner
+/// (and the hint text with it) immediately.
+@visibleForTesting
+int dailyGameHintsUnlocked(int guessCount) =>
+    dailyGameHintUnlockGuesses.where((g) => guessCount >= g).length;
+
 /// WatchVerse Pro's daily "guess the movie" game (spotle.movie-style): 10
 /// guesses, 8 clue tiles per guess, two hints that unlock after guess 5 and
 /// 8. See `DailyGameService` for how the mystery movie is picked and how
@@ -49,6 +58,21 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
   bool _loadingMystery = true;
   bool _mysteryFailed = false;
   final Map<int, GameClueMovie> _guessCache = {};
+  // Clue fetches already in flight / that failed, so build() doesn't fire a
+  // fresh TMDB request for the same id on every rebuild, and a failed fetch
+  // shows a retry instead of an endless progress bar.
+  final Set<int> _guessFetching = {};
+  final Set<int> _guessFetchFailed = {};
+  // Bumped on every _loadMystery() so a slow response for a previously
+  // selected day can't overwrite the mystery of the day now selected.
+  int _mysteryRequest = 0;
+  // Blocks a second guess while the first one's clue fetch + write is still
+  // in flight (both would otherwise compute the same guess count).
+  bool _submittingGuess = false;
+  // One Firestore listener per selected day instead of a fresh subscription
+  // on every rebuild (every search keystroke rebuilds this screen).
+  int? _progressDay;
+  Stream<Map<String, dynamic>?>? _progress;
 
   @override
   void initState() {
@@ -64,6 +88,7 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
   }
 
   Future<void> _loadMystery() async {
+    final request = ++_mysteryRequest;
     setState(() {
       _loadingMystery = true;
       _mysteryFailed = false;
@@ -71,7 +96,7 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
     });
     try {
       final m = await DailyGameService.instance.mysteryMovieForDaysAgo(_daysAgo);
-      if (!mounted) return;
+      if (!mounted || request != _mysteryRequest) return;
       setState(() {
         _mystery = m;
         _loadingMystery = false;
@@ -80,7 +105,7 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
       // Without this the screen sat on an endless blank/loading state with no
       // hint why (pool doc unreadable, TMDB down, offline...).
       debugPrint('DailyGame: failed to load mystery movie: $e\n$st');
-      if (!mounted) return;
+      if (!mounted || request != _mysteryRequest) return;
       setState(() {
         _loadingMystery = false;
         _mysteryFailed = true;
@@ -112,6 +137,12 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
     try {
       final results = await _api.searchMovies(query);
       if (!mounted) return;
+      // A slower response for an older query (or one that resolves after a
+      // guess cleared the field) must not overwrite the current results.
+      if (_searchController.text != query) {
+        setState(() => _searching = false);
+        return;
+      }
       setState(() {
         _searchResults = results.take(10).toList();
         _searching = false;
@@ -123,26 +154,72 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
   }
 
   Future<void> _guess(MediaItem item, List<int> alreadyGuessed) async {
-    if (alreadyGuessed.contains(item.id)) return;
+    if (_submittingGuess || alreadyGuessed.contains(item.id)) return;
     final mystery = _mystery;
     if (mystery == null) return;
+    // Captured up front: the user can switch days from the app bar while the
+    // clue fetch below is in flight, and the guess belongs to *this* day.
+    final daysAgo = _daysAgo;
+    _debounce?.cancel();
     setState(() {
+      _submittingGuess = true;
       _searchController.clear();
       _searchResults = [];
     });
-    final clue = await _api.getGameClueData(item.id);
-    if (!mounted) return;
-    setState(() => _guessCache[item.id] = clue);
+    try {
+      if (!_guessCache.containsKey(item.id)) {
+        final clue = await _api.getGameClueData(item.id);
+        if (!mounted) return;
+        setState(() {
+          _guessCache[item.id] = clue;
+          _guessFetchFailed.remove(item.id);
+        });
+      }
 
-    final newGuessCount = alreadyGuessed.length + 1;
-    final won = item.id == mystery.id;
-    final finished = won || newGuessCount >= dailyGameMaxGuesses;
-    await DailyGameService.instance.recordGuess(
-      daysAgo: _daysAgo,
-      guessedMovieId: item.id,
-      won: won,
-      finished: finished,
-    );
+      final newGuessCount = alreadyGuessed.length + 1;
+      final won = item.id == mystery.id;
+      final finished = won || newGuessCount >= dailyGameMaxGuesses;
+      await DailyGameService.instance.recordGuess(
+        daysAgo: daysAgo,
+        guessedMovieId: item.id,
+        won: won,
+        finished: finished,
+      );
+    } catch (e, st) {
+      debugPrint('DailyGame: guess failed: $e\n$st');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.errorGeneric)),
+      );
+    } finally {
+      if (mounted) setState(() => _submittingGuess = false);
+    }
+  }
+
+  void _fetchGuessClue(int id) {
+    if (_guessCache.containsKey(id) || _guessFetching.contains(id)) return;
+    _guessFetching.add(id);
+    _api.getGameClueData(id).then((clue) {
+      _guessFetching.remove(id);
+      if (mounted) {
+        setState(() {
+          _guessCache[id] = clue;
+          _guessFetchFailed.remove(id);
+        });
+      }
+    }, onError: (Object e, StackTrace st) {
+      debugPrint('DailyGame: clue fetch for $id failed: $e\n$st');
+      _guessFetching.remove(id);
+      if (mounted) setState(() => _guessFetchFailed.add(id));
+    });
+  }
+
+  Stream<Map<String, dynamic>?> _progressStream() {
+    if (_progress == null || _progressDay != _daysAgo) {
+      _progressDay = _daysAgo;
+      _progress = DailyGameService.instance.progressStream(_daysAgo);
+    }
+    return _progress!;
   }
 
   // ------------------------------------------------------------- clues -----
@@ -215,7 +292,7 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
   String _buildShareText(List<int> guessedIds, bool won, AppLocalizations l10n) {
     final buffer = StringBuffer();
     buffer.writeln('WatchVerse ${l10n.dailyGameTitle} — '
-        '${won ? "${guessedIds.length}/10" : "X/10"}');
+        '${won ? "${guessedIds.length}/$dailyGameMaxGuesses" : "X/$dailyGameMaxGuesses"}');
     for (final id in guessedIds) {
       final guess = _guessCache[id];
       final mystery = _mystery;
@@ -318,7 +395,7 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
 
   Widget _game(BuildContext context, AppLocalizations l10n, GameClueMovie mystery) {
     return StreamBuilder<Map<String, dynamic>?>(
-      stream: DailyGameService.instance.progressStream(_daysAgo),
+      stream: _progressStream(),
       builder: (context, snap) {
         final data = snap.data;
         final guessedIds =
@@ -328,21 +405,16 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
         final hintsUsed = ((data?['hintsUsed'] ?? 0) as num).toInt();
 
         for (final id in guessedIds) {
-          if (!_guessCache.containsKey(id)) {
-            _api.getGameClueData(id).then((clue) {
-              if (mounted) setState(() => _guessCache[id] = clue);
-            });
-          }
+          if (!_guessFetchFailed.contains(id)) _fetchGuessClue(id);
         }
+        final hintsUnlocked = dailyGameHintsUnlocked(guessedIds.length);
 
         return Column(
           children: [
             _statusBar(context, l10n, guessedIds.length, finished, won),
             if (!finished) _searchBar(context, l10n, guessedIds),
-            if (!finished &&
-                dailyGameHintUnlockGuesses.contains(guessedIds.length) &&
-                hintsUsed < dailyGameHintUnlockGuesses.indexOf(guessedIds.length) + 1)
-              _hintBanner(context, l10n, mystery, hintsUsed),
+            if (!finished && hintsUnlocked > 0)
+              _hintBanner(context, l10n, mystery, hintsUsed, hintsUnlocked),
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -350,6 +422,19 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
                 itemBuilder: (context, i) {
                   final id = guessedIds[i];
                   final guess = _guessCache[id];
+                  if (guess == null && _guessFetchFailed.contains(id)) {
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () {
+                          setState(() => _guessFetchFailed.remove(id));
+                          _fetchGuessClue(id);
+                        },
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: Text(l10n.dailyGameRetry),
+                      ),
+                    );
+                  }
                   if (guess == null) {
                     return const Padding(
                       padding: EdgeInsets.symmetric(vertical: 10),
@@ -375,21 +460,29 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            finished
-                ? (won ? l10n.dailyGameWinTitle : l10n.dailyGameLoseTitle)
-                : l10n.dailyGameGuessesLeft('$left'),
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+          // Flexible: two unconstrained texts overflowed this Row on narrow
+          // phones (iPhone SE) / with larger text or longer translations.
+          Flexible(
+            child: Text(
+              finished
+                  ? (won ? l10n.dailyGameWinTitle : l10n.dailyGameLoseTitle)
+                  : l10n.dailyGameGuessesLeft('$left'),
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+            ),
           ),
-          StreamBuilder<(int, int)>(
-            stream: DailyGameService.instance.streakStream(),
-            builder: (context, snap) {
-              final streak = snap.data ?? (0, 0);
-              return Text(
-                '${l10n.dailyGameStreak('${streak.$1}')} · ${l10n.dailyGameBestStreak('${streak.$2}')}',
-                style: TextStyle(color: context.colors.textSecondary, fontSize: 12),
-              );
-            },
+          const SizedBox(width: 8),
+          Flexible(
+            child: StreamBuilder<(int, int)>(
+              stream: DailyGameService.instance.streakStream(),
+              builder: (context, snap) {
+                final streak = snap.data ?? (0, 0);
+                return Text(
+                  '${l10n.dailyGameStreak('${streak.$1}')} · ${l10n.dailyGameBestStreak('${streak.$2}')}',
+                  textAlign: TextAlign.end,
+                  style: TextStyle(color: context.colors.textSecondary, fontSize: 12),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -455,8 +548,12 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
   }
 
   Widget _hintBanner(BuildContext context, AppLocalizations l10n,
-      GameClueMovie mystery, int hintsUsed) {
-    final nextHintIndex = hintsUsed; // 0 or 1
+      GameClueMovie mystery, int hintsUsed, int hintsUnlocked) {
+    String hintText(int i) => i == 0
+        ? '${l10n.dailyGameClueYear}: ${mystery.releaseYear}'
+        : '${l10n.dailyGameClueGenres}: ${mystery.genres.join(', ')}';
+    final revealed = hintsUsed < hintsUnlocked ? hintsUsed : hintsUnlocked;
+    final canReveal = hintsUsed < hintsUnlocked;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
       child: Material(
@@ -467,19 +564,20 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
           leading: Icon(Icons.lightbulb_rounded, color: context.colors.accent),
           title: Text(l10n.dailyGameHintUnlocked,
               style: const TextStyle(fontWeight: FontWeight.w700)),
-          trailing: TextButton(
-            onPressed: () => DailyGameService.instance
-                .useHint(_daysAgo, hintsUsed + 1),
-            child: Text(l10n.dailyGameShowHint),
-          ),
-          subtitle: hintsUsed > nextHintIndex
+          trailing: canReveal
+              ? TextButton(
+                  onPressed: () => DailyGameService.instance
+                      .useHint(_daysAgo, hintsUsed + 1)
+                      .catchError((Object e) {
+                    debugPrint('DailyGame: useHint failed: $e');
+                  }),
+                  child: Text(l10n.dailyGameShowHint),
+                )
+              : null,
+          subtitle: revealed == 0
               ? null
               : Text(
-                  nextHintIndex == 0
-                      ? '${l10n.dailyGameClueYear}: ${mystery.releaseYear}'
-                      : '${l10n.dailyGameClueGenres}: ${mystery.genres.join(', ')}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  [for (var i = 0; i < revealed; i++) hintText(i)].join('\n'),
                 ),
         ),
       ),
@@ -499,13 +597,18 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
             child: Text(guess.title,
                 style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
           ),
-          GridView.count(
-            crossAxisCount: 4,
+          GridView(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 6,
-            crossAxisSpacing: 6,
-            childAspectRatio: 1.3,
+            // Fixed row height (ClueTile's intended 62pt, growing with text
+            // scale) instead of an aspect ratio: on an iPhone SE a 1.3 ratio
+            // made tiles ~52pt tall and two-line values overflowed them.
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              mainAxisSpacing: 6,
+              crossAxisSpacing: 6,
+              mainAxisExtent: 12 + MediaQuery.textScalerOf(context).scale(50),
+            ),
             children: [
               for (var i = 0; i < clues.length; i++)
                 ClueTile(
@@ -554,7 +657,8 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
                 type: MaterialType.transparency,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(14),
-                  onTap: () => Share.share(_buildShareText(guessedIds, won, l10n)),
+                  onTap: () => SharePlus.instance.share(
+                      ShareParams(text: _buildShareText(guessedIds, won, l10n))),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     child: Center(

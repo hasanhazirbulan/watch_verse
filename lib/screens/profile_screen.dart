@@ -40,13 +40,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
     final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
-    final snap = await userRef.get();
-    if (snap.data()?['timeStatsBackfilledV2'] == true) return;
-    await Future.wait([
-      MovieService.instance.backfillDetails(),
-      TvTrackingService.instance.backfillAllShowDetails(),
-    ]);
-    await userRef.set({'timeStatsBackfilledV2': true}, SetOptions(merge: true));
+    // Fire-and-forget from initState: without a catch, an offline launch or
+    // a TMDB failure surfaced as an uncaught async error (recorded as a
+    // *fatal* crash by main.dart's PlatformDispatcher.onError). The flag is
+    // only set on success, so the next profile visit simply retries.
+    try {
+      final snap = await userRef.get();
+      if (snap.data()?['timeStatsBackfilledV2'] == true) return;
+      await Future.wait([
+        MovieService.instance.backfillDetails(),
+        TvTrackingService.instance.backfillAllShowDetails(),
+      ]);
+      await userRef.set({'timeStatsBackfilledV2': true}, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('Profile: time-stats backfill failed: $e');
+    }
   }
 
   @override
@@ -288,22 +296,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: context.colors.primary, size: 20),
-          const SizedBox(height: 5),
-          Text(value,
-              style:
-                  const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 2),
-          Text(label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style:
-                  TextStyle(color: context.colors.textMuted, fontSize: 12)),
-        ],
+      // The rail has a fixed 116pt height; with large accessibility text the
+      // column below overflowed it. Scale the content down instead.
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: context.colors.primary, size: 20),
+            const SizedBox(height: 5),
+            Text(value,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 2),
+            Text(label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style:
+                    TextStyle(color: context.colors.textMuted, fontSize: 12)),
+          ],
+        ),
       ),
     );
   }

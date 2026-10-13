@@ -32,6 +32,11 @@ class _CreateWatchPollScreenState extends State<CreateWatchPollScreen> {
   final List<MediaItem> _selectedOptions = [];
   final Set<String> _selectedMemberUids = {};
   bool _creating = false;
+  // Cached so tapping a chip or getting search results (both setState) don't
+  // re-run up to 50 sequential profile reads; refetched only when the
+  // following list itself changes.
+  String? _membersKey;
+  Future<List<Map<String, dynamic>>>? _membersFuture;
 
   @override
   void dispose() {
@@ -49,7 +54,11 @@ class _CreateWatchPollScreenState extends State<CreateWatchPollScreen> {
     }
     _debounce = Timer(const Duration(milliseconds: 350), () async {
       final results = await _api.searchMulti(q.trim()).catchError((_) => <MediaItem>[]);
-      if (mounted) setState(() => _searchResults = results);
+      // Drop responses for a query the field no longer shows (cleared, or a
+      // newer search already ran) so stale results don't pop back in.
+      if (mounted && _searchController.text.trim() == q.trim()) {
+        setState(() => _searchResults = results);
+      }
     });
   }
 
@@ -70,18 +79,28 @@ class _CreateWatchPollScreenState extends State<CreateWatchPollScreen> {
   Future<void> _create() async {
     if (_selectedOptions.length < 2 || _creating) return;
     setState(() => _creating = true);
-    final id = await WatchPollService.instance.createPoll(
-      title: _titleController.text,
-      options: _selectedOptions,
-      invitedUids: _selectedMemberUids.toList(),
-    );
+    String? id;
+    try {
+      id = await WatchPollService.instance.createPoll(
+        title: _titleController.text,
+        options: _selectedOptions,
+        invitedUids: _selectedMemberUids.toList(),
+      );
+    } catch (e) {
+      // Previously uncaught: the button spun forever with no message.
+      debugPrint('CreateWatchPoll: createPoll failed: $e');
+    }
     if (!mounted) return;
     setState(() => _creating = false);
     if (id != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => WatchPollDetailScreen(pollId: id)),
+        MaterialPageRoute(builder: (_) => WatchPollDetailScreen(pollId: id!)),
       );
+    } else {
+      // createPoll also returns null (no throw) when signed out.
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(AppLocalizations.of(context)!.errorGeneric)));
     }
   }
 
@@ -223,8 +242,13 @@ class _CreateWatchPollScreenState extends State<CreateWatchPollScreen> {
             style: TextStyle(color: context.colors.textSecondary, fontSize: 13),
           );
         }
+        final key = following.join(',');
+        if (_membersFuture == null || _membersKey != key) {
+          _membersKey = key;
+          _membersFuture = SocialService.instance.usersByIds(following);
+        }
         return FutureBuilder<List<Map<String, dynamic>>>(
-          future: SocialService.instance.usersByIds(following),
+          future: _membersFuture,
           builder: (context, userSnap) {
             final users = userSnap.data ?? const <Map<String, dynamic>>[];
             return Wrap(

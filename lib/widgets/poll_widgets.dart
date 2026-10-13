@@ -4,6 +4,30 @@ import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/services/poll_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 
+/// Poll categories (`pollId/category`) with a vote still in flight.
+/// [PollService.vote] is read-then-write (reads the previous pick, then
+/// increments counts), so a double-tap — or a quick second tap on another
+/// option — ran two votes against the same "no previous pick" read and
+/// counted the user twice in both the option count and the total.
+final Set<String> _votesInFlight = {};
+
+Future<void> _castVote(
+    BuildContext context, String pollId, String category, String value) async {
+  final key = '$pollId/$category';
+  if (!_votesInFlight.add(key)) return;
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  final l10n = AppLocalizations.of(context)!;
+  try {
+    await PollService.instance.vote(pollId, category, value);
+  } catch (e) {
+    // Was an unhandled async error with no feedback (e.g. permission-denied).
+    debugPrint('Poll: vote failed: $e');
+    messenger?.showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
+  } finally {
+    _votesInFlight.remove(key);
+  }
+}
+
 /// TV Time-style "how was it?" mini poll: platform watched on, emotion felt,
 /// favorite character — each answered with a single tap, each revealing the
 /// live cross-user percentage breakdown once answered.
@@ -378,7 +402,10 @@ class _PollGroup extends StatelessWidget {
                 const SizedBox(height: 14),
                 if (horizontal)
                   SizedBox(
-                    height: 140,
+                    // Fixed parts (padding, photo, gaps) + text lines that
+                    // grow with the text scale; a flat 140 overflowed with
+                    // large accessibility text.
+                    height: 85 + MediaQuery.textScalerOf(context).scale(55),
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: options.length,
@@ -398,8 +425,8 @@ class _PollGroup extends StatelessWidget {
                                     .round()
                                 : null,
                             answered: showStats,
-                            onTap: () => PollService.instance
-                                .vote(pollId, category, opt.key),
+                            onTap: () =>
+                                _castVote(context, pollId, category, opt.key),
                           ),
                         );
                       },
@@ -429,8 +456,8 @@ class _PollGroup extends StatelessWidget {
                                         .round()
                                     : null,
                                 answered: showStats,
-                                onTap: () => PollService.instance
-                                    .vote(pollId, category, opt.key),
+                                onTap: () => _castVote(
+                                    context, pollId, category, opt.key),
                               ),
                             ),
                         ],

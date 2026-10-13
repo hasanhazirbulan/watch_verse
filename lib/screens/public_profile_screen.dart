@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
@@ -317,7 +318,10 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                       fontSize: 17, fontWeight: FontWeight.w700)),
               const SizedBox(height: 12),
               SizedBox(
-                height: 214,
+                // 170 poster + 6 gap, plus room for the title/year lines that
+                // grows with the text scale (fixed 214 overflowed with large
+                // accessibility text).
+                height: 176 + MediaQuery.textScalerOf(context).scale(38),
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: items.length,
@@ -364,6 +368,7 @@ class _AddablePosterState extends State<_AddablePoster> {
       );
     } catch (_) {
       if (mounted) setState(() => _busy = false);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
     }
   }
 
@@ -386,27 +391,31 @@ class _AddablePosterState extends State<_AddablePoster> {
                     height: 170,
                     child: TmdbImage(url: Tmdb.poster(item.posterPath)),
                   ),
-                  Positioned(
-                    top: 6,
-                    right: 6,
-                    child: GestureDetector(
-                      onTap: _add,
-                      child: Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: _added
-                              ? context.colors.success
-                              : Colors.black.withValues(alpha: 0.55),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          _added ? Icons.check_rounded : Icons.add_rounded,
-                          size: 16,
-                          color: Colors.white,
+                  // Hidden for guests: MovieService.setStatus silently no-ops
+                  // without a signed-in user, so a guest used to get the
+                  // "added" check + snackbar for a write that never happened.
+                  if (FirebaseAuth.instance.currentUser != null)
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: GestureDetector(
+                        onTap: _add,
+                        child: Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: _added
+                                ? context.colors.success
+                                : Colors.black.withValues(alpha: 0.55),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            _added ? Icons.check_rounded : Icons.add_rounded,
+                            size: 16,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),

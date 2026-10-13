@@ -28,6 +28,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() => _exporting = true);
     try {
       await ExportService.instance.exportAll();
+    } catch (e) {
+      // Was try/finally only: a failed read or share left an uncaught error
+      // and no feedback at all.
+      debugPrint('Settings: export failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(AppLocalizations.of(context)!.errorGeneric)));
+      }
     } finally {
       if (mounted) setState(() => _exporting = false);
     }

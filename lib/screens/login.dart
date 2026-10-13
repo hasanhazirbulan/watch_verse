@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/screens/main_screen.dart';
 import 'package:watch_verse/screens/register.dart';
-import 'package:watch_verse/services/database_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/validators.dart';
 import 'package:watch_verse/widgets/auth_backdrop.dart';
@@ -43,11 +42,15 @@ class _LoginScreenState extends State<LoginScreen> {
     final l10n = AppLocalizations.of(context)!;
     setState(() => _loading = true);
     try {
-      final cred = await _auth.signInWithEmailAndPassword(
+      // No profile-doc read here: its result was never used, and
+      // DatabaseService.getUser() throws when the doc is missing (e.g. a
+      // registration whose createUser write failed) — which left an
+      // already-signed-in user stuck on this screen behind a
+      // "Could not sign in" error.
+      await _auth.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      await DatabaseService.instance.getUser(cred.user!.uid);
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const MainScreen()),

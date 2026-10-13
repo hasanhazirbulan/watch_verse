@@ -34,6 +34,13 @@ class CommentsScreen extends StatefulWidget {
 class _CommentsScreenState extends State<CommentsScreen> {
   final _svc = CommentService.instance;
   final _controller = TextEditingController();
+  // Created once: building these inside build() handed StreamListView a new
+  // stream on every setState (sending, attaching, a blocked-list update),
+  // which flashed the spinner and threw the list back to the top each time.
+  late final Stream<List<Comment>> _comments =
+      _svc.stream(widget.mediaType, widget.mediaId);
+  late final Stream<List<String>> _blocked =
+      SocialService.instance.blockedStream();
 
   File? _pendingImage; // uploaded on send
   String? _pendingUrl; // pasted GIF/image URL
@@ -59,7 +66,13 @@ class _CommentsScreenState extends State<CommentsScreen> {
         _pendingImage = File(picked.path);
         _pendingUrl = null;
       });
-    } catch (_) {/* ignore picker errors */}
+    } catch (e) {
+      // e.g. photo-library access denied — used to fail with no feedback.
+      debugPrint('Comments: image pick failed: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(AppLocalizations.of(context)!.errorGeneric)));
+    }
   }
 
   Future<void> _pickGif() async {
@@ -198,22 +211,23 @@ class _CommentsScreenState extends State<CommentsScreen> {
         children: [
           Expanded(
             child: StreamBuilder<List<String>>(
-              stream: SocialService.instance.blockedStream(),
+              stream: _blocked,
               builder: (context, blockedSnap) {
                 final blocked = blockedSnap.data ?? const <String>[];
                 return StreamListView<Comment>(
-                  stream: _svc
-                      .stream(widget.mediaType, widget.mediaId)
-                      .map((comments) => comments
-                          .where((c) => !blocked.contains(c.uid))
-                          .toList()),
+                  stream: _comments,
                   emptyBuilder: (_) => _empty(),
-                  builder: (context, comments) => ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                    itemCount: comments.length,
-                    itemBuilder: (context, i) =>
-                        CommentCard(comment: comments[i]),
-                  ),
+                  builder: (context, all) {
+                    final comments =
+                        all.where((c) => !blocked.contains(c.uid)).toList();
+                    if (comments.isEmpty) return _empty();
+                    return ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                      itemCount: comments.length,
+                      itemBuilder: (context, i) =>
+                          CommentCard(comment: comments[i]),
+                    );
+                  },
                 );
               },
             ),

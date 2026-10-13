@@ -73,15 +73,6 @@ class _UpNextScreenState extends State<UpNextScreen> {
   // since it signals a specific status, not the app's accent.
   static const _finishedLineColor = Color(0xFF8B5CF6);
 
-  static const _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ];
-  static const _weekdays = [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-    'Friday', 'Saturday', 'Sunday'
-  ];
-
   final APIservices _api = APIservices();
   late int _tab = widget.initialTab;
   int _myShowsFilter = 0;
@@ -128,19 +119,29 @@ class _UpNextScreenState extends State<UpNextScreen> {
 
   Future<_ShowTmdbData> _loadTmdbData(int id) {
     return _tmdbCache.putIfAbsent(id, () async {
-      final show = await _api.getTvDetails(id);
-      final seasonEps = await Future.wait(show.seasons.map((s) async {
-        try {
-          return await _api.getSeasonEpisodes(id, s.seasonNumber);
-        } catch (_) {
-          return <Episode>[];
-        }
-      }));
-      return _ShowTmdbData(show, [for (final eps in seasonEps) ...eps]);
+      try {
+        final show = await _api.getTvDetails(id);
+        final seasonEps = await Future.wait(show.seasons.map((s) async {
+          try {
+            return await _api.getSeasonEpisodes(id, s.seasonNumber);
+          } catch (_) {
+            return <Episode>[];
+          }
+        }));
+        return _ShowTmdbData(show, [for (final eps in seasonEps) ...eps]);
+      } catch (_) {
+        // Don't cache a failure: otherwise one offline open hid this show
+        // from Up Next for the rest of the session — even after the network
+        // came back and the tracked-shows list changed — until a manual
+        // pull-to-refresh.
+        _tmdbCache.remove(id);
+        rethrow;
+      }
     });
   }
 
   Future<List<_ShowBundle>> _loadBundles(List<int> ids) async {
+    Object? firstError;
     final results = await Future.wait(ids.map((id) async {
       try {
         final tmdb = await _loadTmdbData(id);
@@ -160,11 +161,16 @@ class _UpNextScreenState extends State<UpNextScreen> {
         }
         return _ShowBundle(
             show, flat, watchedAiredCount, lastWatchedAt, nextUnwatched);
-      } catch (_) {
+      } catch (e) {
+        firstError ??= e;
         return null;
       }
     }));
-    return results.whereType<_ShowBundle>().toList();
+    final bundles = results.whereType<_ShowBundle>().toList();
+    // Every tracked show failed (offline, TMDB down…): surface that instead
+    // of returning [] — which Up Next renders as "All caught up!".
+    if (bundles.isEmpty && firstError != null) throw firstError!;
+    return bundles;
   }
 
   @override
@@ -228,11 +234,24 @@ class _UpNextScreenState extends State<UpNextScreen> {
           _future = null;
           _tmdbCache.clear();
         });
-        await _futureFor(ids);
+        try {
+          await _futureFor(ids);
+        } catch (_) {
+          // Shown by the FutureBuilder below; just let the spinner dismiss.
+        }
       },
       child: FutureBuilder<List<_ShowBundle>>(
         future: _futureFor(ids),
         builder: (context, snap) {
+          if (snap.hasError && snap.connectionState == ConnectionState.done) {
+            // Wrapped in a ListView so pull-to-refresh still works as retry.
+            return ListView(
+              children: [
+                const SizedBox(height: 40),
+                asyncErrorView(context, snap.error!),
+              ],
+            );
+          }
           if (!snap.hasData) {
             return ListView(
               children: const [
@@ -404,7 +423,7 @@ class _UpNextScreenState extends State<UpNextScreen> {
     } else if (day == today.add(const Duration(days: 1))) {
       label = l10n.upNextUpcomingTomorrow;
     } else {
-      label = '${_weekdays[day.weekday - 1]}, ${_months[day.month - 1]} ${day.day}';
+      label = MaterialLocalizations.of(context).formatMediumDate(day);
     }
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),

@@ -31,7 +31,16 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   late final Future<List<WatchProvider>> _providers;
   late final Future<List<String>> _genres;
 
-  Movie get movie => widget.movie;
+  // Starts as the seed the caller passed in, then gets its blank fields
+  // filled from the user's stored movie doc (see [movieWithStoredMeta]).
+  late Movie _movie = widget.movie;
+  Movie get movie => _movie;
+
+  /// [movie] with blank metadata backfilled from the live stored doc [data] —
+  /// every write below goes through this so a sparse seed can never blank out
+  /// what's already saved.
+  Movie _withStored(Map<String, dynamic>? data) =>
+      movieWithStoredMeta(movie, data);
 
   MediaItem _asMediaItem() => MediaItem(
         id: movie.id,
@@ -48,6 +57,13 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   void initState() {
     super.initState();
     final id = movie.id;
+    // History, friends' activity and the watched-movies grid open this
+    // screen with a sparse seed (no overview/backdrop/release date/score).
+    // Fill those from the user's stored doc so the header isn't blank.
+    _movies.movieStream(id).first.then((data) {
+      if (!mounted || data == null) return;
+      setState(() => _movie = movieWithStoredMeta(_movie, data));
+    }).catchError((Object _) {});
     _cast =
         _api.getCredits(MediaType.movie, id).catchError((_) => <CastMember>[]);
     _recs = _api
@@ -78,7 +94,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     final wasWatched = data?['status'] == 'watched';
     final saved = await showMovieLogSheet(
       context,
-      movie,
+      _withStored(data),
       rewatch: rewatch,
       initialRating: rewatch ? 0 : ((data?['rating'] ?? 0) as num).toDouble(),
       initialNote: rewatch ? '' : (data?['note'] ?? '') as String,
@@ -233,6 +249,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         final genres = snap.data ?? const <String>[];
                         return Wrap(
                           spacing: 8,
+                          runSpacing: 8,
                           children: [
                             for (final g in genres) _pill(context, g),
                           ],
@@ -323,7 +340,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     selected: status == 'watchlist',
                     onTap: () => status == 'watchlist'
                         ? _movies.remove(movie.id)
-                        : _movies.setStatus(movie, 'watchlist'),
+                        : _movies.setStatus(_withStored(data), 'watchlist'),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -358,7 +375,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                _favPill(context, favorite, () => _toggleFavorite(favorite)),
+                _favPill(context, favorite,
+                    () => _toggleFavorite(_withStored(data), favorite)),
               ],
             ),
           ],
@@ -425,7 +443,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                 itemPadding: const EdgeInsets.symmetric(horizontal: 4),
                 itemBuilder: (context, _) =>
                     Icon(Icons.star_rounded, color: context.colors.accent),
-                onRatingUpdate: (rating) => _movies.setRating(movie, rating),
+                onRatingUpdate: (rating) =>
+                    _movies.setRating(_withStored(snap.data), rating),
               ),
             ),
           ],
@@ -434,8 +453,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     );
   }
 
-  Future<void> _toggleFavorite(bool currentlyFavorite) async {
-    await _movies.setFavorite(movie, !currentlyFavorite);
+  Future<void> _toggleFavorite(Movie m, bool currentlyFavorite) async {
+    await _movies.setFavorite(m, !currentlyFavorite);
   }
 
   Widget _statusPill({
@@ -466,12 +485,16 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       selected ? Colors.white : context.colors.textSecondary),
               if (label != null) ...[
                 const SizedBox(width: 8),
-                Text(label,
+                Flexible(
+                  child: Text(label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                         color: selected
                             ? Colors.white
                             : context.colors.textSecondary,
                         fontWeight: FontWeight.w700)),
+                ),
               ],
             ],
           ),
@@ -586,7 +609,9 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     final rating = ((e['rating'] ?? 0) as num).toDouble();
     final note = (e['note'] ?? '') as String;
     final when = e['watchedOn'];
-    final date = when is Timestamp ? _formatDate(when.toDate()) : '';
+    final date = when is Timestamp
+        ? MaterialLocalizations.of(context).formatShortDate(when.toDate())
+        : '';
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
@@ -635,13 +660,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     );
   }
 
-  static const _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ];
-
-  String _formatDate(DateTime d) => '${_months[d.month - 1]} ${d.day}, ${d.year}';
-
   Widget _pill(BuildContext context, String text, {bool accent = false}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -658,6 +676,30 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
               fontWeight: FontWeight.w600)),
     );
   }
+}
+
+/// Returns [m] with any blank metadata (overview, backdrop, release date,
+/// score, runtime, genres…) filled in from [stored], the user's own movie doc
+/// as streamed by [MovieService.movieStream]. Several entry points (history,
+/// friends' activity, watched-movies grid, friend posters) only know a
+/// title + poster, and every [MovieService] write merges the movie's full
+/// metadata into that doc — so writing the sparse seed as-is would blank out
+/// the stored overview/release date/backdrop the first time the user rated
+/// or re-statused the movie from one of those screens.
+Movie movieWithStoredMeta(Movie m, Map<String, dynamic>? stored) {
+  if (stored == null) return m;
+  final s = Movie.fromMap(stored);
+  return Movie(
+    id: m.id,
+    title: m.title.isNotEmpty ? m.title : s.title,
+    overview: m.overview.isNotEmpty ? m.overview : s.overview,
+    posterPath: m.posterPath.isNotEmpty ? m.posterPath : s.posterPath,
+    backDropPath: m.backDropPath.isNotEmpty ? m.backDropPath : s.backDropPath,
+    releaseDate: m.releaseDate.isNotEmpty ? m.releaseDate : s.releaseDate,
+    voteAverage: m.voteAverage > 0 ? m.voteAverage : s.voteAverage,
+    runtime: m.runtime > 0 ? m.runtime : s.runtime,
+    genres: m.genres.isNotEmpty ? m.genres : s.genres,
+  );
 }
 
 /// Diary bottom sheet — owns its own controller (disposed here, not by the
@@ -732,11 +774,6 @@ class _DiarySheetState extends State<_DiarySheet> {
       TextEditingController(text: widget.initialNote);
   bool _saving = false;
 
-  static const _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ];
-
   @override
   void dispose() {
     _noteCtrl.dispose();
@@ -767,7 +804,7 @@ class _DiarySheetState extends State<_DiarySheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final dateLabel = '${_months[_date.month - 1]} ${_date.day}, ${_date.year}';
+    final dateLabel = MaterialLocalizations.of(context).formatShortDate(_date);
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
@@ -828,9 +865,12 @@ class _DiarySheetState extends State<_DiarySheet> {
                       Icon(Icons.calendar_today_rounded,
                           size: 16, color: context.colors.primary),
                       const SizedBox(width: 10),
-                      Text(dateLabel,
-                          style: const TextStyle(fontWeight: FontWeight.w600)),
-                      const Spacer(),
+                      Expanded(
+                        child: Text(dateLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w600)),
+                      ),
                       Icon(Icons.edit_rounded,
                           size: 15, color: context.colors.textMuted),
                     ],

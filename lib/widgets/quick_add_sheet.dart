@@ -3,13 +3,15 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/models/model.dart';
-import 'package:watch_verse/screens/movie_detail_screen.dart' show showMovieLogSheet;
+import 'package:watch_verse/screens/movie_detail_screen.dart'
+    show movieWithStoredMeta, showMovieLogSheet;
 import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/add_to_list_sheet.dart';
+import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 
 /// Letterboxd-style long-press quick actions for a poster: Watch/Like/
@@ -28,13 +30,17 @@ Future<void> showQuickAddSheet(BuildContext context, MediaItem item) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
     ),
-    builder: (_) => _QuickAddSheet(item: item),
+    // The sheet lives on the root navigator, so its own context would push
+    // "Go to …" onto the root too — above the tab bar, unlike a normal poster
+    // tap. Navigate from the caller's context instead.
+    builder: (_) => _QuickAddSheet(item: item, host: context),
   );
 }
 
 class _QuickAddSheet extends StatelessWidget {
   final MediaItem item;
-  const _QuickAddSheet({required this.item});
+  final BuildContext host;
+  const _QuickAddSheet({required this.item, required this.host});
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +56,9 @@ class _QuickAddSheet extends StatelessWidget {
             _header(context),
             const SizedBox(height: 18),
             if (item.mediaType == MediaType.movie)
-              _MovieQuickActions(item: item)
+              _MovieQuickActions(item: item, host: host)
             else
-              _ShowQuickActions(item: item),
+              _ShowQuickActions(item: item, host: host),
           ],
         ),
       ),
@@ -194,16 +200,19 @@ Widget _sheetRow(BuildContext context,
 
 class _MovieQuickActions extends StatelessWidget {
   final MediaItem item;
-  const _MovieQuickActions({required this.item});
+  final BuildContext host;
+  const _MovieQuickActions({required this.item, required this.host});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final movie = item.toMovie();
     return StreamBuilder<Map<String, dynamic>?>(
       stream: MovieService.instance.movieStream(item.id),
       builder: (context, snap) {
         final data = snap.data;
+        // Friend-poster items carry no overview; backfill from the stored doc
+        // so these writes don't blank it out (see movieWithStoredMeta).
+        final movie = movieWithStoredMeta(item.toMovie(), data);
         final status = data?['status'] as String?;
         final favorite = data?['favorite'] == true;
         final rating = ((data?['rating'] ?? 0) as num).toDouble();
@@ -267,22 +276,28 @@ class _MovieQuickActions extends StatelessWidget {
                 label: l10n.quickAddReviewOrLog,
                 onTap: () {
                   Navigator.pop(context);
-                  if (!canWatch) return;
-                  showMovieLogSheet(context, movie);
+                  if (!host.mounted) return;
+                  if (!canWatch) {
+                    // Used to close the sheet and silently do nothing.
+                    ScaffoldMessenger.of(host).showSnackBar(SnackBar(
+                        content: Text(l10n.movieCannotMarkUnreleased)));
+                    return;
+                  }
+                  showMovieLogSheet(host, movie);
                 }),
             _sheetRow(context,
                 icon: Icons.playlist_add_rounded,
                 label: l10n.quickAddAddToList,
                 onTap: () {
                   Navigator.pop(context);
-                  showAddToListSheet(context, item);
+                  if (host.mounted) showAddToListSheet(host, item);
                 }),
             _sheetRow(context,
                 icon: Icons.open_in_new_rounded,
                 label: l10n.quickAddGoTo(item.title),
                 onTap: () {
                   Navigator.pop(context);
-                  openMedia(context, item);
+                  if (host.mounted) openMedia(host, item);
                 }),
           ],
         );
@@ -293,7 +308,8 @@ class _MovieQuickActions extends StatelessWidget {
 
 class _ShowQuickActions extends StatefulWidget {
   final MediaItem item;
-  const _ShowQuickActions({required this.item});
+  final BuildContext host;
+  const _ShowQuickActions({required this.item, required this.host});
 
   @override
   State<_ShowQuickActions> createState() => _ShowQuickActionsState();
@@ -309,6 +325,25 @@ class _ShowQuickActionsState extends State<_ShowQuickActions> {
     return FutureBuilder<TvShow>(
       future: _show,
       builder: (context, snap) {
+        if (snap.hasError) {
+          // Used to spin forever when the show-details fetch failed; show the
+          // error and keep "Go to …" so the sheet isn't a dead end.
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              asyncErrorView(context, snap.error!),
+              _sheetRow(context,
+                  icon: Icons.open_in_new_rounded,
+                  label: l10n.quickAddGoTo(widget.item.title),
+                  onTap: () {
+                    Navigator.pop(context);
+                    if (widget.host.mounted) {
+                      openMedia(widget.host, widget.item);
+                    }
+                  }),
+            ],
+          );
+        }
         if (!snap.hasData) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 24),
@@ -360,14 +395,18 @@ class _ShowQuickActionsState extends State<_ShowQuickActions> {
                     label: l10n.quickAddAddToList,
                     onTap: () {
                       Navigator.pop(context);
-                      showAddToListSheet(context, show.toMediaItem());
+                      if (widget.host.mounted) {
+                        showAddToListSheet(widget.host, show.toMediaItem());
+                      }
                     }),
                 _sheetRow(context,
                     icon: Icons.open_in_new_rounded,
                     label: l10n.quickAddGoTo(show.name),
                     onTap: () {
                       Navigator.pop(context);
-                      openMedia(context, widget.item);
+                      if (widget.host.mounted) {
+                        openMedia(widget.host, widget.item);
+                      }
                     }),
               ],
             );

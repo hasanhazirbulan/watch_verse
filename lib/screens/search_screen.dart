@@ -61,6 +61,7 @@ class _SearchScreenState extends State<SearchScreen> {
   void _onChanged(String value) {
     _debounce?.cancel();
     _query = value;
+    _runId++; // the query changed: drop any search still in flight
     if (value.trim().isEmpty) {
       setState(() {
         _titlesRaw = [];
@@ -80,28 +81,40 @@ class _SearchScreenState extends State<SearchScreen> {
     if (_query.trim().isNotEmpty) _run();
   }
 
+  // Bumped on every search; a response is only applied if no newer search
+  // (or a clear) started while it was in flight. Without this, typing
+  // "bat" → "batman" could let the slower "bat" response land last and
+  // show its results under the "batman" query.
+  int _runId = 0;
+
   Future<void> _run() async {
     final q = _query.trim();
     if (q.isEmpty) return;
+    final runId = ++_runId;
+    final people = _filter.isPeople;
     setState(() => _loading = true);
     try {
-      if (_filter.isPeople) {
+      if (people) {
         if (_peopleQuery != q) {
-          _people = await SocialService.instance.searchUsers(q);
+          final found = await SocialService.instance.searchUsers(q);
+          if (runId != _runId) return;
+          _people = found;
           _peopleQuery = q;
         }
       } else if (_titlesQuery != q) {
-        _titlesRaw = await _api.searchMulti(q);
+        final found = await _api.searchMulti(q);
+        if (runId != _runId) return;
+        _titlesRaw = found;
         _titlesQuery = q;
       }
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted || runId != _runId) return;
       final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.searchFailed(e.toString()))),
       );
     }
-    if (!mounted) return;
+    if (!mounted || runId != _runId) return;
     setState(() => _loading = false);
   }
 

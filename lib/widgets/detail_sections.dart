@@ -48,15 +48,18 @@ class CastStrip extends StatelessWidget {
         width: 82,
         child: Column(
           children: [
-            CircleAvatar(
-              radius: 38,
-              backgroundColor: context.colors.surfaceAlt,
-              backgroundImage: Tmdb.poster(m.profilePath, size: 'w185') != null
-                  ? NetworkImage(Tmdb.poster(m.profilePath, size: 'w185')!)
-                  : null,
-              child: m.profilePath.isEmpty
-                  ? Icon(Icons.person, color: context.colors.textMuted)
-                  : null,
+            // TmdbImage (not a bare NetworkImage) so a dead/slow profile
+            // photo falls back to the person icon instead of an empty circle
+            // plus an uncaught image-load exception.
+            ClipOval(
+              child: SizedBox(
+                width: 76,
+                height: 76,
+                child: TmdbImage(
+                  url: Tmdb.poster(m.profilePath, size: 'w185'),
+                  placeholderIcon: Icons.person,
+                ),
+              ),
             ),
             const SizedBox(height: 6),
             Text(m.name,
@@ -138,6 +141,14 @@ class WatchProvidersSection extends StatelessWidget {
 
   Widget _logo(BuildContext context, WatchProvider p) {
     final url = Tmdb.logo(p.logoPath);
+    final fallback = Container(
+      color: context.colors.surfaceAlt,
+      alignment: Alignment.center,
+      child: Text(
+        p.name.isNotEmpty ? p.name[0] : '?',
+        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+      ),
+    );
     return Tooltip(
       message: p.name,
       child: ClipRRect(
@@ -146,16 +157,11 @@ class WatchProvidersSection extends StatelessWidget {
           width: 38,
           height: 38,
           child: url == null
-              ? Container(
-                  color: context.colors.surfaceAlt,
-                  alignment: Alignment.center,
-                  child: Text(
-                    p.name.isNotEmpty ? p.name[0] : '?',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 13),
-                  ),
-                )
-              : Image.network(url, fit: BoxFit.cover),
+              ? fallback
+              // A failed logo load used to show Flutter's broken-image glyph
+              // (and log an uncaught image exception); use the letter tile.
+              : Image.network(url,
+                  fit: BoxFit.cover, errorBuilder: (_, _, _) => fallback),
         ),
       ),
     );
@@ -309,7 +315,14 @@ class _TrailerButtonState extends State<TrailerButton> {
 
   Future<void> _open() async {
     final uri = Uri.parse('https://www.youtube.com/watch?v=$_key');
-    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    bool ok;
+    try {
+      ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      // launchUrl throws (PlatformException) rather than returning false
+      // when no app can handle the URL on some platforms.
+      ok = false;
+    }
     if (!ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

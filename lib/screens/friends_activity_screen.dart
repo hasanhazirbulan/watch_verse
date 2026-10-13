@@ -40,6 +40,12 @@ class _FriendsActivityScreenState extends State<FriendsActivityScreen> {
       body: StreamBuilder<Map<String, dynamic>?>(
         stream: _social.myStream(),
         builder: (context, meSnap) {
+          // Without this, every open flashed "No friends yet" until the
+          // profile doc arrived — even for accounts following people.
+          if (meSnap.connectionState == ConnectionState.waiting &&
+              !meSnap.hasData) {
+            return asyncLoadingIndicator();
+          }
           final following = (meSnap.data?['following'] as List?)
                   ?.cast<String>() ??
               const <String>[];

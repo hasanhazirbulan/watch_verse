@@ -218,9 +218,14 @@ class _ListsScreenState extends State<ListsScreen> {
             else
               SizedBox(
                 height: 66,
-                child: Row(
+                // Six 50px-wide thumbs need 300px; on a 320pt-wide phone
+                // the card only has ~264px, so the row overflowed. Show only
+                // as many as fit (max 6).
+                child: LayoutBuilder(
+                  builder: (context, constraints) => Row(
                   children: [
-                    for (final m in items.take(6))
+                    for (final m in items.take(
+                        (constraints.maxWidth / 50).floor().clamp(0, 6)))
                       Padding(
                         padding: const EdgeInsets.only(right: 6),
                         child: ClipRRect(
@@ -234,6 +239,7 @@ class _ListsScreenState extends State<ListsScreen> {
                         ),
                       ),
                   ],
+                ),
                 ),
               ),
           ],

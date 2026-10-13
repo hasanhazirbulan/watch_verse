@@ -13,8 +13,16 @@ import 'package:watch_verse/widgets/poll_widgets.dart';
 class EpisodeDetailScreen extends StatefulWidget {
   final TvShow show;
   final Episode episode;
+
+  /// True when pushed from the show's own [TvDetailScreen]: the app-bar show
+  /// button then just pops back to it instead of stacking a second copy of
+  /// the same show page (show → episode → show → episode …).
+  final bool openedFromShow;
   const EpisodeDetailScreen(
-      {super.key, required this.show, required this.episode});
+      {super.key,
+      required this.show,
+      required this.episode,
+      this.openedFromShow = false});
 
   @override
   State<EpisodeDetailScreen> createState() => _EpisodeDetailScreenState();
@@ -54,7 +62,9 @@ class _EpisodeDetailScreenState extends State<EpisodeDetailScreen> {
             IconButton(
               icon: const Icon(Icons.tv_rounded),
               tooltip: show.name,
-              onPressed: () => openMedia(context, show.toMediaItem()),
+              onPressed: () => widget.openedFromShow
+                  ? Navigator.pop(context)
+                  : openMedia(context, show.toMediaItem()),
             ),
           ]),
       body: ListView(
@@ -133,15 +143,19 @@ class _EpisodeDetailScreenState extends State<EpisodeDetailScreen> {
                       color: watched ? context.colors.primary : Colors.white,
                       size: 20),
                   const SizedBox(width: 8),
-                  Text(
-                      watched
-                          ? l10n.episodeWatchedLabel
-                          : l10n.episodeMarkAsWatchedLabel,
-                      style: TextStyle(
-                          color:
-                              watched ? context.colors.primary : Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15)),
+                  Flexible(
+                    child: Text(
+                        watched
+                            ? l10n.episodeWatchedLabel
+                            : l10n.episodeMarkAsWatchedLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            color:
+                                watched ? context.colors.primary : Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15)),
+                  ),
                 ],
               ),
             ),
@@ -229,10 +243,14 @@ class _EpisodeDetailScreenState extends State<EpisodeDetailScreen> {
         final l10n = AppLocalizations.of(context)!;
         final data = snap.data;
         final rating = ((data?['rating'] ?? 0) as num).toDouble();
-        // Seed the note field once, from the stored value.
-        if (!_noteSeeded && data != null) {
-          _noteController.text = (data['note'] ?? '') as String;
+        // Seed the note field once, from the first snapshot. Previously this
+        // waited for a non-null doc — so for an episode with no note doc yet,
+        // the first rating tap (which creates the doc) re-seeded the field
+        // with '' and wiped whatever the user had typed but not saved yet.
+        if (!_noteSeeded && snap.connectionState != ConnectionState.waiting) {
           _noteSeeded = true;
+          final stored = (data?['note'] ?? '') as String;
+          if (_noteController.text.isEmpty) _noteController.text = stored;
         }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

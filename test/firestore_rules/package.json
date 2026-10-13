@@ -1,0 +1,12 @@
+{
+  "name": "watchverse-firestore-rules-tests",
+  "private": true,
+  "description": "Emulator tests for ../../firestore.rules. From this dir: npm install && npm test",
+  "scripts": {
+    "test": "firebase emulators:exec --only firestore --project demo-watchverse-rules --config ../../firebase.json \"node --test rules.test.mjs\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "firebase": "^11.0.0"
+  }
+}

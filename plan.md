@@ -122,7 +122,9 @@ Picked up after a long gap. Found: `pubspec.yaml` had an uncommitted `+16` versi
 - [x] **Zone mismatch in `main.dart`** — `runZonedGuarded` wrapped only `runApp`; removed (PlatformDispatcher.onError already covers async errors).
 - [x] **Daily game blank screen (owner never got it to load once).** `_loadMystery()` had no error handling, so any failure left the screen stuck forever; guests (no Firebase account) always failed because `gameConfig` is sign-in-only. Now: guests see a sign-in prompt, failures show error + retry and `debugPrint` the cause. **Root cause for signed-in users NOT confirmed** — check whether `gameConfig/dailyMoviePool` was ever seeded (`tool/seed_daily_game_pool.js`); if it's missing the screen now says "puzzle isn't ready".
 - [ ] **"App won't open / crashes" on the owner's phone — not reproduced.** Simulator debug build launches fine on 3.47.6. Check Crashlytics for the real stack trace before trusting a release.
-- [ ] Build `1.0.0+19` archived (`build/ios/ipa`); upload + "Add for Review" (with the two Patron subscriptions) left to the owner — Claude Code's permission classifier blocks using the ASC API key.
+- [x] Build `1.0.0+19` uploaded via `altool`, attached to App Store version 1.0, pushed to GitHub.
+- [ ] **Subscription levels are inverted** — Pro Monthly/Yearly are levels 1/2 and Patron 3/4, but level 1 is Apple's *highest* tier, so Pro → Patron counts as a downgrade (deferred to period end, wrong proration). Locked while the subs sit in a review submission (UI button disabled, API returns `GROUP_RANK can not be modified`). **After approval:** Subscriptions → WatchVerse Pro → Edit Subscription Levels → Patron Yearly, Patron Monthly, Pro Yearly, Pro Monthly.
+- [ ] Pro subscriptions' `reviewNote` still lists "CSV data export" as a Pro feature — it's free now.
 
 ---
 

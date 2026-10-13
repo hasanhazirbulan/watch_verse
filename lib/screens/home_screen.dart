@@ -206,7 +206,9 @@ class _HomeScreenState extends State<HomeScreen> {
             _drawerItem(Icons.workspace_premium_rounded, l10n.homeWatchVersePro,
                 () {
               _scaffoldKey.currentState?.closeDrawer();
-              if (ProService.instance.isPro) {
+              // Pro subscribers still get the sheet so they can move up to
+              // Patron; only the top tier has nothing left to buy.
+              if (ProService.instance.isPatron) {
                 ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(l10n.proActiveBadge)));
                 return;

@@ -201,6 +201,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         Text(l10n.settingsNotificationsSection,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 6),
+        // The senders live in functions/, which isn't deployed (no Blaze
+        // plan), so say so rather than imply these toggles do anything yet.
+        Text(l10n.settingsNotificationsNotLive,
+            style: TextStyle(color: context.colors.textMuted, fontSize: 13)),
         const SizedBox(height: 12),
         StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
           stream: userRef.snapshots(),

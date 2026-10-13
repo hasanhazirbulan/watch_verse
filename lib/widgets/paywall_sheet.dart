@@ -9,7 +9,7 @@ import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 
 /// WatchVerse Pro upsell sheet — shown at every gate (list limit, advanced
-/// stats, Pro profile themes, CSV export, the daily game) and from the Home
+/// stats; Patron profile themes) and from the Home
 /// drawer. Matches the app's existing modal-sheet convention (see
 /// `showQuickAddSheet` in `lib/widgets/quick_add_sheet.dart`): rounded top
 /// corners, drag handle, `context.colors.surface` background.
@@ -114,8 +114,8 @@ class _PaywallSheetState extends State<_PaywallSheet> {
   // Guests (no Firebase account — see the "Continue as guest" login option)
   // can browse the paywall and see pricing same as everyone else, but can't
   // complete a purchase without an account first. Not a StoreKit limitation
-  // — it's that every Pro perk (unlimited lists, CSV export, profile
-  // themes, the daily game's saved progress) is itself account-gated
+  // — it's that every paid perk (unlimited lists, advanced stats, profile
+  // themes) is itself account-gated
   // elsewhere in the app, so a guest's purchase would unlock nothing they
   // could actually use until they signed in anyway.
   bool get _signedIn => FirebaseAuth.instance.currentUser != null;
@@ -188,12 +188,10 @@ class _PaywallSheetState extends State<_PaywallSheet> {
             if (_tier == ProTier.pro) ...[
               _feature(context, Icons.bar_chart_rounded, l10n.proFeatureStats),
               _feature(context, Icons.playlist_add_check_rounded, l10n.proFeatureLists),
-              _feature(context, Icons.theaters_rounded, l10n.proFeatureGame),
             ] else ...[
               _feature(context, Icons.check_circle_rounded, l10n.proFeatureEverythingInPro),
               _feature(context, Icons.palette_rounded, l10n.proFeatureProfile),
               _feature(context, Icons.military_tech_rounded, l10n.proFeatureBadge),
-              _feature(context, Icons.rocket_launch_rounded, l10n.proFeatureEarlyAccess),
             ],
             const SizedBox(height: 22),
             FutureBuilder<List<ProductDetails>>(

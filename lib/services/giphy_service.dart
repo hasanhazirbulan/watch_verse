@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -43,7 +44,9 @@ class GiphyService {
   Future<List<GiphyGif>> _fetch(String url, Map<String, String> params) async {
     final uri = Uri.parse(url)
         .replace(queryParameters: {'api_key': _apiKey, ...params});
-    final res = await http.get(uri);
+    // Same reasoning as APIservices._timeout: a request that never returns
+    // would leave the GIF picker spinning forever instead of erroring.
+    final res = await http.get(uri).timeout(const Duration(seconds: 15));
     if (res.statusCode != 200) {
       throw Exception('Giphy request failed (${res.statusCode})');
     }

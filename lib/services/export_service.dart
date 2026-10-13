@@ -60,7 +60,9 @@ class ExportService {
           s['status'] ?? '',
           s['watchedCount'] ?? 0,
           s['totalEpisodes'] ?? '',
-          s['rating'] ?? '',
+          // TvTrackingService.setRating stores a show's rating as
+          // `userRating` (`rating` is the movie-doc field name).
+          s['userRating'] ?? '',
         ],
     ];
     return _csvFile(rows, 'watchverse_shows.csv');

@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:flutter/foundation.dart' show debugPrint, visibleForTesting;
 
 class DatabaseService {
-  DatabaseService._privateConstructor(); // Private constructor
+  DatabaseService._privateConstructor({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   static final DatabaseService _instance =
   DatabaseService._privateConstructor();
@@ -11,27 +12,46 @@ class DatabaseService {
     return _instance;
   }
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  /// Test-only factory: inject a fake Firestore.
+  @visibleForTesting
+  factory DatabaseService.test({required FirebaseFirestore firestore}) =>
+      DatabaseService._privateConstructor(firestore: firestore);
 
-  // Create a user
+  final FirebaseFirestore _firestore;
+
+  /// How often [createUser] retries a failed profile write before giving up.
+  static const createUserAttempts = 3;
+
+  /// Creates the `users/{uid}` profile doc right after sign-up.
+  ///
+  /// [email] is accepted for call-site compatibility but deliberately NOT
+  /// stored: `users/{uid}` is readable by every signed-in user (public
+  /// profiles, search), and nothing in the app reads an email from it — the
+  /// signed-in user's own address comes from Firebase Auth.
+  ///
+  /// Retries a few times, then rethrows. It used to swallow the error, so a
+  /// failed write let registration "succeed" with no profile doc at all
+  /// (invisible to search, no public profile).
   Future<void> createUser({
     required String uid,
     required String email,
     String? name,
     String? profileImageUrl,
-    // Other user fields
+    Duration retryDelay = const Duration(milliseconds: 500),
   }) async {
-    try {
-      await _firestore.collection('users').doc(uid).set({
-        'email': email,
-        'name': name,
-        'profileImageUrl': profileImageUrl,
-        'createdAt': FieldValue.serverTimestamp(),
-        // Other user fields
-      });
-    } catch (e) {
-      debugPrint('Error creating user: $e');
-      // Error handling — e.g. show an error message to the user
+    for (var attempt = 1;; attempt++) {
+      try {
+        await _firestore.collection('users').doc(uid).set({
+          'name': name,
+          'profileImageUrl': profileImageUrl,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        return;
+      } catch (e) {
+        debugPrint('Error creating user (attempt $attempt): $e');
+        if (attempt >= createUserAttempts) rethrow;
+        await Future<void>.delayed(retryDelay * attempt);
+      }
     }
   }
 

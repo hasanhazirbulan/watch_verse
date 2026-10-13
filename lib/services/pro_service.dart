@@ -170,6 +170,12 @@ class ProService {
   /// purchase alongside a current Patron one), the higher tier wins —
   /// Patron already includes everything Pro does, so this can only ever
   /// grant more, never less, than a single-product read would.
+  ///
+  /// The tier is granted *before* `completePurchase` is called, and a
+  /// failing `completePurchase` is contained: this is an `async` stream
+  /// callback, so a throw there used to skip the grant for a purchase Apple
+  /// had already charged (until the next launch's restore) and surface as an
+  /// uncaught error.
   void _onPurchaseUpdates(List<PurchaseDetails> updates) async {
     var highest = ProTier.none;
     for (final purchase in updates) {
@@ -179,11 +185,20 @@ class ProService {
               purchase.status == PurchaseStatus.restored)) {
         if (tier.index > highest.index) highest = tier;
       }
-      if (purchase.pendingCompletePurchase) {
-        await InAppPurchase.instance.completePurchase(purchase);
-      }
     }
     if (highest != ProTier.none) await _setTier(highest);
+
+    for (final purchase in updates) {
+      if (purchase.pendingCompletePurchase) {
+        try {
+          await InAppPurchase.instance.completePurchase(purchase);
+        } catch (e) {
+          // StoreKit redelivers unfinished transactions on the next launch,
+          // so this is retried automatically.
+          if (kDebugMode) debugPrint('ProService: completePurchase threw: $e');
+        }
+      }
+    }
   }
 
   Future<void> _setTier(ProTier value) async {
@@ -207,30 +222,32 @@ class ProService {
     return _products;
   }
 
-  Future<bool> purchase(ProductDetails product) async {
-    try {
-      final param = PurchaseParam(productDetails: product);
-      final started =
-          await InAppPurchase.instance.buyNonConsumable(purchaseParam: param);
-      if (!started) return false;
-      // The actual entitlement flip happens asynchronously via
-      // [_onPurchaseUpdates] once StoreKit reports the transaction — give it
-      // a moment so the sheet can reflect the result before closing.
-      await Future<void>.delayed(const Duration(milliseconds: 600));
-      return _tierOf(product.id) != ProTier.none && isPro;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  Future<bool> restore() async {
+  /// Restores purchases and reports whether a tier is active afterwards.
+  ///
+  /// `restorePurchases()` only *starts* the restore — the restored
+  /// transactions arrive later on the purchase stream. This used to sleep
+  /// 600 ms and then read [isPro], which reported "nothing to restore" to a
+  /// real subscriber whenever StoreKit took longer than that. Now waits for
+  /// the tier to flip (bounded, since StoreKit sends nothing at all when
+  /// there is nothing to restore).
+  ///
+  /// (A `purchase()` method lived here too; the paywall now drives purchases
+  /// from `purchaseStream` itself, so it was removed rather than fixed.)
+  Future<bool> restore({Duration timeout = const Duration(seconds: 10)}) async {
     try {
       await InAppPurchase.instance.restorePurchases();
-      await Future<void>.delayed(const Duration(milliseconds: 600));
-      return isPro;
     } catch (_) {
       return false;
     }
+    if (isPro) return true;
+    try {
+      await tierStream
+          .firstWhere((t) => t != ProTier.none)
+          .timeout(timeout);
+    } on TimeoutException {
+      // Nothing restored in time.
+    }
+    return isPro;
   }
 
   void dispose() {

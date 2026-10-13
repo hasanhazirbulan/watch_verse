@@ -1,15 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 /// Social graph: follow/unfollow, user search, and reading other users' public
 /// library + activity. Follower/following are stored as arrays on the user doc
 /// (`followers` / `following`), matching the project's security rules.
 class SocialService {
-  SocialService._();
+  SocialService._({FirebaseFirestore? firestore, FirebaseAuth? auth})
+      : _db = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance;
   static final SocialService instance = SocialService._();
 
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-  String? get uid => FirebaseAuth.instance.currentUser?.uid;
+  /// Test-only factory: inject a fake Firestore/Auth instead of touching
+  /// real backends.
+  @visibleForTesting
+  factory SocialService.test(
+          {required FirebaseFirestore firestore, required FirebaseAuth auth}) =>
+      SocialService._(firestore: firestore, auth: auth);
+
+  final FirebaseFirestore _db;
+  final FirebaseAuth _auth;
+  String? get uid => _auth.currentUser?.uid;
 
   CollectionReference<Map<String, dynamic>> get _users =>
       _db.collection('users');
@@ -292,12 +303,23 @@ class SocialService {
     await batch.commit();
   }
 
+  /// Whether [targetUid]'s profile doc still exists. When it doesn't (that
+  /// user deleted their account), a `set(merge)` of their `followers` would
+  /// be a *create*, which the rules only allow for the owner — and since it
+  /// shares a batch with this user's own write, the whole unfollow/block
+  /// was rejected, leaving the deleted account stuck in `following`.
+  Future<bool> _profileExists(String targetUid) async =>
+      (await _users.doc(targetUid).get()).exists;
+
   Future<void> unfollow(String targetUid) async {
     final me = uid;
     if (me == null) return;
+    final targetExists = await _profileExists(targetUid);
     final batch = _db.batch();
-    batch.set(_users.doc(targetUid),
-        {'followers': FieldValue.arrayRemove([me])}, SetOptions(merge: true));
+    if (targetExists) {
+      batch.set(_users.doc(targetUid),
+          {'followers': FieldValue.arrayRemove([me])}, SetOptions(merge: true));
+    }
     batch.set(_users.doc(me),
         {'following': FieldValue.arrayRemove([targetUid])},
         SetOptions(merge: true));
@@ -310,21 +332,35 @@ class SocialService {
   Stream<List<String>> blockedStream() => myStream()
       .map((d) => (d?['blocked'] as List?)?.cast<String>() ?? const <String>[]);
 
-  /// Blocks a user: hides them from you and also drops any follow relationship.
+  /// Blocks a user. Exactly what changes:
+  ///  * their uid is added to *your* `blocked` list (their comments/content
+  ///    are hidden from you client-side);
+  ///  * you stop following them (removed from your `following`, and you from
+  ///    their `followers`);
+  ///  * they are removed from *your* `followers`.
+  /// What it can't do: their own `following` array still lists you — the
+  /// rules only allow cross-user writes to `followers`, so that entry stays
+  /// until they unfollow. Nothing here stops them reading your public
+  /// profile either; blocking is a "hide from me" filter, not access control.
   Future<void> block(String targetUid) async {
     final me = uid;
     if (me == null || me == targetUid) return;
+    final targetExists = await _profileExists(targetUid);
     final batch = _db.batch();
     batch.set(
         _users.doc(me),
         {
           'blocked': FieldValue.arrayUnion([targetUid]),
           'following': FieldValue.arrayRemove([targetUid]),
+          'followers': FieldValue.arrayRemove([targetUid]),
         },
         SetOptions(merge: true));
-    // Remove me from their followers so the block takes effect both ways.
-    batch.set(_users.doc(targetUid),
-        {'followers': FieldValue.arrayRemove([me])}, SetOptions(merge: true));
+    // Remove me from their followers (the one field of theirs the rules let
+    // us touch) so I no longer show up as following them.
+    if (targetExists) {
+      batch.set(_users.doc(targetUid),
+          {'followers': FieldValue.arrayRemove([me])}, SetOptions(merge: true));
+    }
     await batch.commit();
   }
 

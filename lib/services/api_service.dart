@@ -274,13 +274,19 @@ class APIservices {
   /// every one of them repeatedly instead of once.
   static final _providerCache = <String, Future<List<WatchProvider>>>{};
 
+  ///
+  /// A failed fetch still resolves to an empty list for the caller, but is
+  /// evicted rather than cached — otherwise one timeout/offline moment hid
+  /// the provider badges for that title until the app was restarted.
   Future<List<WatchProvider>> getWatchProvidersCached(
       MediaType type, int id, String region) {
     final key = '${type.apiPath}-$id-$region';
     return _providerCache.putIfAbsent(
         key,
-        () => getWatchProviders(type, id, region)
-            .catchError((_) => <WatchProvider>[]));
+        () => getWatchProviders(type, id, region).catchError((Object _) {
+              _providerCache.remove(key);
+              return <WatchProvider>[];
+            }));
   }
 
   Future<Person> getPersonDetails(int id) async {

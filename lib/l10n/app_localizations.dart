@@ -332,6 +332,12 @@ abstract class AppLocalizations {
   /// **'Shared watch matches'**
   String get settingsNotifySharedWatch;
 
+  /// Caption under the Settings > Notifications toggles while the server-side push senders (functions/) are not deployed. Remove once pushes are actually sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Push notifications aren\'t being sent yet. Your choices here are saved and will apply once they are.'**
+  String get settingsNotificationsNotLive;
+
   /// No description provided for @settingsAppVersion.
   ///
   /// In en, this message translates to:
@@ -353,7 +359,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsDeleteAccountConfirmBody.
   ///
   /// In en, this message translates to:
-  /// **'This can\'t be undone. Your account and sign-in will be permanently deleted.'**
+  /// **'This can\'t be undone. Your account, sign-in, library, lists, diary, and comments will be permanently deleted. An App Store subscription isn\'t cancelled automatically — cancel it separately in your device\'s subscription settings.'**
   String get settingsDeleteAccountConfirmBody;
 
   /// No description provided for @settingsDeleteAccountAction.
@@ -1629,7 +1635,7 @@ abstract class AppLocalizations {
   /// No description provided for @commentWSpoilersHint.
   ///
   /// In en, this message translates to:
-  /// **'Spoilers may be inside'**
+  /// **'May contain spoilers'**
   String get commentWSpoilersHint;
 
   /// No description provided for @commentWDelete.
@@ -1665,7 +1671,7 @@ abstract class AppLocalizations {
   /// No description provided for @commentWBlockedSnackbar.
   ///
   /// In en, this message translates to:
-  /// **'Blocked. You won\'t see their content.'**
+  /// **'Blocked. Their comments are hidden and you\'ve unfollowed them.'**
   String get commentWBlockedSnackbar;
 
   /// No description provided for @commentWJustNow.
@@ -1761,7 +1767,7 @@ abstract class AppLocalizations {
   /// No description provided for @episodeNoteHint.
   ///
   /// In en, this message translates to:
-  /// **'Write a comment about this episode…'**
+  /// **'Write a note about this episode…'**
   String get episodeNoteHint;
 
   /// No description provided for @episodeNoteSaved.
@@ -2589,7 +2595,7 @@ abstract class AppLocalizations {
   /// No description provided for @historyEmptySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Episodes you mark as watched will show up here.'**
+  /// **'Movies and episodes you mark as watched will show up here.'**
   String get historyEmptySubtitle;
 
   /// No description provided for @historyAgoNow.
@@ -3024,12 +3030,6 @@ abstract class AppLocalizations {
   /// **'Exclusive profile themes'**
   String get proFeatureProfile;
 
-  /// No description provided for @proFeatureExport.
-  ///
-  /// In en, this message translates to:
-  /// **'Export your data to CSV'**
-  String get proFeatureExport;
-
   /// No description provided for @proFeatureGame.
   ///
   /// In en, this message translates to:
@@ -3099,13 +3099,13 @@ abstract class AppLocalizations {
   /// No description provided for @proRestoreSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Pro restored!'**
+  /// **'Subscription restored!'**
   String get proRestoreSuccess;
 
   /// No description provided for @proRestoreFailure.
   ///
   /// In en, this message translates to:
-  /// **'No previous purchase found for this account'**
+  /// **'No previous purchase found for this Apple ID'**
   String get proRestoreFailure;
 
   /// No description provided for @proPurchaseFailure.
@@ -3123,7 +3123,7 @@ abstract class AppLocalizations {
   /// No description provided for @proActiveBadge.
   ///
   /// In en, this message translates to:
-  /// **'You\'re a Pro member'**
+  /// **'Your WatchVerse subscription is active'**
   String get proActiveBadge;
 
   /// No description provided for @proSignInToContinue.
@@ -3153,7 +3153,7 @@ abstract class AppLocalizations {
   /// No description provided for @proUnlockProfileTheme.
   ///
   /// In en, this message translates to:
-  /// **'Pro theme'**
+  /// **'Patron theme'**
   String get proUnlockProfileTheme;
 
   /// No description provided for @proExporting.

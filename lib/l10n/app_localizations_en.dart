@@ -130,6 +130,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsNotifySharedWatch => 'Shared watch matches';
 
   @override
+  String get settingsNotificationsNotLive =>
+      'Push notifications aren\'t being sent yet. Your choices here are saved and will apply once they are.';
+
+  @override
   String settingsAppVersion(String version) {
     return 'Version $version';
   }
@@ -142,7 +146,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsDeleteAccountConfirmBody =>
-      'This can\'t be undone. Your account and sign-in will be permanently deleted.';
+      'This can\'t be undone. Your account, sign-in, library, lists, diary, and comments will be permanently deleted. An App Store subscription isn\'t cancelled automatically — cancel it separately in your device\'s subscription settings.';
 
   @override
   String get settingsDeleteAccountAction => 'Delete';
@@ -882,7 +886,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commentWCommentsLabel => 'Comments';
 
   @override
-  String get commentWSpoilersHint => 'Spoilers may be inside';
+  String get commentWSpoilersHint => 'May contain spoilers';
 
   @override
   String get commentWDelete => 'Delete';
@@ -901,7 +905,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commentWBlockedSnackbar =>
-      'Blocked. You won\'t see their content.';
+      'Blocked. Their comments are hidden and you\'ve unfollowed them.';
 
   @override
   String get commentWJustNow => 'now';
@@ -963,7 +967,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get episodeNotesPrivateHint => 'Private — only you can see this.';
 
   @override
-  String get episodeNoteHint => 'Write a comment about this episode…';
+  String get episodeNoteHint => 'Write a note about this episode…';
 
   @override
   String get episodeNoteSaved => 'Note saved';
@@ -1406,7 +1410,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get historyEmptySubtitle =>
-      'Episodes you mark as watched will show up here.';
+      'Movies and episodes you mark as watched will show up here.';
 
   @override
   String get historyAgoNow => 'now';
@@ -1670,9 +1674,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proFeatureProfile => 'Exclusive profile themes';
 
   @override
-  String get proFeatureExport => 'Export your data to CSV';
-
-  @override
   String get proFeatureGame => 'Daily movie guessing game';
 
   @override
@@ -1708,10 +1709,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proRestore => 'Restore purchases';
 
   @override
-  String get proRestoreSuccess => 'Pro restored!';
+  String get proRestoreSuccess => 'Subscription restored!';
 
   @override
-  String get proRestoreFailure => 'No previous purchase found for this account';
+  String get proRestoreFailure =>
+      'No previous purchase found for this Apple ID';
 
   @override
   String get proPurchaseFailure => 'Purchase failed — please try again';
@@ -1720,7 +1722,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proNotConfigured => 'Pro isn\'t available yet — check back soon';
 
   @override
-  String get proActiveBadge => 'You\'re a Pro member';
+  String get proActiveBadge => 'Your WatchVerse subscription is active';
 
   @override
   String get proSignInToContinue => 'Sign In to Continue';
@@ -1737,7 +1739,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proUnlockStats => 'Unlock with Pro';
 
   @override
-  String get proUnlockProfileTheme => 'Pro theme';
+  String get proUnlockProfileTheme => 'Patron theme';
 
   @override
   String get proExporting => 'Preparing your export…';

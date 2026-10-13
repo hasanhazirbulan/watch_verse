@@ -375,16 +375,47 @@ class APIservices {
   /// Movie search only (unlike [searchMulti], which mixes in TV) — the daily
   /// game's guess input only ever offers movies, since the mystery title is
   /// always a movie.
-  Future<List<MediaItem>> searchMovies(String query) async {
+  ///
+  /// [year] narrows results to titles with any release in that year — used
+  /// by the Letterboxd importer to disambiguate same-name films.
+  Future<List<MediaItem>> searchMovies(String query, {int? year}) async {
     if (query.trim().isEmpty) return [];
     final data = await _getJson(
-      _uri('/search/movie', {'query': query, 'include_adult': 'false'}),
+      _uri('/search/movie', {
+        'query': query,
+        'include_adult': 'false',
+        if (year != null) 'year': '$year',
+      }),
     );
     final results = (data['results'] as List<dynamic>? ?? []);
     return results
         .map((e) => MediaItem.fromMovieMap(e as Map<String, dynamic>))
         .where((m) => m.id != 0)
         .toList();
+  }
+
+  /// Exact lookup of an IMDb id (`tt0111161`) via `/find` — used by the
+  /// IMDb importer, so no fuzzy title matching is needed for those rows.
+  /// A title resolves to at most one movie or one show; both are null when
+  /// TMDB doesn't know the id.
+  Future<({MediaItem? movie, MediaItem? tv})> findByImdbId(
+      String imdbId) async {
+    final data = await _getJson(
+      _uri('/find/$imdbId', {'external_source': 'imdb_id'}),
+    );
+    MediaItem? first(String key, MediaItem Function(Map<String, dynamic>) f) {
+      final list = (data[key] as List<dynamic>? ?? []);
+      for (final e in list) {
+        final m = f(e as Map<String, dynamic>);
+        if (m.id != 0) return m;
+      }
+      return null;
+    }
+
+    return (
+      movie: first('movie_results', MediaItem.fromMovieMap),
+      tv: first('tv_results', MediaItem.fromTvMap),
+    );
   }
 
   /// A person's filmography (movies + TV), de-duplicated and ordered so titles

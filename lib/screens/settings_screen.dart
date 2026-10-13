@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/screens/blocked_users_screen.dart';
 import 'package:watch_verse/screens/edit_profile_screen.dart';
+import 'package:watch_verse/screens/import_screen.dart';
 import 'package:watch_verse/services/account_deletion_service.dart';
 import 'package:watch_verse/services/export_service.dart';
 import 'package:watch_verse/services/legal_links.dart';
@@ -136,6 +137,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 : Icons.file_download_rounded,
             label: _exporting ? l10n.proExporting : l10n.proExportAction,
             onTap: _exporting ? null : _exportData,
+          ),
+          const SizedBox(height: 12),
+          _tile(
+            icon: Icons.file_upload_rounded,
+            label: l10n.importDataAction,
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const ImportScreen())),
           ),
           const SizedBox(height: 12),
           _tile(

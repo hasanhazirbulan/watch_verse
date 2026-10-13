@@ -33,7 +33,12 @@ class TvTrackingService {
     return _db.collection('users').doc(uid).collection('activity');
   }
 
-  Map<String, dynamic> _metadata(TvShow show) => {
+  Map<String, dynamic> _metadata(TvShow show) => metadataFor(show);
+
+  /// The metadata fields every show doc carries — public so the IMDb
+  /// importer (`LibraryImportService`) writes exactly the same doc shape as
+  /// [addShow].
+  static Map<String, dynamic> metadataFor(TvShow show) => {
         'id': show.id,
         'name': show.name,
         'posterPath': show.posterPath,

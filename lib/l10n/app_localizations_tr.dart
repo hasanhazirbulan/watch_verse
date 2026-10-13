@@ -1752,6 +1752,118 @@ class AppLocalizationsTr extends AppLocalizations {
   String get proExportAction => 'Verilerimi dışa aktar (CSV)';
 
   @override
+  String get importDataAction => 'Letterboxd veya IMDb\'den içe aktar';
+
+  @override
+  String get importTitle => 'Verileri içe aktar';
+
+  @override
+  String get importIntro =>
+      'Geçmişini Letterboxd veya IMDb\'den getir. WatchVerse\'teki hiçbir şeyin üzerine yazılmaz — mevcut puanların ve izlediğin filmler korunur, aynı dosyayı tekrar içe aktarmak kopya oluşturmaz.';
+
+  @override
+  String get importLetterboxdHeading => 'Letterboxd';
+
+  @override
+  String get importLetterboxdSteps =>
+      'letterboxd.com\'da Settings → Import & Export → Export Your Data yolunu izle. İnen .zip dosyasını olduğu gibi seç — ya da yalnızca içindeki watched, ratings, diary ve watchlist CSV dosyalarını.';
+
+  @override
+  String get importImdbHeading => 'IMDb';
+
+  @override
+  String get importImdbSteps =>
+      'imdb.com\'da Your Ratings sayfasını (ve izleme listeni) aç, ⋯ menüsünden Export\'u seç. Hazır olduğunda CSV dosyasını Exports sayfasından indir.';
+
+  @override
+  String get importWhatHappens =>
+      'İzlenen ve puanlanan filmler orijinal tarihleriyle izlendi olarak işaretlenir, Letterboxd günlük kayıtları korunur, izleme listesindeki filmler izleme listene eklenir. IMDb\'deki diziler, hiçbir bölüm işaretlenmeden Dizilerim\'e eklenir.';
+
+  @override
+  String get importPickFiles => 'Dosya seç';
+
+  @override
+  String get importPickHint => 'Aynı anda birden fazla dosya seçebilirsin.';
+
+  @override
+  String get importReading => 'Dosyalar okunuyor…';
+
+  @override
+  String importProgress(String done, String total) {
+    return 'Yapımlar eşleştiriliyor… $done / $total';
+  }
+
+  @override
+  String get importCancelling => 'Durduruluyor…';
+
+  @override
+  String get importNothingFound =>
+      'Bu dosyalarda Letterboxd veya IMDb verisi bulunamadı.';
+
+  @override
+  String importUnrecognizedFiles(String files) {
+    return 'Atlandı (Letterboxd veya IMDb dışa aktarımı değil): $files';
+  }
+
+  @override
+  String get importDoneTitle => 'İçe aktarma tamamlandı';
+
+  @override
+  String get importCancelledNote =>
+      'İçe aktarma durduruldu. Şu ana kadar eşleşenlerin hepsi kaydedildi — tamamlamak için istediğin zaman tekrar içe aktarabilirsin; hiçbir şey iki kez eklenmez.';
+
+  @override
+  String get importSummaryWatched => 'İzlendi olarak işaretlenen filmler';
+
+  @override
+  String get importSummaryRatings => 'Puanlar';
+
+  @override
+  String get importSummaryWatchlist => 'İzleme listesine eklenenler';
+
+  @override
+  String get importSummaryShows => 'Dizilerim\'e eklenen diziler';
+
+  @override
+  String get importSummaryDiary => 'Günlük kayıtları';
+
+  @override
+  String get importSummaryExisting => 'Zaten kütüphanende olanlar';
+
+  @override
+  String get importSummarySkipped =>
+      'Atlanan satırlar (bölümler, oyunlar, geçersiz)';
+
+  @override
+  String get importSummaryUnmatched => 'Eşleşmeyenler';
+
+  @override
+  String get importViewUnmatched => 'Eşleşmeyenleri gör';
+
+  @override
+  String get importUnmatchedHint =>
+      'Bunlar güvenilir şekilde eşleştirilemedi. Arayarak elle ekleyebilirsin.';
+
+  @override
+  String get importLookupFailed =>
+      'Arama başarısız — tekrar içe aktarmak sorunu çözebilir';
+
+  @override
+  String get importDone => 'Tamam';
+
+  @override
+  String get importMore => 'Daha fazla içe aktar';
+
+  @override
+  String importError(String error) {
+    return 'İçe aktarma başarısız: $error';
+  }
+
+  @override
+  String get importSignInPrompt =>
+      'Letterboxd veya IMDb geçmişini içe aktarmak için giriş yap.';
+
+  @override
   String get proLegalFooter =>
       'Abone olarak Kullanım Koşulları\'nı ve Gizlilik Politikası\'nı kabul etmiş olursunuz.';
 

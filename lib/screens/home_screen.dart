@@ -24,6 +24,7 @@ import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/paywall_sheet.dart';
 import 'package:watch_verse/widgets/quick_add_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:watch_verse/utils/genre_names.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -515,7 +516,8 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.white12, width: 1),
         ),
-        child: Text(g.name,
+        child: Text(
+            localizedGenre(g.name, Localizations.localeOf(context).languageCode),
             style: TextStyle(
                 color: context.colors.textSecondary,
                 fontWeight: FontWeight.w600,

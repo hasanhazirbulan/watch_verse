@@ -16,6 +16,7 @@ import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/clue_tile.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/utils/genre_names.dart';
 
 /// Today's status line for the Games hub card — one Firestore doc listener;
 /// nothing for guests (they can't play).
@@ -569,7 +570,7 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
       if (i == 0) {
         return mystery.genres.isEmpty
             ? yearHint
-            : '${l10n.dailyGameClueGenres}: ${mystery.genres.join(', ')}';
+            : '${l10n.dailyGameClueGenres}: ${localizedGenreText(mystery.genres.join(', '), Localizations.localeOf(context).languageCode)}';
       }
       return mystery.cast.isEmpty
           ? yearHint
@@ -681,7 +682,10 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
               for (var i = 0; i < clues.length; i++)
                 ClueTile(
                   label: _clueLabel(l10n, clues[i].kind),
-                  value: clues[i].value,
+                  value: clues[i].kind == ClueKind.genres
+                      ? localizedGenreText(clues[i].value,
+                          Localizations.localeOf(context).languageCode)
+                      : clues[i].value,
                   match: clues[i].match,
                   direction: clues[i].direction,
                   index: i,

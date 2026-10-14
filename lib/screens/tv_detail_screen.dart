@@ -11,6 +11,7 @@ import 'package:watch_verse/widgets/add_to_list_sheet.dart';
 import 'package:watch_verse/widgets/comment_widgets.dart';
 import 'package:watch_verse/widgets/detail_sections.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/utils/genre_names.dart';
 
 /// Bundle of everything the detail screen needs after the network round-trips:
 /// full show details plus every episode grouped by season.
@@ -408,7 +409,10 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         for (final b in bits) _pill(context, b),
-        for (final g in show.genres.take(3)) _pill(context, g, accent: true),
+        for (final g in show.genres.take(3))
+          _pill(context,
+              localizedGenre(g, Localizations.localeOf(context).languageCode),
+              accent: true),
       ],
     );
   }

@@ -11,6 +11,7 @@ import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/utils/genre_names.dart';
 
 /// Daily "Plot" game: guess today's movie (or show) from its TMDB overview
 /// with names redacted. Every wrong guess or skip unlocks the next clue
@@ -367,7 +368,8 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
   String _clueValue(PlotPuzzle p, PlotClueKind k) => switch (k) {
         PlotClueKind.plotRest => plotOpeningSplit(p.redactedOverview).rest,
         PlotClueKind.year => '${p.year}',
-        PlotClueKind.genres => p.genres.join(', '),
+        PlotClueKind.genres => localizedGenreText(
+            p.genres.join(', '), Localizations.localeOf(context).languageCode),
         PlotClueKind.actor => p.cast.isNotEmpty ? p.cast.first : '',
         PlotClueKind.tagline => '“${p.tagline}”',
         PlotClueKind.secondActor => p.cast.length > 1 ? p.cast[1] : '',

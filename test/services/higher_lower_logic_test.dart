@@ -32,6 +32,27 @@ void main() {
     });
   });
 
+  group('higherLowerCallIsCorrect', () {
+    test('values that display the same count as a tie', () {
+      const c = HigherLowerCategory.movieRevenue;
+      // Both show as "\$368M" — the player can't tell them apart.
+      expect(formatHigherLowerValue(c, 368200000),
+          formatHigherLowerValue(c, 368400000));
+      for (final g in HigherLowerGuess.values) {
+        expect(higherLowerCallIsCorrect(c, 368400000, 368200000, g), isTrue);
+      }
+      // Visibly different values still have to be called right.
+      expect(
+          higherLowerCallIsCorrect(
+              c, 368000000, 372000000, HigherLowerGuess.lower),
+          isFalse);
+      expect(
+          higherLowerCallIsCorrect(HigherLowerCategory.movieRating, 7.0, 7.1,
+              HigherLowerGuess.lower),
+          isFalse);
+    });
+  });
+
   group('formatHigherLowerValue', () {
     test('ratings', () {
       expect(formatHigherLowerValue(HigherLowerCategory.movieRating, 7.8),

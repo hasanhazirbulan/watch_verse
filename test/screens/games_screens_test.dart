@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
@@ -36,6 +37,21 @@ void _useSmallPhone(WidgetTester tester) {
 Future<void> _settle(WidgetTester tester) async {
   for (var i = 0; i < 10; i++) {
     await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+
+/// A signed-in store whose writes never get a server ack (offline / a slow
+/// connection): Firestore's `set` future only completes once acked.
+class _UnackedStore implements GamePlayStore {
+  final saves = <Map<String, dynamic>>[];
+  @override
+  bool get isSignedIn => true;
+  @override
+  Future<Map<String, dynamic>?> load(String docId) async => null;
+  @override
+  Future<void> save(String docId, Map<String, dynamic> state) {
+    saves.add(state);
+    return Completer<void>().future;
   }
 }
 
@@ -92,9 +108,50 @@ void main() {
 
     expect(find.text('You got it!'), findsOneWidget);
     expect(find.text('Solved in 1/6'), findsOneWidget);
+    // Dark theme: the green tiles are a light color, so their letters must
+    // be dark — white on them was barely readable.
+    final tileLetter = tester.widget<Text>(find.text(answer.letters[0]).first);
+    expect(tileLetter.style?.color, Colors.black87);
     final doc = await savedDoc('titleWordle', MediaType.movie);
     expect(doc?['won'], true);
     expect(doc?['guesses'], [answer.letters]);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Title Wordle: typing the next guess doesn\'t wait for the save', (
+    tester,
+  ) async {
+    _useSmallPhone(tester);
+    final answer = dailyPoolEntry(
+      titleWordleMoviePool,
+      gamePuzzleNumber(DateTime.now().toUtc()),
+    );
+    final unacked = _UnackedStore();
+    // A wrong guess: a letter that isn't the answer's first one, repeated.
+    final filler = answer.letters[0] == 'Q' ? 'Z' : 'Q';
+    await tester.pumpWidget(_wrap(TitleWordleScreen(store: unacked)));
+    await _settle(tester);
+
+    for (var i = 0; i < answer.letters.length; i++) {
+      await tester.tap(find.text(filler).last);
+      await tester.pump();
+    }
+    await tester.tap(find.byIcon(Icons.keyboard_return_rounded));
+    await tester.pump();
+    expect(unacked.saves, hasLength(1));
+
+    // The save is still pending — the keyboard must keep working.
+    await tester.tap(find.text('X').last);
+    await tester.pump();
+    expect(find.text('X'), findsNWidgets(2)); // key + board tile
+    for (var i = 1; i < answer.letters.length; i++) {
+      await tester.tap(find.text('X').last);
+      await tester.pump();
+    }
+    await tester.tap(find.byIcon(Icons.keyboard_return_rounded));
+    await tester.pump();
+    expect(unacked.saves, hasLength(2));
+    expect(unacked.saves.last['guesses'], hasLength(2));
     expect(tester.takeException(), isNull);
   });
 

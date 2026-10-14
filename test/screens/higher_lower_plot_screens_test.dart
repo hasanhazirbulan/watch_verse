@@ -90,6 +90,41 @@ void main() {
     expect(find.text('Play again'), findsOneWidget);
   });
 
+  testWidgets('Higher or Lower: leaving during the miss reveal keeps the best',
+      (tester) async {
+    _useSmallPhone(tester);
+    final service = HigherLowerService(
+      bundle: _Bundle({
+        HigherLowerService.poolAsset: jsonEncode({
+          'categories': {
+            'tvRating': [_hl(4, 1), _hl(5, 2)],
+          },
+        }),
+      }),
+    );
+    await tester.pumpWidget(_app(HigherLowerScreen(service: service)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('TV show rating'));
+    await tester.pumpAndSettle();
+
+    // Two titles valued 1 and 2: whichever is on top, the right call now is
+    // the wrong one next round (the two swap places).
+    final call =
+        find.text('1.0 ★').evaluate().isNotEmpty ? 'Higher' : 'Lower';
+    await tester.tap(find.text(call));
+    await tester.pump(const Duration(milliseconds: 1100));
+    await tester.pumpAndSettle();
+    expect(find.text('Score: 1'), findsOneWidget);
+    await tester.tap(find.text(call));
+    await tester.pump();
+    expect(find.text('Wrong!'), findsOneWidget);
+    // Back out before the 900 ms reveal ends.
+    await tester.tap(find.byTooltip('Change category'));
+    await tester.pumpAndSettle();
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getInt('higher_lower_best_tvRating'), 1);
+  });
+
   testWidgets('Plot: skipping through all attempts reveals the answer',
       (tester) async {
     _useSmallPhone(tester);

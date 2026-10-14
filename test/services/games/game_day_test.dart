@@ -13,9 +13,10 @@ void main() {
     });
 
     test('puzzle numbers count from launch and clamp before it', () {
-      expect(gamePuzzleNumber(DateTime.utc(2026, 10, 15, 12)), 1);
-      expect(gamePuzzleNumber(DateTime.utc(2026, 10, 16, 12)), 2);
-      expect(gamePuzzleNumber(DateTime.utc(2027, 10, 15, 12)), 366);
+      // Launched 2026-10-14 (EST), the day the games shipped.
+      expect(gamePuzzleNumber(DateTime.utc(2026, 10, 14, 12)), 1);
+      expect(gamePuzzleNumber(DateTime.utc(2026, 10, 15, 12)), 2);
+      expect(gamePuzzleNumber(DateTime.utc(2027, 10, 14, 12)), 366);
       expect(gamePuzzleNumber(DateTime.utc(2026, 1, 1)), 1);
     });
 

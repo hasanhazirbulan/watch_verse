@@ -74,6 +74,18 @@ bool higherLowerIsCorrect(num known, num hidden, HigherLowerGuess guess) {
   return guess == HigherLowerGuess.higher ? hidden > known : hidden < known;
 }
 
+/// [higherLowerIsCorrect] for [category], also treating two values that
+/// *display* the same (e.g. two box-office totals both shown as "$368M") as
+/// a tie: the player is told ties count, and can only judge what's shown.
+bool higherLowerCallIsCorrect(HigherLowerCategory category, num known,
+    num hidden, HigherLowerGuess guess) {
+  if (formatHigherLowerValue(category, known) ==
+      formatHigherLowerValue(category, hidden)) {
+    return true;
+  }
+  return higherLowerIsCorrect(known, hidden, guess);
+}
+
 /// "7.8 ★" for ratings; "$2.79B" / "$845M" / "$45.6M" / "$950K" for box
 /// office. Billions get two decimals so two different values rarely *look*
 /// equal while comparing differently.

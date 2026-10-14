@@ -107,11 +107,24 @@ class _HigherLowerScreenState extends State<HigherLowerScreen> {
         category == null) {
       return;
     }
-    final correct = higherLowerIsCorrect(left.value, right.value, guess);
+    final correct =
+        higherLowerCallIsCorrect(category, left.value, right.value, guess);
     setState(() {
       _lastCorrect = correct;
       if (correct) _score++;
     });
+    // Saved now, not after the reveal delay: leaving (or changing category)
+    // during the reveal cancels the timer, which used to drop a new best.
+    final previousBest = _best[category] ?? 0;
+    final bestFuture = correct
+        ? null
+        : _service.submitScore(category, _score).catchError((Object e) {
+            debugPrint('HigherLower: saving best score failed: $e');
+            return previousBest;
+          }).then((best) {
+            if (mounted) setState(() => _best = {..._best, category: best});
+            return best;
+          });
     _advanceTimer = Timer(Duration(milliseconds: correct ? 1000 : 900), () async {
       if (!mounted) return;
       if (correct) {
@@ -125,14 +138,10 @@ class _HigherLowerScreenState extends State<HigherLowerScreen> {
         _precache(_upNext);
         return;
       }
-      final previousBest = _best[category] ?? 0;
-      var best = previousBest;
-      try {
-        best = await _service.submitScore(category, _score);
-      } catch (e) {
-        debugPrint('HigherLower: saving best score failed: $e');
-      }
-      if (!mounted) return;
+      final deck = _deck;
+      final best = await bestFuture!;
+      // Left for the category list (or a new run) meanwhile: not this run.
+      if (!mounted || _deck != deck) return;
       setState(() {
         _gameOver = true;
         _newBest = _score > previousBest;

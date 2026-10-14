@@ -1259,5 +1259,56 @@
   "tvSeasonLoadFailed": "Couldn't load this season's episodes.",
   "discoverLoadMoreFailed": "Couldn't load more.",
   "retryAction": "Retry",
-  "patronBadgeLabel": "Patron"
+  "patronBadgeLabel": "Patron",
+  "actorGuessTitle": "Who's the Actor?",
+  "actorGuessHubSubtitle": "Name today's mystery actor from six clues",
+  "actorGuessSignInPrompt": "Sign in to play Who's the Actor?",
+  "actorGuessLoadError": "Couldn't load today's actor.",
+  "actorGuessNoPool": "Today's puzzle isn't ready yet — check back soon",
+  "actorGuessRetry": "Try again",
+  "actorGuessSearchHint": "Search for an actor or actress…",
+  "actorGuessSearchFailed": "Search failed. Check your connection.",
+  "actorGuessNoResults": "No actors found",
+  "actorGuessAlreadyGuessed": "Already guessed",
+  "actorGuessGuessesLeft": "{count} guesses left",
+  "@actorGuessGuessesLeft": {
+    "placeholders": { "count": { "type": "String" } }
+  },
+  "actorGuessClueNumber": "Clue {number}",
+  "@actorGuessClueNumber": {
+    "placeholders": { "number": { "type": "String" } }
+  },
+  "actorGuessClueOrigin": "Career",
+  "actorGuessFirstMovie": "First movie role: {year}",
+  "@actorGuessFirstMovie": {
+    "placeholders": { "year": { "type": "String" } }
+  },
+  "actorGuessBornIn": "Born in: {country}",
+  "@actorGuessBornIn": {
+    "placeholders": { "country": { "type": "String" } }
+  },
+  "actorGuessClueDeepCuts": "Also appeared in",
+  "actorGuessClueKnownTitles": "Well-known titles",
+  "actorGuessClueCharacter": "Famous role",
+  "actorGuessCharacterIn": "{character} in {title}",
+  "@actorGuessCharacterIn": {
+    "placeholders": { "character": { "type": "String" }, "title": { "type": "String" } }
+  },
+  "actorGuessClueTopTitles": "Best known for",
+  "actorGuessCluePhoto": "Their photo",
+  "actorGuessNextClueHint": "Each wrong guess reveals another clue",
+  "actorGuessYourGuesses": "Your guesses",
+  "actorGuessWinTitle": "You got it!",
+  "actorGuessWinSubtitle": "Solved in {count}/{max} guesses",
+  "@actorGuessWinSubtitle": {
+    "placeholders": { "count": { "type": "String" }, "max": { "type": "String" } }
+  },
+  "actorGuessLoseTitle": "Out of guesses",
+  "actorGuessAnswerWas": "Today's actor was {name}",
+  "@actorGuessAnswerWas": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "actorGuessViewFilmography": "View filmography",
+  "actorGuessShareResult": "Share result",
+  "actorGuessComeBackTomorrow": "Come back tomorrow for a new actor"
 }

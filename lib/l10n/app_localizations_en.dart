@@ -1973,4 +1973,110 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get patronBadgeLabel => 'Patron';
+
+  @override
+  String get actorGuessTitle => 'Who\'s the Actor?';
+
+  @override
+  String get actorGuessHubSubtitle =>
+      'Name today\'s mystery actor from six clues';
+
+  @override
+  String get actorGuessSignInPrompt => 'Sign in to play Who\'s the Actor?';
+
+  @override
+  String get actorGuessLoadError => 'Couldn\'t load today\'s actor.';
+
+  @override
+  String get actorGuessNoPool =>
+      'Today\'s puzzle isn\'t ready yet — check back soon';
+
+  @override
+  String get actorGuessRetry => 'Try again';
+
+  @override
+  String get actorGuessSearchHint => 'Search for an actor or actress…';
+
+  @override
+  String get actorGuessSearchFailed => 'Search failed. Check your connection.';
+
+  @override
+  String get actorGuessNoResults => 'No actors found';
+
+  @override
+  String get actorGuessAlreadyGuessed => 'Already guessed';
+
+  @override
+  String actorGuessGuessesLeft(String count) {
+    return '$count guesses left';
+  }
+
+  @override
+  String actorGuessClueNumber(String number) {
+    return 'Clue $number';
+  }
+
+  @override
+  String get actorGuessClueOrigin => 'Career';
+
+  @override
+  String actorGuessFirstMovie(String year) {
+    return 'First movie role: $year';
+  }
+
+  @override
+  String actorGuessBornIn(String country) {
+    return 'Born in: $country';
+  }
+
+  @override
+  String get actorGuessClueDeepCuts => 'Also appeared in';
+
+  @override
+  String get actorGuessClueKnownTitles => 'Well-known titles';
+
+  @override
+  String get actorGuessClueCharacter => 'Famous role';
+
+  @override
+  String actorGuessCharacterIn(String character, String title) {
+    return '$character in $title';
+  }
+
+  @override
+  String get actorGuessClueTopTitles => 'Best known for';
+
+  @override
+  String get actorGuessCluePhoto => 'Their photo';
+
+  @override
+  String get actorGuessNextClueHint => 'Each wrong guess reveals another clue';
+
+  @override
+  String get actorGuessYourGuesses => 'Your guesses';
+
+  @override
+  String get actorGuessWinTitle => 'You got it!';
+
+  @override
+  String actorGuessWinSubtitle(String count, String max) {
+    return 'Solved in $count/$max guesses';
+  }
+
+  @override
+  String get actorGuessLoseTitle => 'Out of guesses';
+
+  @override
+  String actorGuessAnswerWas(String name) {
+    return 'Today\'s actor was $name';
+  }
+
+  @override
+  String get actorGuessViewFilmography => 'View filmography';
+
+  @override
+  String get actorGuessShareResult => 'Share result';
+
+  @override
+  String get actorGuessComeBackTomorrow => 'Come back tomorrow for a new actor';
 }

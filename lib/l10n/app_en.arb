@@ -1070,7 +1070,6 @@
   "blockedUnblockButton": "Unblock",
   "blockedEmptyTitle": "No blocked users",
   "blockedEmptySubtitle": "People you block will appear here.",
-
   "watchPollsTitle": "Watch Polls",
   "watchPollDefaultTitle": "What should we watch?",
   "watchPollClosedLabel": "CLOSED",
@@ -1185,13 +1184,24 @@
   "importReading": "Reading files…",
   "importProgress": "Matching titles… {done} / {total}",
   "@importProgress": {
-    "placeholders": { "done": { "type": "String" }, "total": { "type": "String" } }
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
   },
   "importCancelling": "Stopping…",
   "importNothingFound": "No Letterboxd or IMDb data found in those files.",
   "importUnrecognizedFiles": "Skipped (not a Letterboxd or IMDb export): {files}",
   "@importUnrecognizedFiles": {
-    "placeholders": { "files": { "type": "String" } }
+    "placeholders": {
+      "files": {
+        "type": "String"
+      }
+    }
   },
   "importDoneTitle": "Import complete",
   "importCancelledNote": "Import stopped. Everything matched so far is saved — import again anytime to finish; nothing will be duplicated.",
@@ -1210,7 +1220,11 @@
   "importMore": "Import more",
   "importError": "Import failed: {error}",
   "@importError": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "importSignInPrompt": "Sign in to import your Letterboxd or IMDb history.",
   "proLegalFooter": "By subscribing you agree to our Terms of Service and Privacy Policy.",
@@ -1219,7 +1233,11 @@
   "dailyGameSearchHint": "Search for a movie…",
   "dailyGameGuessesLeft": "{count} guesses left",
   "@dailyGameGuessesLeft": {
-    "placeholders": { "count": { "type": "String" } }
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
   },
   "dailyGameClueDirector": "Director",
   "dailyGameClueStudio": "Studio",
@@ -1248,12 +1266,20 @@
   "dailyGameToday": "Today",
   "dailyGamePuzzleFor": "Puzzle for {date}",
   "@dailyGamePuzzleFor": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "dailyGameHowToPlay": "How to play",
   "dailyGameHowToIntro": "Find the mystery movie in {max} guesses. Search for any movie and pick it — each guess shows how it compares to the mystery movie.",
   "@dailyGameHowToIntro": {
-    "placeholders": { "max": { "type": "String" } }
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
   },
   "dailyGameHowToGreen": "Green: exact match",
   "dailyGameHowToGold": "Gold: close — shares a director, studio, cast member or genre, or the year is within 5, the rating within 0.5, or the box office within 50%",
@@ -1262,23 +1288,42 @@
   "dailyGameHowToShared": "For cast, genres, studio and director, a gold tile shows what the two movies share.",
   "dailyGameHowToHints": "Stuck? Hints unlock after guess {first} and {second}. A new movie every day — the calendar lets you play the past week too.",
   "@dailyGameHowToHints": {
-    "placeholders": { "first": { "type": "String" }, "second": { "type": "String" } }
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
   },
   "dailyGameGotIt": "Got it",
   "dailyGameHints": "Hints",
   "dailyGameNextHint": "Next hint after guess {count}",
   "@dailyGameNextHint": {
-    "placeholders": { "count": { "type": "String" } }
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
   },
   "dailyGameHintTopBilled": "Top-billed: {name}",
   "@dailyGameHintTopBilled": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "dailyGameNoResults": "No matching movies",
   "dailyGameSearchFailed": "Search failed. Check your connection.",
   "dailyGameSolvedIn": "{count, plural, =1{Solved on the first guess!} other{Solved in {count} guesses}}",
   "@dailyGameSolvedIn": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "dailyGameAnswerWas": "The movie was",
   "dailyGameViewMovie": "View movie",
@@ -1289,5 +1334,90 @@
   "gamesHubStatusNotPlayed": "Not played today",
   "gamesHubStatusInProgress": "In progress",
   "gamesHubStatusSolved": "Solved today",
-  "gamesHubStatusMissed": "Played today"
+  "gamesHubStatusMissed": "Played today",
+  "actorGuessTitle": "Who's the Actor?",
+  "actorGuessHubSubtitle": "Name today's mystery actor from six clues",
+  "actorGuessSignInPrompt": "Sign in to play Who's the Actor?",
+  "actorGuessLoadError": "Couldn't load today's actor.",
+  "actorGuessNoPool": "Today's puzzle isn't ready yet — check back soon",
+  "actorGuessRetry": "Try again",
+  "actorGuessSearchHint": "Search for an actor or actress…",
+  "actorGuessSearchFailed": "Search failed. Check your connection.",
+  "actorGuessNoResults": "No actors found",
+  "actorGuessAlreadyGuessed": "Already guessed",
+  "actorGuessGuessesLeft": "{count} guesses left",
+  "@actorGuessGuessesLeft": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "actorGuessClueNumber": "Clue {number}",
+  "@actorGuessClueNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "actorGuessClueOrigin": "Career",
+  "actorGuessFirstMovie": "First movie role: {year}",
+  "@actorGuessFirstMovie": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "actorGuessBornIn": "Born in: {country}",
+  "@actorGuessBornIn": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "actorGuessClueDeepCuts": "Also appeared in",
+  "actorGuessClueKnownTitles": "Well-known titles",
+  "actorGuessClueCharacter": "Famous role",
+  "actorGuessCharacterIn": "{character} in {title}",
+  "@actorGuessCharacterIn": {
+    "placeholders": {
+      "character": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "actorGuessClueTopTitles": "Best known for",
+  "actorGuessCluePhoto": "Their photo",
+  "actorGuessNextClueHint": "Each wrong guess reveals another clue",
+  "actorGuessYourGuesses": "Your guesses",
+  "actorGuessWinTitle": "You got it!",
+  "actorGuessWinSubtitle": "Solved in {count}/{max} guesses",
+  "@actorGuessWinSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "actorGuessLoseTitle": "Out of guesses",
+  "actorGuessAnswerWas": "Today's actor was {name}",
+  "@actorGuessAnswerWas": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "actorGuessViewFilmography": "View filmography",
+  "actorGuessShareResult": "Share result",
+  "actorGuessComeBackTomorrow": "Come back tomorrow for a new actor"
 }

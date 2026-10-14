@@ -2060,4 +2060,111 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get gamesHubStatusMissed => 'Bugün oynandı';
+
+  @override
+  String get actorGuessTitle => 'Bu Oyuncu Kim?';
+
+  @override
+  String get actorGuessHubSubtitle =>
+      'Altı ipucuyla günün gizemli oyuncusunu bul';
+
+  @override
+  String get actorGuessSignInPrompt => 'Bu Oyuncu Kim? oynamak için giriş yap.';
+
+  @override
+  String get actorGuessLoadError => 'Bugünün oyuncusu yüklenemedi.';
+
+  @override
+  String get actorGuessNoPool =>
+      'Bugünün bulmacası henüz hazır değil — birazdan tekrar bak';
+
+  @override
+  String get actorGuessRetry => 'Tekrar dene';
+
+  @override
+  String get actorGuessSearchHint => 'Bir oyuncu ara…';
+
+  @override
+  String get actorGuessSearchFailed =>
+      'Arama başarısız. Bağlantını kontrol et.';
+
+  @override
+  String get actorGuessNoResults => 'Oyuncu bulunamadı';
+
+  @override
+  String get actorGuessAlreadyGuessed => 'Zaten tahmin ettin';
+
+  @override
+  String actorGuessGuessesLeft(String count) {
+    return '$count tahmin hakkın kaldı';
+  }
+
+  @override
+  String actorGuessClueNumber(String number) {
+    return '$number. ipucu';
+  }
+
+  @override
+  String get actorGuessClueOrigin => 'Kariyer';
+
+  @override
+  String actorGuessFirstMovie(String year) {
+    return 'İlk film rolü: $year';
+  }
+
+  @override
+  String actorGuessBornIn(String country) {
+    return 'Doğduğu ülke: $country';
+  }
+
+  @override
+  String get actorGuessClueDeepCuts => 'Şunlarda da oynadı';
+
+  @override
+  String get actorGuessClueKnownTitles => 'Bilinen yapımları';
+
+  @override
+  String get actorGuessClueCharacter => 'Ünlü rolü';
+
+  @override
+  String actorGuessCharacterIn(String character, String title) {
+    return '$title yapımında $character';
+  }
+
+  @override
+  String get actorGuessClueTopTitles => 'En çok bilindiği yapımlar';
+
+  @override
+  String get actorGuessCluePhoto => 'Fotoğrafı';
+
+  @override
+  String get actorGuessNextClueHint => 'Her yanlış tahmin yeni bir ipucu açar';
+
+  @override
+  String get actorGuessYourGuesses => 'Tahminlerin';
+
+  @override
+  String get actorGuessWinTitle => 'Bildin!';
+
+  @override
+  String actorGuessWinSubtitle(String count, String max) {
+    return '$count/$max tahminde bildin';
+  }
+
+  @override
+  String get actorGuessLoseTitle => 'Tahmin hakkın bitti';
+
+  @override
+  String actorGuessAnswerWas(String name) {
+    return 'Bugünün oyuncusu: $name';
+  }
+
+  @override
+  String get actorGuessViewFilmography => 'Filmografiyi gör';
+
+  @override
+  String get actorGuessShareResult => 'Sonucu paylaş';
+
+  @override
+  String get actorGuessComeBackTomorrow => 'Yeni oyuncu için yarın tekrar gel';
 }

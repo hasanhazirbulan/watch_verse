@@ -3695,6 +3695,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Played today'**
   String get gamesHubStatusMissed;
+
+  /// No description provided for @actorGuessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who\'s the Actor?'**
+  String get actorGuessTitle;
+
+  /// No description provided for @actorGuessHubSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Name today\'s mystery actor from six clues'**
+  String get actorGuessHubSubtitle;
+
+  /// No description provided for @actorGuessSignInPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to play Who\'s the Actor?'**
+  String get actorGuessSignInPrompt;
+
+  /// No description provided for @actorGuessLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load today\'s actor.'**
+  String get actorGuessLoadError;
+
+  /// No description provided for @actorGuessNoPool.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s puzzle isn\'t ready yet — check back soon'**
+  String get actorGuessNoPool;
+
+  /// No description provided for @actorGuessRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get actorGuessRetry;
+
+  /// No description provided for @actorGuessSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for an actor or actress…'**
+  String get actorGuessSearchHint;
+
+  /// No description provided for @actorGuessSearchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Search failed. Check your connection.'**
+  String get actorGuessSearchFailed;
+
+  /// No description provided for @actorGuessNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No actors found'**
+  String get actorGuessNoResults;
+
+  /// No description provided for @actorGuessAlreadyGuessed.
+  ///
+  /// In en, this message translates to:
+  /// **'Already guessed'**
+  String get actorGuessAlreadyGuessed;
+
+  /// No description provided for @actorGuessGuessesLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} guesses left'**
+  String actorGuessGuessesLeft(String count);
+
+  /// No description provided for @actorGuessClueNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Clue {number}'**
+  String actorGuessClueNumber(String number);
+
+  /// No description provided for @actorGuessClueOrigin.
+  ///
+  /// In en, this message translates to:
+  /// **'Career'**
+  String get actorGuessClueOrigin;
+
+  /// No description provided for @actorGuessFirstMovie.
+  ///
+  /// In en, this message translates to:
+  /// **'First movie role: {year}'**
+  String actorGuessFirstMovie(String year);
+
+  /// No description provided for @actorGuessBornIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Born in: {country}'**
+  String actorGuessBornIn(String country);
+
+  /// No description provided for @actorGuessClueDeepCuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Also appeared in'**
+  String get actorGuessClueDeepCuts;
+
+  /// No description provided for @actorGuessClueKnownTitles.
+  ///
+  /// In en, this message translates to:
+  /// **'Well-known titles'**
+  String get actorGuessClueKnownTitles;
+
+  /// No description provided for @actorGuessClueCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'Famous role'**
+  String get actorGuessClueCharacter;
+
+  /// No description provided for @actorGuessCharacterIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{character} in {title}'**
+  String actorGuessCharacterIn(String character, String title);
+
+  /// No description provided for @actorGuessClueTopTitles.
+  ///
+  /// In en, this message translates to:
+  /// **'Best known for'**
+  String get actorGuessClueTopTitles;
+
+  /// No description provided for @actorGuessCluePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Their photo'**
+  String get actorGuessCluePhoto;
+
+  /// No description provided for @actorGuessNextClueHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each wrong guess reveals another clue'**
+  String get actorGuessNextClueHint;
+
+  /// No description provided for @actorGuessYourGuesses.
+  ///
+  /// In en, this message translates to:
+  /// **'Your guesses'**
+  String get actorGuessYourGuesses;
+
+  /// No description provided for @actorGuessWinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You got it!'**
+  String get actorGuessWinTitle;
+
+  /// No description provided for @actorGuessWinSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Solved in {count}/{max} guesses'**
+  String actorGuessWinSubtitle(String count, String max);
+
+  /// No description provided for @actorGuessLoseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of guesses'**
+  String get actorGuessLoseTitle;
+
+  /// No description provided for @actorGuessAnswerWas.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s actor was {name}'**
+  String actorGuessAnswerWas(String name);
+
+  /// No description provided for @actorGuessViewFilmography.
+  ///
+  /// In en, this message translates to:
+  /// **'View filmography'**
+  String get actorGuessViewFilmography;
+
+  /// No description provided for @actorGuessShareResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Share result'**
+  String get actorGuessShareResult;
+
+  /// No description provided for @actorGuessComeBackTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Come back tomorrow for a new actor'**
+  String get actorGuessComeBackTomorrow;
 }
 
 class _AppLocalizationsDelegate

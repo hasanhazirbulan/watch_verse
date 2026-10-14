@@ -13,7 +13,6 @@ import 'package:watch_verse/widgets/comment_widgets.dart';
 import 'package:watch_verse/widgets/detail_sections.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/poll_widgets.dart';
-import 'package:watch_verse/utils/genre_names.dart';
 
 class MovieDetailsScreen extends StatefulWidget {
   final Movie movie;
@@ -252,9 +251,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                           spacing: 8,
                           runSpacing: 8,
                           children: [
-                            for (final g in genres)
-                              _pill(context,
-                                  localizedGenre(g, Localizations.localeOf(context).languageCode)),
+                            for (final g in genres) _pill(context, g),
                           ],
                         );
                       },

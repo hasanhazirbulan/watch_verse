@@ -11,7 +11,6 @@ import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/duration_format.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/paywall_sheet.dart';
-import 'package:watch_verse/utils/genre_names.dart';
 
 /// Drill-down from the profile's time-spent tiles: how watch time breaks
 /// down by type (movie/show) and genre, plus how it's trended over the last
@@ -355,8 +354,7 @@ class _WatchStatsScreenState extends State<WatchStatsScreen> {
                   itemBuilder: (context, i) => Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: _legendRow(context, palette[i % palette.length],
-                        localizedGenre(slices[i].key,
-                            Localizations.localeOf(context).languageCode)),
+                        slices[i].key),
                   ),
                 ),
               ),

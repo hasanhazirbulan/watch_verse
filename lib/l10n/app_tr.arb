@@ -39,7 +39,6 @@
   "settingsNotifyEpisodeToday": "Bugün yayınlanan bölümler",
   "settingsNotifyFriendActivity": "Arkadaş aktivitesi",
   "settingsNotifySharedWatch": "Ortak içerik eşleşmesi",
-  "settingsNotificationsNotLive": "Anlık bildirimler henüz gönderilmiyor. Buradaki tercihlerin kaydedilir ve bildirimler başladığında geçerli olur.",
   "settingsAppVersion": "Sürüm {version}",
   "settingsDeleteAccount": "Hesabı Sil",
   "settingsDeleteAccountConfirmTitle": "Hesabını silmek istiyor musun?",

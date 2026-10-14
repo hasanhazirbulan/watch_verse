@@ -170,9 +170,10 @@
       Firebase Cloud Messaging, stored on your profile while you are signed in
       on a device where you allowed notifications. It is removed from your
       profile when you sign out. Your notification on/off choices from
-      Settings are stored on your profile too. WatchVerse does not currently
-      send push notifications; the token is stored so they can be delivered
-      once that feature is switched on.</li>
+      Settings are stored on your profile too. WatchVerse uses them to send
+      the notifications you leave switched on: new episodes of shows you track
+      airing today or tomorrow, a daily digest of friends&rsquo; activity, and
+      shared-watch matches.</li>
   <li>Google Firebase records standard technical information such as IP address
       and timestamps when the app connects to its servers.</li>
   <li><strong>App usage data (Firebase Analytics)</strong> — which screens you
@@ -350,6 +351,13 @@
       <td>Showing a GIF or image someone added to a comment by link</td>
       <td>When a comment contains an image link, your device loads it
           directly from that website, which sees your IP address</td>
+    </tr>
+    <tr>
+      <td><strong>GitHub (Actions)</strong></td>
+      <td>Runs the scheduled job that sends push notifications</td>
+      <td>While the job runs it reads, from Firebase, your push token,
+          notification settings, display name, followers and the release
+          dates of shows you track; nothing is kept after the run</td>
     </tr>
     <tr>
       <td><strong>Apple / Google</strong></td>

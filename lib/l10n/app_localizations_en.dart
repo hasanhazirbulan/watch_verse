@@ -130,10 +130,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsNotifySharedWatch => 'Shared watch matches';
 
   @override
-  String get settingsNotificationsNotLive =>
-      'Push notifications aren\'t being sent yet. Your choices here are saved and will apply once they are.';
-
-  @override
   String settingsAppVersion(String version) {
     return 'Version $version';
   }

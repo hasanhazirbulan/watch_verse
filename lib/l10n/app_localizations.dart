@@ -332,12 +332,6 @@ abstract class AppLocalizations {
   /// **'Shared watch matches'**
   String get settingsNotifySharedWatch;
 
-  /// Caption under the Settings > Notifications toggles while the server-side push senders (functions/) are not deployed. Remove once pushes are actually sent.
-  ///
-  /// In en, this message translates to:
-  /// **'Push notifications aren\'t being sent yet. Your choices here are saved and will apply once they are.'**
-  String get settingsNotificationsNotLive;
-
   /// No description provided for @settingsAppVersion.
   ///
   /// In en, this message translates to:

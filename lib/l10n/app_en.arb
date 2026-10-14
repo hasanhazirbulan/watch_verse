@@ -56,10 +56,6 @@
   "settingsNotifyEpisodeToday": "New episodes out today",
   "settingsNotifyFriendActivity": "Friend activity",
   "settingsNotifySharedWatch": "Shared watch matches",
-  "settingsNotificationsNotLive": "Push notifications aren't being sent yet. Your choices here are saved and will apply once they are.",
-  "@settingsNotificationsNotLive": {
-    "description": "Caption under the Settings > Notifications toggles while the server-side push senders (functions/) are not deployed. Remove once pushes are actually sent."
-  },
   "settingsAppVersion": "Version {version}",
   "@settingsAppVersion": {
     "placeholders": {

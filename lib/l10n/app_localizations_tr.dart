@@ -131,10 +131,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsNotifySharedWatch => 'Ortak içerik eşleşmesi';
 
   @override
-  String get settingsNotificationsNotLive =>
-      'Anlık bildirimler henüz gönderilmiyor. Buradaki tercihlerin kaydedilir ve bildirimler başladığında geçerli olur.';
-
-  @override
   String settingsAppVersion(String version) {
     return 'Sürüm $version';
   }

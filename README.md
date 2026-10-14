@@ -19,7 +19,7 @@ A Flutter app for discovering and tracking movies and TV shows, with social feat
 - **Authentication** — sign up/login via Firebase Auth, or browse as a guest
 - **Settings** — edit profile, light/dark/system theme, notification preferences, free CSV export of your library (movies, shows, diary, lists), and account deletion (resumes automatically on next sign-in if interrupted)
 - **WatchVerse Pro / Patron** — optional iOS subscriptions via StoreKit (`in_app_purchase`, no backend). Pro: unlimited lists + advanced stats. Patron: Pro + exclusive profile themes
-- **Push notifications** — client-side only for now; nothing is sent until the Cloud Functions are deployed (see [Push Notifications](#push-notifications) below)
+- **Push notifications** — episode airing reminders, friend-activity digest and shared-watch matches, sent by a scheduled GitHub Actions job (see [Push Notifications](#push-notifications) below)
 - **Localization** — English and Turkish (`lib/l10n`)
 
 ## Tech Stack
@@ -85,7 +85,7 @@ cd test/firestore_rules && npm install && npm test
 
 ## Push Notifications
 
-The client is fully wired up (`lib/services/notification_service.dart`): it requests permission, stores each signed-in user's FCM token on their `users/{uid}` doc, and shows a local notification for foreground pushes. Settings has per-type toggles (episodes airing tomorrow/today, friend activity, shared-watch matches) stored on the user doc. Actually **sending** a notification is a server-side job — see [`functions/`](functions/README.md) for the Cloud Functions that do this and how to deploy them. **They are not deployed** (the Firebase project is on the free Spark plan, which can't run Cloud Functions), so today no push notifications are sent at all. The app works normally without them.
+The client is fully wired up (`lib/services/notification_service.dart`): it requests permission, stores each signed-in user's FCM token on their `users/{uid}` doc, and shows a local notification for foreground pushes. Settings has per-type toggles (episodes airing tomorrow/today, friend activity, shared-watch matches) stored on the user doc. Sending runs in [`scripts/notify/run.js`](scripts/notify/run.js) on a GitHub Actions schedule ([`.github/workflows/notifications.yml`](.github/workflows/notifications.yml); needs the `FIREBASE_SERVICE_ACCOUNT` repo secret, which is set) — a free stand-in for the Cloud Functions in `functions/`, which are **not** deployed (Spark plan). Don't deploy those notification functions as well, or users get every push twice.
 
 Platform setup already done in this repo: Android manifest permission + notification channel, iOS `Info.plist` background mode. Still required on iOS specifically (can't be done via file edits — needs your Apple Developer account): enable the **Push Notifications** capability in Xcode (Signing & Capabilities) and upload an APNs key to the Firebase console.
 

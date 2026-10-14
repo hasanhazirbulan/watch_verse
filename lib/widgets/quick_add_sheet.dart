@@ -232,8 +232,14 @@ class _MovieQuickActions extends StatelessWidget {
                     dimmed: !canWatch,
                     onTap: () {
                       if (!canWatch) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(l10n.movieCannotMarkUnreleased)));
+                        // A SnackBar from the sheet's context renders behind
+                        // the sheet (it's on the root navigator); close it and
+                        // show the message on the host, like "Review or log".
+                        Navigator.pop(context);
+                        if (host.mounted) {
+                          ScaffoldMessenger.of(host).showSnackBar(SnackBar(
+                              content: Text(l10n.movieCannotMarkUnreleased)));
+                        }
                         return;
                       }
                       status == 'watched'

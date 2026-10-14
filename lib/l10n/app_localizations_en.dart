@@ -1958,4 +1958,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dailyGamePickAnotherDay => 'Pick a day';
+
+  @override
+  String get pollSignInToVote => 'Sign in to vote.';
+
+  @override
+  String get tvSeasonLoadFailed => 'Couldn\'t load this season\'s episodes.';
+
+  @override
+  String get discoverLoadMoreFailed => 'Couldn\'t load more.';
+
+  @override
+  String get retryAction => 'Retry';
 }

@@ -573,5 +573,9 @@
   "dailyGameRetry": "Tekrar dene",
   "dailyGameSignInPrompt": "Günlük film oyununu oynamak için giriş yap.",
   "dailyGameGuessedAlready": "Zaten tahmin edildi",
-  "dailyGamePickAnotherDay": "Başka bir gün seç"
+  "dailyGamePickAnotherDay": "Başka bir gün seç",
+  "pollSignInToVote": "Oy vermek için giriş yap.",
+  "tvSeasonLoadFailed": "Bu sezonun bölümleri yüklenemedi.",
+  "discoverLoadMoreFailed": "Daha fazlası yüklenemedi.",
+  "retryAction": "Tekrar dene"
 }

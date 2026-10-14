@@ -37,19 +37,26 @@ class StreamListView<T> extends StatelessWidget {
   final Widget Function(BuildContext context, List<T> items) builder;
   final WidgetBuilder emptyBuilder;
 
+  /// Rendered straight away (no spinner) until [stream] emits — e.g. the last
+  /// value of a cached broadcast stream that a new listener won't replay.
+  final List<T>? initialData;
+
   const StreamListView({
     super.key,
     required this.stream,
     required this.builder,
     required this.emptyBuilder,
+    this.initialData,
   });
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<T>>(
       stream: stream,
+      initialData: initialData,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !snapshot.hasData) {
           return asyncLoadingIndicator();
         }
         if (snapshot.hasError) {

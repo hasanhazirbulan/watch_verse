@@ -3539,6 +3539,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick a day'**
   String get dailyGamePickAnotherDay;
+
+  /// No description provided for @pollSignInToVote.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to vote.'**
+  String get pollSignInToVote;
+
+  /// No description provided for @tvSeasonLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this season\'s episodes.'**
+  String get tvSeasonLoadFailed;
+
+  /// No description provided for @discoverLoadMoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load more.'**
+  String get discoverLoadMoreFailed;
+
+  /// No description provided for @retryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retryAction;
 }
 
 class _AppLocalizationsDelegate

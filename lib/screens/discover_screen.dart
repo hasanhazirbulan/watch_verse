@@ -29,6 +29,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   bool _hasMore = true;
   bool _error = false;
 
+  /// Bumped by [_refresh]; a page that resolves under an older generation is
+  /// dropped so a refresh mid-load can't mix old and new pages.
+  int _generation = 0;
+
   @override
   void initState() {
     super.initState();
@@ -45,19 +49,25 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   }
 
   void _onScroll() {
-    if (_scroll.position.pixels >=
-        _scroll.position.maxScrollExtent - 500) {
+    // After a failed page, wait for the explicit retry in the footer rather
+    // than re-firing on every scroll tick.
+    if (!_error &&
+        _scroll.position.pixels >= _scroll.position.maxScrollExtent - 500) {
       _loadMore();
     }
   }
 
   Future<void> _loadMore() async {
     if (_loading || !_hasMore || !mounted) return;
-    setState(() => _loading = true);
+    final gen = _generation;
+    setState(() {
+      _loading = true;
+      _error = false;
+    });
     try {
       final batch =
           await _api.discoverByGenre(widget.type, widget.genre.id, page: _page);
-      if (!mounted) return;
+      if (!mounted || gen != _generation) return;
       setState(() {
         for (final m in batch) {
           if (_seen.add('${m.mediaType}-${m.id}')) _items.add(m);
@@ -68,17 +78,20 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         _error = false;
       });
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || gen != _generation) return;
+      // Keep _hasMore so the footer can offer a retry (it used to silently
+      // stop paging with no message).
       setState(() {
         _loading = false;
         _error = true;
-        _hasMore = false;
       });
     }
   }
 
   Future<void> _refresh() async {
     setState(() {
+      _generation++;
+      _loading = false; // any in-flight page is now stale and will be dropped
       _items.clear();
       _seen.clear();
       _page = 1;
@@ -126,29 +139,58 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           l10n.discoverEmptySubtitle(widget.genre.name));
     }
 
-    return GridView.builder(
+    final failedMore = _error && _hasMore;
+    return CustomScrollView(
       controller: _scroll,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 18,
-        crossAxisSpacing: 12,
-        childAspectRatio: 0.52,
-      ),
-      // +1 row-ish for the trailing loader.
-      itemCount: _items.length + (_hasMore ? 3 : 0),
-      itemBuilder: (context, i) {
-        if (i >= _items.length) {
-          return const SkeletonBox(height: 160, radius: 14);
-        }
-        return PosterCard(
-          item: _items[i],
-          width: double.infinity,
-          onTap: () => openMedia(context, _items[i]),
-          onLongPress: () => showQuickAddSheet(context, _items[i]),
-          showProviderBadge: true,
-        );
-      },
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(16, 16, 16, failedMore ? 0 : 90),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 18,
+              crossAxisSpacing: 12,
+              childAspectRatio: 0.52,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, i) {
+                if (i >= _items.length) {
+                  return const SkeletonBox(height: 160, radius: 14);
+                }
+                return PosterCard(
+                  item: _items[i],
+                  width: double.infinity,
+                  onTap: () => openMedia(context, _items[i]),
+                  onLongPress: () => showQuickAddSheet(context, _items[i]),
+                  showProviderBadge: true,
+                );
+              },
+              // +1 row-ish for the trailing loader.
+              childCount: _items.length + (_hasMore && !failedMore ? 3 : 0),
+            ),
+          ),
+        ),
+        if (failedMore)
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
+            sliver: SliverToBoxAdapter(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(l10n.discoverLoadMoreFailed,
+                        style: TextStyle(color: context.colors.textSecondary)),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: _loadMore,
+                    child: Text(l10n.retryAction),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
     );
   }
 

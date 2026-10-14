@@ -2159,4 +2159,126 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get actorGuessComeBackTomorrow => 'Come back tomorrow for a new actor';
+
+  @override
+  String get gamesCommonMovies => 'Movies';
+
+  @override
+  String get gamesCommonTv => 'TV Shows';
+
+  @override
+  String gamesCommonPuzzleNumber(String number) {
+    return 'Puzzle #$number';
+  }
+
+  @override
+  String get gamesCommonShare => 'Share result';
+
+  @override
+  String get gamesCommonViewDetails => 'View details';
+
+  @override
+  String get gamesCommonComeBackTomorrow => 'A new puzzle arrives tomorrow.';
+
+  @override
+  String get gamesCommonGuestNote =>
+      'Playing as a guest — sign in to save your results.';
+
+  @override
+  String get gamesCommonLoadError => 'Couldn\'t load today\'s puzzle.';
+
+  @override
+  String get gamesCommonRetry => 'Try again';
+
+  @override
+  String get gamesCommonSaveFailed =>
+      'Couldn\'t save your progress. Check your connection.';
+
+  @override
+  String get gamesCommonWin => 'You got it!';
+
+  @override
+  String get gamesCommonLose => 'Not this time';
+
+  @override
+  String gamesCommonSolvedIn(String count, String total) {
+    return 'Solved in $count/$total';
+  }
+
+  @override
+  String gamesCommonAnswerWas(String title) {
+    return 'The answer was $title';
+  }
+
+  @override
+  String gamesCommonGuessesLeft(String count) {
+    return '$count guesses left';
+  }
+
+  @override
+  String get framesGameTitle => 'Frames';
+
+  @override
+  String get framesGameIntroMovie =>
+      'Name the movie from its stills. Each wrong guess or skip reveals another frame.';
+
+  @override
+  String get framesGameIntroTv =>
+      'Name the TV show from its stills. Each wrong guess or skip reveals another frame.';
+
+  @override
+  String get framesGameSearchHintMovie => 'Search for a movie…';
+
+  @override
+  String get framesGameSearchHintTv => 'Search for a TV show…';
+
+  @override
+  String get framesGameSkip => 'Skip';
+
+  @override
+  String framesGameFrameLabel(String number) {
+    return 'Frame $number';
+  }
+
+  @override
+  String get framesGameSkipped => 'Skipped';
+
+  @override
+  String get framesGameAlreadyGuessed => 'Already guessed';
+
+  @override
+  String get framesGameNoResults => 'No matches';
+
+  @override
+  String get titleWordleTitle => 'Title Wordle';
+
+  @override
+  String get titleWordleIntroMovie =>
+      'Guess today\'s movie title in 6 tries. Type letters only — word breaks are already shown.';
+
+  @override
+  String get titleWordleIntroTv =>
+      'Guess today\'s TV show title in 6 tries. Type letters only — word breaks are already shown.';
+
+  @override
+  String titleWordleLetterCount(String count) {
+    return '$count letters';
+  }
+
+  @override
+  String get titleWordleNotEnoughLetters => 'Not enough letters';
+
+  @override
+  String get titleWordleSubmit => 'Submit guess';
+
+  @override
+  String get titleWordleDelete => 'Delete letter';
+
+  @override
+  String get gamesHubFramesSubtitle =>
+      'Guess the movie or show from its stills';
+
+  @override
+  String get gamesHubTitleWordleSubtitle =>
+      'Guess the movie or show title, Wordle style';
 }

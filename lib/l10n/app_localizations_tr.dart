@@ -2167,4 +2167,126 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get actorGuessComeBackTomorrow => 'Yeni oyuncu için yarın tekrar gel';
+
+  @override
+  String get gamesCommonMovies => 'Filmler';
+
+  @override
+  String get gamesCommonTv => 'Diziler';
+
+  @override
+  String gamesCommonPuzzleNumber(String number) {
+    return 'Bulmaca #$number';
+  }
+
+  @override
+  String get gamesCommonShare => 'Sonucu paylaş';
+
+  @override
+  String get gamesCommonViewDetails => 'Detayları gör';
+
+  @override
+  String get gamesCommonComeBackTomorrow => 'Yarın yeni bir bulmaca gelecek.';
+
+  @override
+  String get gamesCommonGuestNote =>
+      'Misafir olarak oynuyorsun — sonuçlarını kaydetmek için giriş yap.';
+
+  @override
+  String get gamesCommonLoadError => 'Bugünün bulmacası yüklenemedi.';
+
+  @override
+  String get gamesCommonRetry => 'Tekrar dene';
+
+  @override
+  String get gamesCommonSaveFailed =>
+      'İlerlemen kaydedilemedi. Bağlantını kontrol et.';
+
+  @override
+  String get gamesCommonWin => 'Bildin!';
+
+  @override
+  String get gamesCommonLose => 'Bu sefer olmadı';
+
+  @override
+  String gamesCommonSolvedIn(String count, String total) {
+    return '$count/$total denemede bildin';
+  }
+
+  @override
+  String gamesCommonAnswerWas(String title) {
+    return 'Cevap: $title';
+  }
+
+  @override
+  String gamesCommonGuessesLeft(String count) {
+    return '$count tahmin hakkın kaldı';
+  }
+
+  @override
+  String get framesGameTitle => 'Kareler';
+
+  @override
+  String get framesGameIntroMovie =>
+      'Filmi karelerinden bil. Her yanlış tahmin ya da pas yeni bir kare açar.';
+
+  @override
+  String get framesGameIntroTv =>
+      'Diziyi karelerinden bil. Her yanlış tahmin ya da pas yeni bir kare açar.';
+
+  @override
+  String get framesGameSearchHintMovie => 'Film ara…';
+
+  @override
+  String get framesGameSearchHintTv => 'Dizi ara…';
+
+  @override
+  String get framesGameSkip => 'Pas geç';
+
+  @override
+  String framesGameFrameLabel(String number) {
+    return 'Kare $number';
+  }
+
+  @override
+  String get framesGameSkipped => 'Pas geçildi';
+
+  @override
+  String get framesGameAlreadyGuessed => 'Bunu zaten denedin';
+
+  @override
+  String get framesGameNoResults => 'Sonuç yok';
+
+  @override
+  String get titleWordleTitle => 'İsim Wordle';
+
+  @override
+  String get titleWordleIntroMovie =>
+      'Bugünün film adını 6 denemede bul. Sadece harfleri yaz — kelime araları zaten gösteriliyor.';
+
+  @override
+  String get titleWordleIntroTv =>
+      'Bugünün dizi adını 6 denemede bul. Sadece harfleri yaz — kelime araları zaten gösteriliyor.';
+
+  @override
+  String titleWordleLetterCount(String count) {
+    return '$count harf';
+  }
+
+  @override
+  String get titleWordleNotEnoughLetters => 'Harf sayısı yetmiyor';
+
+  @override
+  String get titleWordleSubmit => 'Tahmini gönder';
+
+  @override
+  String get titleWordleDelete => 'Harfi sil';
+
+  @override
+  String get gamesHubFramesSubtitle =>
+      'Filmi ya da diziyi sahnelerinden tahmin et';
+
+  @override
+  String get gamesHubTitleWordleSubtitle =>
+      'Film ya da dizi adını Wordle usulü tahmin et';
 }

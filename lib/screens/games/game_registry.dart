@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/screens/actor_guess_screen.dart';
 import 'package:watch_verse/screens/daily_game_screen.dart';
+import 'package:watch_verse/screens/games/frames_game_screen.dart';
+import 'package:watch_verse/screens/games/title_wordle_screen.dart';
 
 /// One card on the Games hub (`GamesHubScreen`). Strings are functions of
 /// [AppLocalizations] so entries can live in a plain top-level list.
@@ -32,6 +34,18 @@ final List<GameEntry> gameRegistry = [
     subtitle: (l10n) => l10n.gamesHubDailyMovieSubtitle,
     builder: (_) => const DailyGameScreen(),
     todayStatus: dailyGameTodayStatus,
+  ),
+  GameEntry(
+    icon: Icons.photo_library_rounded,
+    title: (l10n) => l10n.framesGameTitle,
+    subtitle: (l10n) => l10n.gamesHubFramesSubtitle,
+    builder: (_) => const FramesGameScreen(),
+  ),
+  GameEntry(
+    icon: Icons.grid_view_rounded,
+    title: (l10n) => l10n.titleWordleTitle,
+    subtitle: (l10n) => l10n.gamesHubTitleWordleSubtitle,
+    builder: (_) => const TitleWordleScreen(),
   ),
   GameEntry(
     icon: Icons.face_retouching_natural_rounded,

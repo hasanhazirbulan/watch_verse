@@ -1419,5 +1419,84 @@
   },
   "actorGuessViewFilmography": "View filmography",
   "actorGuessShareResult": "Share result",
-  "actorGuessComeBackTomorrow": "Come back tomorrow for a new actor"
+  "actorGuessComeBackTomorrow": "Come back tomorrow for a new actor",
+  "gamesCommonMovies": "Movies",
+  "gamesCommonTv": "TV Shows",
+  "gamesCommonPuzzleNumber": "Puzzle #{number}",
+  "@gamesCommonPuzzleNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesCommonShare": "Share result",
+  "gamesCommonViewDetails": "View details",
+  "gamesCommonComeBackTomorrow": "A new puzzle arrives tomorrow.",
+  "gamesCommonGuestNote": "Playing as a guest — sign in to save your results.",
+  "gamesCommonLoadError": "Couldn't load today's puzzle.",
+  "gamesCommonRetry": "Try again",
+  "gamesCommonSaveFailed": "Couldn't save your progress. Check your connection.",
+  "gamesCommonWin": "You got it!",
+  "gamesCommonLose": "Not this time",
+  "gamesCommonSolvedIn": "Solved in {count}/{total}",
+  "@gamesCommonSolvedIn": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesCommonAnswerWas": "The answer was {title}",
+  "@gamesCommonAnswerWas": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesCommonGuessesLeft": "{count} guesses left",
+  "@gamesCommonGuessesLeft": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "framesGameTitle": "Frames",
+  "framesGameIntroMovie": "Name the movie from its stills. Each wrong guess or skip reveals another frame.",
+  "framesGameIntroTv": "Name the TV show from its stills. Each wrong guess or skip reveals another frame.",
+  "framesGameSearchHintMovie": "Search for a movie…",
+  "framesGameSearchHintTv": "Search for a TV show…",
+  "framesGameSkip": "Skip",
+  "framesGameFrameLabel": "Frame {number}",
+  "@framesGameFrameLabel": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "framesGameSkipped": "Skipped",
+  "framesGameAlreadyGuessed": "Already guessed",
+  "framesGameNoResults": "No matches",
+  "titleWordleTitle": "Title Wordle",
+  "titleWordleIntroMovie": "Guess today's movie title in 6 tries. Type letters only — word breaks are already shown.",
+  "titleWordleIntroTv": "Guess today's TV show title in 6 tries. Type letters only — word breaks are already shown.",
+  "titleWordleLetterCount": "{count} letters",
+  "@titleWordleLetterCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "titleWordleNotEnoughLetters": "Not enough letters",
+  "titleWordleSubmit": "Submit guess",
+  "titleWordleDelete": "Delete letter",
+  "gamesHubFramesSubtitle": "Guess the movie or show from its stills",
+  "gamesHubTitleWordleSubtitle": "Guess the movie or show title, Wordle style"
 }

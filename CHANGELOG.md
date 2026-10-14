@@ -17,6 +17,11 @@ All notable changes to this project are documented here. Format loosely follows 
 - Privacy Policy / Terms: Patron badge, all game results listed (Higher or Lower stays on device).
 
 ### Fixed (2026-10-14)
+- Games review: Higher or Lower lost a new best when leaving during the reveal, and called equal-looking box-office values a miss; Title Wordle's keyboard was locked until each save confirmed (dead offline); dark-theme tile text was unreadable in Wordle/Frames; Daily game share could post a too-low score; Frames/Wordle puzzle #1 moved to 2026-10-14 so no day repeats.
+- Streaming: detail screens said "On your Netflix" for titles only on US Netflix or only to rent/buy; now only real flat-rate/free availability in your region counts.
+- Marking a 500+ episode season watched failed (Firestore batch cap).
+- New accounts: Patron badge and push token were only saved on the next launch (written before the profile doc existed).
+- Year in Review share image capped at ~1440px wide (iPad made 50 MB+ bitmaps).
 - Daily Movie game: guesses after midnight were saved to the next day's puzzle while still showing the old movie; the board was guessable before saved progress loaded.
 - Registration left a half-created account ("email already in use" on retry) when the profile write failed; the auth account is now rolled back.
 - Catching up on or removing a long-running show (500+ episodes) failed on Firestore's per-batch write limit; `removeShow` also left episode notes behind.

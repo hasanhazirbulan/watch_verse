@@ -3563,6 +3563,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get retryAction;
+
+  /// No description provided for @patronBadgeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Patron'**
+  String get patronBadgeLabel;
 }
 
 class _AppLocalizationsDelegate

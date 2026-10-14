@@ -577,5 +577,6 @@
   "pollSignInToVote": "Oy vermek için giriş yap.",
   "tvSeasonLoadFailed": "Bu sezonun bölümleri yüklenemedi.",
   "discoverLoadMoreFailed": "Daha fazlası yüklenemedi.",
-  "retryAction": "Tekrar dene"
+  "retryAction": "Tekrar dene",
+  "patronBadgeLabel": "Patron"
 }

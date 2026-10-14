@@ -1977,4 +1977,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get retryAction => 'Tekrar dene';
+
+  @override
+  String get patronBadgeLabel => 'Patron';
 }

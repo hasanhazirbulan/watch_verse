@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:watch_verse/widgets/patron_badge.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/screens/follow_list_screen.dart';
@@ -119,6 +120,10 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                           shadows: [
                             Shadow(color: Colors.black26, blurRadius: 6)
                           ])),
+                  if (data?['patron'] == true) ...[
+                    const SizedBox(height: 6),
+                    const PatronBadge(),
+                  ],
                   const SizedBox(height: 3),
                   Text(l10n.pubProfileMemberLabel,
                       style:

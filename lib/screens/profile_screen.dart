@@ -11,6 +11,7 @@ import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/widgets/patron_badge.dart';
 import 'package:watch_verse/theme/avatar_backgrounds.dart';
 import 'package:watch_verse/utils/duration_format.dart';
 import 'package:watch_verse/utils/navigation.dart';
@@ -137,6 +138,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
             ),
+            if (data?['patron'] == true) ...[
+              const SizedBox(height: 6),
+              const PatronBadge(),
+            ],
             if (characterQuote.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(

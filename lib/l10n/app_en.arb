@@ -1258,5 +1258,6 @@
   "pollSignInToVote": "Sign in to vote.",
   "tvSeasonLoadFailed": "Couldn't load this season's episodes.",
   "discoverLoadMoreFailed": "Couldn't load more.",
-  "retryAction": "Retry"
+  "retryAction": "Retry",
+  "patronBadgeLabel": "Patron"
 }

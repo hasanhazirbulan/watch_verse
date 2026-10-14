@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -78,6 +80,7 @@ class ProService {
   ProTier _tier = ProTier.none;
   bool _initialized = false;
   StreamSubscription<List<PurchaseDetails>>? _sub;
+  StreamSubscription<User?>? _authSub;
   List<ProductDetails> _products = const [];
 
   /// Live tier. Emits immediately with the last known value to new
@@ -100,8 +103,7 @@ class ProService {
   bool get isPatron => _tier == ProTier.patron;
 
   /// Call once at app start (from `main()`), after `Firebase.initializeApp`
-  /// — Firebase isn't actually used here, but this keeps init ordering
-  /// obvious alongside the other services `main()` sets up.
+  /// (the Patron badge is written to Firestore).
   Future<void> initialize() async {
     if (_initialized) return;
     _initialized = true;
@@ -115,6 +117,13 @@ class ProService {
     } else if (prefs.getBool(_legacyProActivePrefsKey) == true) {
       _tier = ProTier.pro;
     }
+
+    // Publish the Patron badge for whoever signs in on a Patron device (the
+    // purchase may have happened before sign-in, or on a previous account
+    // session).
+    _authSub = FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user != null && isPatron) _publishPatronBadge(user.uid);
+    });
 
     final available = await InAppPurchase.instance.isAvailable();
     if (kDebugMode) debugPrint('ProService: isAvailable=$available');
@@ -207,6 +216,22 @@ class ProService {
     _controller.add(value);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_proTierPrefsKey, value.index);
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (value == ProTier.patron && uid != null) _publishPatronBadge(uid);
+  }
+
+  /// Sets `patron: true` on the public profile doc so other users see the
+  /// badge. `update` (not `set`) so a sign-in that races profile creation
+  /// never leaves a half-built users doc; the next sign-in retries.
+  Future<void> _publishPatronBadge(String uid) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .update({'patron': true});
+    } catch (e) {
+      if (kDebugMode) debugPrint('ProService: patron badge write failed: $e');
+    }
   }
 
   /// Available subscription products (Pro + Patron, Monthly + Yearly), for
@@ -252,5 +277,6 @@ class ProService {
 
   void dispose() {
     _sub?.cancel();
+    _authSub?.cancel();
   }
 }

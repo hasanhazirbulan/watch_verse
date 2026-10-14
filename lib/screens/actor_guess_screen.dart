@@ -559,7 +559,8 @@ class _ActorGuessScreenState extends State<ActorGuessScreen> {
             _factLine(
               context,
               Icons.public_rounded,
-              l10n.actorGuessBornIn(puzzle.country),
+              l10n.actorGuessBornIn(localizedCountry(puzzle.country,
+                  Localizations.localeOf(context).languageCode)),
             ),
         ],
       ),

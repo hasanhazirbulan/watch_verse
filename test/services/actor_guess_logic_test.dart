@@ -29,6 +29,13 @@ ActorGuessPuzzle _puzzle({int id = 1, String name = 'Léa Seydoux'}) =>
     );
 
 void main() {
+  test('localizedCountry translates pool countries for Turkish only', () {
+    expect(localizedCountry('USA', 'tr'), 'ABD');
+    expect(localizedCountry('UK', 'tr'), 'Birleşik Krallık');
+    expect(localizedCountry('USA', 'en'), 'USA');
+    expect(localizedCountry('Atlantis', 'tr'), 'Atlantis');
+  });
+
   group('day index', () {
     test('rolls over at midnight EST (05:00 UTC), not UTC midnight', () {
       final before = DateTime.utc(2026, 10, 14, 4, 59);

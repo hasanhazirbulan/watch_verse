@@ -4,8 +4,10 @@ import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/screens/person_screen.dart';
 import 'package:watch_verse/services/api_service.dart';
+import 'package:watch_verse/services/streaming/streaming_logic.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/widgets/streaming_widgets.dart';
 
 /// Horizontal strip of top-billed cast; tapping a face opens their filmography.
 class CastStrip extends StatelessWidget {
@@ -116,54 +118,74 @@ class MediaRail extends StatelessWidget {
 }
 
 /// "Where to Watch" — streaming provider logos for the viewer's region
-/// (JustWatch data via TMDB). Renders nothing when no providers are listed.
+/// (JustWatch data via TMDB, credited underneath as TMDB requires). The
+/// user's own services ([myProviderIds], from Settings → My streaming
+/// services) are moved first, ringed, and called out ("On your Netflix").
+/// Renders nothing when no providers are listed.
 class WatchProvidersSection extends StatelessWidget {
   final List<WatchProvider> providers;
-  const WatchProvidersSection({super.key, required this.providers});
+  final Set<int> myProviderIds;
+  const WatchProvidersSection(
+      {super.key, required this.providers, this.myProviderIds = const {}});
 
   @override
   Widget build(BuildContext context) {
     if (providers.isEmpty) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context)!;
+    final ordered = userServicesFirst(providers, myProviderIds);
+    final mine = matchUserServices(providers, myProviderIds);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.detailWhereToWatch,
+        Text(l10n.detailWhereToWatch,
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+        if (mine.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Icon(Icons.check_circle_rounded,
+                  size: 16, color: context.colors.success),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(l10n.streamingOnYour(joinProviderNames(mine)),
+                    style: TextStyle(
+                        color: context.colors.success,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: 10),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: providers.map((p) => _logo(context, p)).toList(),
+          children: ordered
+              .map((p) => _logo(context, p, myProviderIds.contains(p.id)))
+              .toList(),
         ),
+        const SizedBox(height: 6),
+        const JustWatchCredit(),
       ],
     );
   }
 
-  Widget _logo(BuildContext context, WatchProvider p) {
-    final url = Tmdb.logo(p.logoPath);
-    final fallback = Container(
-      color: context.colors.surfaceAlt,
-      alignment: Alignment.center,
-      child: Text(
-        p.name.isNotEmpty ? p.name[0] : '?',
-        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-      ),
-    );
+  Widget _logo(BuildContext context, WatchProvider p, bool mine) {
+    // A failed logo load shows a letter tile (see ProviderLogo), not
+    // Flutter's broken-image glyph.
+    final logo = ProviderLogo(provider: p);
     return Tooltip(
       message: p.name,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(9),
-        child: SizedBox(
-          width: 38,
-          height: 38,
-          child: url == null
-              ? fallback
-              // A failed logo load used to show Flutter's broken-image glyph
-              // (and log an uncaught image exception); use the letter tile.
-              : Image.network(url,
-                  fit: BoxFit.cover, errorBuilder: (_, _, _) => fallback),
-        ),
-      ),
+      child: mine
+          ? Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                border: Border.all(color: context.colors.success, width: 2),
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: logo,
+            )
+          : logo,
     );
   }
 }

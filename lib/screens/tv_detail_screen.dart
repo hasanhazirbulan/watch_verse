@@ -6,6 +6,7 @@ import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/screens/episode_detail_screen.dart';
 import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
+import 'package:watch_verse/services/streaming/streaming_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/widgets/add_to_list_sheet.dart';
 import 'package:watch_verse/widgets/comment_widgets.dart';
@@ -50,6 +51,8 @@ class TvDetailScreen extends StatefulWidget {
 
 class _TvDetailScreenState extends State<TvDetailScreen> {
   final APIservices _api = APIservices();
+  late final Stream<StreamingPrefs> _streamingPrefs =
+      StreamingDeps.instance.prefs.watch();
   final TvTrackingService _tracking = TvTrackingService.instance;
   late Future<_TvData> _future;
   final Set<int> _retryingSeasons = {};
@@ -82,10 +85,10 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
     final recsF = _api
         .getRecommendations(MediaType.tv, show.id)
         .catchError((_) => <MediaItem>[]);
-    final region =
-        WidgetsBinding.instance.platformDispatcher.locale.countryCode ?? 'US';
-    final providersF = _api
-        .getWatchProviders(MediaType.tv, show.id, region)
+    // The region chosen in Settings → My streaming services, else device's.
+    final providersF = StreamingDeps.instance
+        .resolveRegion()
+        .then((region) => _api.getWatchProviders(MediaType.tv, show.id, region))
         .catchError((_) => <WatchProvider>[]);
 
     final entries = await seasonsF;
@@ -233,7 +236,13 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
                 _ratingSection(show),
                 if (data.providers.isNotEmpty) ...[
                   const SizedBox(height: 20),
-                  WatchProvidersSection(providers: data.providers),
+                  StreamBuilder<StreamingPrefs>(
+                    stream: _streamingPrefs,
+                    builder: (context, prefsSnap) => WatchProvidersSection(
+                        providers: data.providers,
+                        myProviderIds:
+                            prefsSnap.data?.providerIds ?? const {}),
+                  ),
                 ],
                 const SizedBox(height: 20),
                 CastStrip(cast: data.cast),

@@ -7,6 +7,7 @@ import 'package:watch_verse/models/model.dart';
 import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/poll_service.dart';
+import 'package:watch_verse/services/streaming/streaming_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/widgets/add_to_list_sheet.dart';
 import 'package:watch_verse/widgets/comment_widgets.dart';
@@ -29,6 +30,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   late final Future<List<CastMember>> _cast;
   late final Future<List<MediaItem>> _recs;
   late final Future<List<WatchProvider>> _providers;
+  late final Stream<StreamingPrefs> _streamingPrefs =
+      StreamingDeps.instance.prefs.watch();
   late final Future<List<String>> _genres;
 
   // Starts as the seed the caller passed in, then gets its blank fields
@@ -69,10 +72,10 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     _recs = _api
         .getRecommendations(MediaType.movie, id)
         .catchError((_) => <MediaItem>[]);
-    final region =
-        WidgetsBinding.instance.platformDispatcher.locale.countryCode ?? 'US';
-    _providers = _api
-        .getWatchProviders(MediaType.movie, id, region)
+    // The region chosen in Settings → My streaming services, else device's.
+    _providers = StreamingDeps.instance
+        .resolveRegion()
+        .then((region) => _api.getWatchProviders(MediaType.movie, id, region))
         .catchError((_) => <WatchProvider>[]);
     // Genre tag row under the title: MediaItem.toMovie() never carries
     // genres (only the detail endpoint has them), so fetch it here rather
@@ -280,7 +283,14 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       if (provs.isEmpty) return const SizedBox.shrink();
                       return Padding(
                         padding: const EdgeInsets.only(top: 20),
-                        child: WatchProvidersSection(providers: provs),
+                        child: StreamBuilder<StreamingPrefs>(
+                          stream: _streamingPrefs,
+                          builder: (context, prefsSnap) =>
+                              WatchProvidersSection(
+                                  providers: provs,
+                                  myProviderIds:
+                                      prefsSnap.data?.providerIds ?? const {}),
+                        ),
                       );
                     },
                   ),

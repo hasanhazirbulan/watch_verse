@@ -290,6 +290,32 @@ class APIservices {
             }));
   }
 
+  /// Raw `results` map of `/{type}/{id}/watch/providers` — every region's
+  /// flatrate/free/ads/rent/buy buckets. Parsed by the "My streaming
+  /// services" logic (lib/services/streaming/streaming_logic.dart), which
+  /// unlike [getWatchProviders] must not fall back to another region.
+  Future<Map<String, dynamic>> getWatchProvidersRaw(
+      MediaType type, int id) async {
+    final data = await _getJson(_uri('/${type.apiPath}/$id/watch/providers'));
+    return (data['results'] as Map<String, dynamic>?) ?? const {};
+  }
+
+  /// Countries TMDB/JustWatch have provider data for
+  /// (`/watch/providers/regions`): `iso_3166_1` + `english_name` entries.
+  Future<List<dynamic>> getWatchProviderRegions() async {
+    final data = await _getJson(_uri('/watch/providers/regions'));
+    return (data['results'] as List<dynamic>?) ?? const [];
+  }
+
+  /// Every provider TMDB lists for [type] in [region]
+  /// (`/watch/providers/{movie|tv}`), each with `display_priorities`.
+  Future<List<dynamic>> getWatchProviderCatalog(
+      MediaType type, String region) async {
+    final data = await _getJson(_uri(
+        '/watch/providers/${type.apiPath}', {'watch_region': region}));
+    return (data['results'] as List<dynamic>?) ?? const [];
+  }
+
   Future<Person> getPersonDetails(int id) async {
     final data = await _getJson(_uri('/person/$id'));
     return Person.fromMap(data);

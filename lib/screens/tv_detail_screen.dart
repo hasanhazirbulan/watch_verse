@@ -21,13 +21,16 @@ class _TvData {
   final List<CastMember> cast;
   final List<MediaItem> recommendations;
   final List<WatchProvider> providers;
+  /// Provider ids streaming in the user's own region (see
+  /// [WatchProvidersSection.streamingHere]).
+  final Set<int> streamingHere;
   /// Seasons whose episode fetch failed — shown empty with a per-season
   /// retry instead of failing the whole show page.
   final Set<int> failedSeasons;
   late List<Episode> flat; // all trackable episodes, season/episode order
 
   _TvData(this.show, this.episodesBySeason, this.cast, this.recommendations,
-      this.providers, this.failedSeasons) {
+      this.providers, this.streamingHere, this.failedSeasons) {
     rebuildFlat();
   }
 
@@ -88,16 +91,18 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
     // The region chosen in Settings → My streaming services, else device's.
     final providersF = StreamingDeps.instance
         .resolveRegion()
-        .then((region) => _api.getWatchProviders(MediaType.tv, show.id, region))
-        .catchError((_) => <WatchProvider>[]);
+        .then((region) => _api.getWhereToWatch(MediaType.tv, show.id, region))
+        .catchError((_) => (all: <WatchProvider>[], streamingHere: <int>{}));
 
     final entries = await seasonsF;
+    final whereToWatch = await providersF;
     return _TvData(
       show,
       Map.fromEntries(entries),
       await castF,
       await recsF,
-      await providersF,
+      whereToWatch.all,
+      whereToWatch.streamingHere,
       failedSeasons,
     );
   }
@@ -241,7 +246,8 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
                     builder: (context, prefsSnap) => WatchProvidersSection(
                         providers: data.providers,
                         myProviderIds:
-                            prefsSnap.data?.providerIds ?? const {}),
+                            prefsSnap.data?.providerIds ?? const {},
+                        streamingHere: data.streamingHere),
                   ),
                 ],
                 const SizedBox(height: 20),

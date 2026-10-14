@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:http/http.dart' as http;
 import 'package:watch_verse/models/game_clue_movie.dart';
 import 'package:watch_verse/models/media.dart';
+import 'package:watch_verse/services/streaming/streaming_logic.dart'
+    show parseStreamingAvailability;
 
 /// Supplied at build/run time via `--dart-define-from-file=secrets.json`
 /// (see secrets.example.json). Never hardcode a real key here.
@@ -251,7 +253,32 @@ class APIservices {
   Future<List<WatchProvider>> getWatchProviders(
       MediaType type, int id, String region) async {
     final data = await _getJson(_uri('/${type.apiPath}/$id/watch/providers'));
-    final results = (data['results'] as Map<String, dynamic>? ?? {});
+    return watchProvidersFromResults(
+        (data['results'] as Map<String, dynamic>? ?? {}), region);
+  }
+
+  /// The detail screens' "Where to Watch": [getWatchProviders]'s list (with
+  /// its US fallback and rent/buy) plus, from the same request, the ids that
+  /// actually *stream* in [region] — only those may be called out as "on
+  /// your" services (a US-only Netflix listing isn't on a German user's
+  /// Netflix, and renting on a service isn't included in its subscription).
+  Future<({List<WatchProvider> all, Set<int> streamingHere})> getWhereToWatch(
+          MediaType type, int id, String region) async =>
+      whereToWatchFromResults(await getWatchProvidersRaw(type, id), region);
+
+  /// [getWhereToWatch]'s parsing of a raw `results` map.
+  static ({List<WatchProvider> all, Set<int> streamingHere})
+      whereToWatchFromResults(Map<String, dynamic> results, String region) => (
+            all: watchProvidersFromResults(results, region),
+            streamingHere: {
+              for (final p in parseStreamingAvailability(results, region))
+                p.id,
+            },
+          );
+
+  /// [getWatchProviders]'s parsing of a raw `results` map.
+  static List<WatchProvider> watchProvidersFromResults(
+      Map<String, dynamic> results, String region) {
     final regionData =
         (results[region] ?? results['US']) as Map<String, dynamic>?;
     if (regionData == null) return [];

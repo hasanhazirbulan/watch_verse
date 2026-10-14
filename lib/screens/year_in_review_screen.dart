@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:fl_chart/fl_chart.dart';
@@ -854,7 +855,12 @@ class _ShareableCardState extends State<_ShareableCard> {
           _boundaryKey.currentContext?.findRenderObject()
               as RenderRepaintBoundary?;
       if (boundary == null) throw StateError('card not rendered');
-      final image = await boundary.toImage(pixelRatio: 3);
+      // 3x on a phone; capped at ~1440 px wide so a full-width card on an
+      // iPad (1000+ pt) doesn't allocate a 50+ MB bitmap to encode.
+      final width = boundary.size.width;
+      final image = await boundary.toImage(
+        pixelRatio: width > 0 ? math.min(3.0, 1440 / width) : 3.0,
+      );
       final data = await image.toByteData(format: ui.ImageByteFormat.png);
       image.dispose();
       if (data == null) throw StateError('PNG encoding failed');

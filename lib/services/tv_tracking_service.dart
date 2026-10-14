@@ -485,37 +485,40 @@ class TvTrackingService {
       bool watched,
       List<Future<void>> pending) async {
     final current = await watchedKeys(show.id);
-    final batch = _db.batch();
+    // Chunked like markEpisodesWatched: some shows list one "season" with
+    // more than 500 episodes (long-running anime/daily shows), which a
+    // single batch can't hold.
+    final ops = <void Function(WriteBatch)>[];
     var minutesDelta = 0;
 
     for (final ep in episodes) {
       final epRef = ref.collection('watched').doc(ep.key);
       if (watched && !current.contains(ep.key)) {
-        batch.set(epRef, {
-          'season': ep.seasonNumber,
-          'episode': ep.episodeNumber,
-          'watchedAt': FieldValue.serverTimestamp(),
-        });
+        ops.add((b) => b.set(epRef, {
+              'season': ep.seasonNumber,
+              'episode': ep.episodeNumber,
+              'watchedAt': FieldValue.serverTimestamp(),
+            }));
         current.add(ep.key);
         minutesDelta += ep.runtime;
       } else if (!watched && current.contains(ep.key)) {
-        batch.delete(epRef);
+        ops.add((b) => b.delete(epRef));
         current.remove(ep.key);
         minutesDelta -= ep.runtime;
       }
     }
 
     final count = current.length;
-    batch.set(ref, {
-      ..._metadata(show),
-      'watchedCount': count,
-      if (minutesDelta != 0)
-        'watchedMinutes': FieldValue.increment(minutesDelta),
-      'status': _statusFor(count, show.numberOfEpisodes),
-      'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    ops.add((b) => b.set(ref, {
+          ..._metadata(show),
+          'watchedCount': count,
+          if (minutesDelta != 0)
+            'watchedMinutes': FieldValue.increment(minutesDelta),
+          'status': _statusFor(count, show.numberOfEpisodes),
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true)));
 
-    pending.add(batch.commit());
+    pending.add(_commitChunked(ops));
 
     // Log a single season-level entry in the watch history.
     final seasonNumber = episodes.first.seasonNumber;

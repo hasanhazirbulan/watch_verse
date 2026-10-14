@@ -125,15 +125,27 @@ class MediaRail extends StatelessWidget {
 class WatchProvidersSection extends StatelessWidget {
   final List<WatchProvider> providers;
   final Set<int> myProviderIds;
+
+  /// Ids streaming (flatrate/free/ads) in the user's own region — the only
+  /// ones that count as "on your" services, since [providers] may be the US
+  /// fallback list and includes rent/buy. Null treats every entry of
+  /// [providers] as streaming in the region.
+  final Set<int>? streamingHere;
   const WatchProvidersSection(
-      {super.key, required this.providers, this.myProviderIds = const {}});
+      {super.key,
+      required this.providers,
+      this.myProviderIds = const {},
+      this.streamingHere});
 
   @override
   Widget build(BuildContext context) {
     if (providers.isEmpty) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
-    final ordered = userServicesFirst(providers, myProviderIds);
-    final mine = matchUserServices(providers, myProviderIds);
+    final here = streamingHere;
+    final myIds =
+        here == null ? myProviderIds : myProviderIds.intersection(here);
+    final ordered = userServicesFirst(providers, myIds);
+    final mine = matchUserServices(providers, myIds);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -161,7 +173,7 @@ class WatchProvidersSection extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: ordered
-              .map((p) => _logo(context, p, myProviderIds.contains(p.id)))
+              .map((p) => _logo(context, p, myIds.contains(p.id)))
               .toList(),
         ),
         const SizedBox(height: 6),

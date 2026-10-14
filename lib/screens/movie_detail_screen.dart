@@ -30,6 +30,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   late final Future<List<CastMember>> _cast;
   late final Future<List<MediaItem>> _recs;
   late final Future<List<WatchProvider>> _providers;
+  late final Future<Set<int>> _streamingHere;
   late final Stream<StreamingPrefs> _streamingPrefs =
       StreamingDeps.instance.prefs.watch();
   late final Future<List<String>> _genres;
@@ -73,10 +74,12 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
         .getRecommendations(MediaType.movie, id)
         .catchError((_) => <MediaItem>[]);
     // The region chosen in Settings → My streaming services, else device's.
-    _providers = StreamingDeps.instance
-        .resolveRegion()
-        .then((region) => _api.getWatchProviders(MediaType.movie, id, region))
-        .catchError((_) => <WatchProvider>[]);
+    final whereToWatch = StreamingDeps.instance.resolveRegion().then(
+        (region) => _api.getWhereToWatch(MediaType.movie, id, region));
+    _providers =
+        whereToWatch.then((w) => w.all).catchError((_) => <WatchProvider>[]);
+    _streamingHere =
+        whereToWatch.then((w) => w.streamingHere).catchError((_) => <int>{});
     // Genre tag row under the title: MediaItem.toMovie() never carries
     // genres (only the detail endpoint has them), so fetch it here rather
     // than waiting for the log-sheet's lazy backfill to happen to populate it.
@@ -283,13 +286,19 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       if (provs.isEmpty) return const SizedBox.shrink();
                       return Padding(
                         padding: const EdgeInsets.only(top: 20),
-                        child: StreamBuilder<StreamingPrefs>(
-                          stream: _streamingPrefs,
-                          builder: (context, prefsSnap) =>
-                              WatchProvidersSection(
-                                  providers: provs,
-                                  myProviderIds:
-                                      prefsSnap.data?.providerIds ?? const {}),
+                        child: FutureBuilder<Set<int>>(
+                          future: _streamingHere,
+                          builder: (context, hereSnap) =>
+                              StreamBuilder<StreamingPrefs>(
+                            stream: _streamingPrefs,
+                            builder: (context, prefsSnap) =>
+                                WatchProvidersSection(
+                                    providers: provs,
+                                    myProviderIds:
+                                        prefsSnap.data?.providerIds ??
+                                            const {},
+                                    streamingHere: hereSnap.data ?? const {}),
+                          ),
                         ),
                       );
                     },

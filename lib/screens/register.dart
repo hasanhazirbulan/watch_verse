@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/screens/main_screen.dart';
 import 'package:watch_verse/services/database_service.dart';
+import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/validators.dart';
 import 'package:watch_verse/widgets/auth_backdrop.dart';
@@ -68,6 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         await cred.user!.delete().catchError((_) => _auth.signOut());
         rethrow;
       }
+      unawaited(ProService.instance.onProfileCreated(cred.user!.uid));
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const MainScreen()),

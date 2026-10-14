@@ -220,9 +220,19 @@ class ProService {
     if (value == ProTier.patron && uid != null) _publishPatronBadge(uid);
   }
 
+  /// Call once a new account's profile doc exists (registration). The auth
+  /// listener's badge write for a fresh sign-up races `createUser` and, being
+  /// an `update`, fails with not-found when it lands first — which left a
+  /// Patron who registered on this device without a badge until the next
+  /// launch.
+  Future<void> onProfileCreated(String uid) async {
+    if (isPatron) await _publishPatronBadge(uid);
+  }
+
   /// Sets `patron: true` on the public profile doc so other users see the
   /// badge. `update` (not `set`) so a sign-in that races profile creation
-  /// never leaves a half-built users doc; the next sign-in retries.
+  /// never leaves a half-built users doc; [onProfileCreated] retries once
+  /// the doc exists, and every later launch's auth event does too.
   Future<void> _publishPatronBadge(String uid) async {
     try {
       await FirebaseFirestore.instance

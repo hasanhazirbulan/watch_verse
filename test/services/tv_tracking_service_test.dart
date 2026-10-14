@@ -96,6 +96,35 @@ void main() {
     expect(data['status'], 'completed');
   });
 
+  test('marking/unmarking a season of more than 500 episodes works',
+      () async {
+    // The fake enforces Firestore's 500-writes-per-batch cap.
+    final season = [for (var n = 1; n <= 600; n++) ep(n)];
+    await service.setSeasonWatched(show, season, true);
+    var data = (await showDoc().get()).data()!;
+    expect(data['watchedCount'], 600);
+    expect(data['watchedMinutes'], 600 * 60);
+    expect((await showDoc().collection('watched').get()).docs.length, 600);
+
+    await service.setSeasonWatched(show, season, false);
+    data = (await showDoc().get()).data()!;
+    expect(data['watchedCount'], 0);
+    expect(data['watchedMinutes'], 0);
+    expect((await showDoc().collection('watched').get()).docs, isEmpty);
+  });
+
+  test('catch-up of more than 500 episodes and removing the show work',
+      () async {
+    final eps = [for (var n = 1; n <= 1000; n++) ep(n)];
+    await service.markEpisodesWatched(show, eps);
+    expect((await showDoc().get()).data()!['watchedCount'], 1000);
+    expect((await showDoc().collection('watched').get()).docs.length, 1000);
+
+    await service.removeShow(show.id);
+    expect((await showDoc().get()).exists, isFalse);
+    expect((await showDoc().collection('watched').get()).docs, isEmpty);
+  });
+
   test('watch then unwatch leaves no history entry behind', () async {
     await service.setEpisodeWatched(show, ep(1), true);
     await service.setEpisodeWatched(show, ep(1), false);

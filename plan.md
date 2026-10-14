@@ -134,3 +134,12 @@ Picked up after a long gap. Found: `pubspec.yaml` had an uncommitted `+16` versi
 ---
 
 **Note:** This list reflects observations based on the current state of the codebase; final prioritization and scope are up to the project owner.
+
+## Session 2026-10-14 — Games hub
+
+- [x] Drawer "Games" → `GamesHubScreen`; one-list registry in `lib/screens/games/game_registry.dart`. Six free games, no streaks: Daily Movie (reworked: directional clues, ranked search, 1 TMDB call/guess, midnight-rollover fix, how-to sheet), Frames (stills, movie+TV), Title Wordle (movie+TV), Plot (redacted overview, movie+TV), Who's the Actor?, Higher or Lower (endless, local best).
+- Pools are bundled, no backend: `tool/generate_game_pools.js` (Frames/Wordle → `lib/services/games/pools/*.g.dart`), `tool/generate_plot_higher_lower_pools.dart` (→ `assets/games/plot_pool_*.json`, `higher_lower_pool.json`), `tool/actor_guess_build_pool.js` (→ `assets/games/actor_guess_pool.json`). Regenerating changes puzzles (TMDB data drifts) — treat as deliberate.
+- Progress: `users/{uid}/gamePlays/{game}-{mode}-{date}` under the existing owner-only rule; no rules change.
+- On-device smoke test: `flutter test integration_test/games_smoke_test.dart --dart-define-from-file=secrets.json -d <sim>` (guest-playable games, real TMDB) — passes. Signed-in games (Daily, Plot, Actor) not yet played on a device.
+- Known: Title Wordle TV pool is 307 (repeats after ~10 months); Plot text/genres are English for Turkish users.
+- Build `1.0.0+21` (games) uploaded to TestFlight 2026-10-14; review still runs on build 20.

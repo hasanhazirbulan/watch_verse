@@ -86,7 +86,6 @@ class _WordleBoardState extends State<_WordleBoard> {
   bool _loading = true;
   bool _failed = false;
   String _input = '';
-  bool _saving = false;
 
   @override
   void initState() {
@@ -137,7 +136,12 @@ class _WordleBoardState extends State<_WordleBoard> {
 
   // -------------------------------------------------------------- input ---
 
-  bool get _canType => _state != null && !_state!.finished && !_saving;
+  // Not gated on the save: Firestore only completes a write once the server
+  // acks it, so the keyboard used to go dead after every guess until then
+  // (dropping the first letters of the next guess, and for good while
+  // offline). The state is already updated locally and every save writes
+  // the whole state, so an overlapping save can't lose anything.
+  bool get _canType => _state != null && !_state!.finished;
 
   void _type(String letter) {
     if (!_canType || _input.length >= _entry.letters.length) return;
@@ -170,7 +174,6 @@ class _WordleBoardState extends State<_WordleBoard> {
     setState(() {
       _state = next;
       _input = '';
-      _saving = true;
     });
     try {
       await _store.save(_docId, next.toMap(_entry.id));
@@ -183,8 +186,6 @@ class _WordleBoardState extends State<_WordleBoard> {
           ),
         );
       }
-    } finally {
-      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -342,6 +343,12 @@ class _WordleBoardState extends State<_WordleBoard> {
     LetterResult.absent => context.colors.textMuted,
   };
 
+  /// Text on a [_fill] color. The dark theme's green and gold are light
+  /// colors, and white letters on them were barely readable (same rule as
+  /// the daily game's `ClueTile`).
+  static Color _onFill(Color fill) =>
+      fill.computeLuminance() > 0.4 ? Colors.black87 : Colors.white;
+
   Widget _board(BuildContext context, TitleWordleState state) {
     final words = _entry.wordLengths;
     final letters = _entry.letters.length;
@@ -422,7 +429,7 @@ class _WordleBoardState extends State<_WordleBoard> {
               style: TextStyle(
                 fontSize: tile * 0.5,
                 fontWeight: FontWeight.w800,
-                color: submitted ? Colors.white : colors.textPrimary,
+                color: submitted ? _onFill(fill) : colors.textPrimary,
               ),
             ),
           ),
@@ -479,7 +486,7 @@ class _WordleBoardState extends State<_WordleBoard> {
                             fontSize: 15,
                             color: s == null
                                 ? context.colors.textPrimary
-                                : Colors.white,
+                                : _onFill(bg),
                           ),
                         ),
                   ),

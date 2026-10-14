@@ -10,7 +10,10 @@ import 'package:watch_verse/models/media.dart';
 
 /// The date puzzle #1 went live. Puzzle numbers in share texts count from
 /// here, and pool entry `n - 1` is puzzle `n` (wrapping around the pool).
-final gamesLaunchDate = DateTime.utc(2026, 10, 15);
+/// The day the games first shipped (build 21): with a later date, players on
+/// a pre-launch day got the clamped puzzle #1 and then the very same answer
+/// again on launch day.
+final gamesLaunchDate = DateTime.utc(2026, 10, 14);
 
 /// The EST calendar date (as a UTC midnight) for [utcNow].
 DateTime gameEstDate(DateTime utcNow) {

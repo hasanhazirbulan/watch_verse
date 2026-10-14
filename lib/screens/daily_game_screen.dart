@@ -839,20 +839,34 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
 
   Future<void> _share(BuildContext buttonContext, AppLocalizations l10n,
       GameClueMovie mystery, DailyGamePlay play) async {
-    final rows = [
-      for (final id in play.guessedIds)
-        if (_guessCache[id] case final guess?) compareGameClues(guess, mystery),
-    ];
-    final text = buildDailyGameShareText(
-      gameTitle: l10n.dailyGameTitle,
-      dateLabel: _svc.dateKeyForDay(_day),
-      rows: rows,
-      won: play.won,
-    );
     // iPad's share sheet is a popover and throws without an anchor rect.
     final box = buttonContext.findRenderObject() as RenderBox?;
     final origin =
         box == null ? null : box.localToGlobal(Offset.zero) & box.size;
+    final dateLabel = _svc.dateKeyForDay(_day);
+    // Every guess's clues, not just the rows loaded so far: sharing right
+    // after reopening a finished day used to drop the still-loading rows
+    // and report the wrong score (the score is the row count).
+    final rows = <List<GameClue>>[];
+    try {
+      for (final id in play.guessedIds) {
+        final guess = _guessCache[id] ?? await _svc.clueData(id);
+        rows.add(compareGameClues(guess, mystery));
+      }
+    } catch (e) {
+      debugPrint('DailyGame: share failed to load guesses: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
+      }
+      return;
+    }
+    final text = buildDailyGameShareText(
+      gameTitle: l10n.dailyGameTitle,
+      dateLabel: dateLabel,
+      rows: rows,
+      won: play.won,
+    );
     try {
       await SharePlus.instance
           .share(ShareParams(text: text, sharePositionOrigin: origin));

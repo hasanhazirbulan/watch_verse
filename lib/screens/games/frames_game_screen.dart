@@ -396,8 +396,12 @@ class _FramesBoardState extends State<_FramesBoard> {
                                 '${i + 1}',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w800,
+                                  // Dark theme's green is light: white
+                                  // on it was barely readable.
                                   color: guess == null
                                       ? colors.textPrimary
+                                      : fill.computeLuminance() > 0.4
+                                      ? Colors.black87
                                       : Colors.white,
                                 ),
                               )

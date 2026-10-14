@@ -56,11 +56,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      await _databaseService.createUser(
-        uid: cred.user!.uid,
-        email: _emailController.text.trim(),
-        name: _nameController.text.trim(),
-      );
+      try {
+        await _databaseService.createUser(
+          uid: cred.user!.uid,
+          email: _emailController.text.trim(),
+          name: _nameController.text.trim(),
+        );
+      } catch (_) {
+        // Roll back the auth account so retrying doesn't hit
+        // "email-already-in-use" for an account with no profile doc.
+        await cred.user!.delete().catchError((_) => _auth.signOut());
+        rethrow;
+      }
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const MainScreen()),

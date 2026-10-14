@@ -118,6 +118,14 @@ class NotificationService {
     }
   }
 
+  /// Called by registration once `users/{uid}` exists. The sign-up auth
+  /// event runs [initialize] before `createUser` has written the profile
+  /// doc, so that first `_saveToken` update fails with not-found and a new
+  /// user would get no pushes until their next app launch.
+  Future<void> onProfileCreated(String uid) async {
+    if (_uid == uid) await _saveToken(uid);
+  }
+
   Future<void> _saveToken(String uid) async {
     try {
       // Inside the try: this also runs from the onTokenRefresh listener,

@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/screens/main_screen.dart';
 import 'package:watch_verse/services/database_service.dart';
+import 'package:watch_verse/services/notification_service.dart';
 import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/validators.dart';
@@ -72,6 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         rethrow;
       }
       unawaited(ProService.instance.onProfileCreated(cred.user!.uid));
+      unawaited(NotificationService.instance.onProfileCreated(cred.user!.uid));
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const MainScreen()),

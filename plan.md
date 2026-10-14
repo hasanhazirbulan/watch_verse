@@ -92,7 +92,7 @@ Post-watch poll redesign, account settings/deletion for App Store readiness, and
 
 ## 7. Session — 2026-08-09
 
-WatchVerse Pro subscription (`in_app_purchase`, `lib/services/pro_service.dart` + `lib/widgets/paywall_sheet.dart`) and a Pro-exclusive daily "guess the movie" game (`lib/screens/daily_game_screen.dart`, deterministic day-index rotation through a 2000-movie pool seeded by `tool/seed_daily_game_pool.js`, no backend needed). Also fixed profile stats overflow and refreshed paywall pricing on every open instead of caching a stale query. Not documented here at the time — see Session 2026-10-03 for the fallout.
+WatchVerse Pro subscription (`in_app_purchase`, `lib/services/pro_service.dart` + `lib/widgets/paywall_sheet.dart`) and a daily "guess the movie" game (Pro-exclusive at first; free since 2026-10, now under the Games hub) (`lib/screens/daily_game_screen.dart`, deterministic day-index rotation through a 2000-movie pool seeded by `tool/seed_daily_game_pool.js`, no backend needed). Also fixed profile stats overflow and refreshed paywall pricing on every open instead of caching a stale query. Not documented here at the time — see Session 2026-10-03 for the fallout.
 
 ## 8. Session — 2026-10-03
 

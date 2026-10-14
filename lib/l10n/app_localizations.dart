@@ -3378,12 +3378,6 @@ abstract class AppLocalizations {
   /// **'Daily Movie Game'**
   String get dailyGameTitle;
 
-  /// No description provided for @dailyGameDrawerLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily Movie Game'**
-  String get dailyGameDrawerLabel;
-
   /// No description provided for @dailyGameSearchHint.
   ///
   /// In en, this message translates to:
@@ -3395,18 +3389,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} guesses left'**
   String dailyGameGuessesLeft(String count);
-
-  /// No description provided for @dailyGameStreak.
-  ///
-  /// In en, this message translates to:
-  /// **'Streak {count}'**
-  String dailyGameStreak(String count);
-
-  /// No description provided for @dailyGameBestStreak.
-  ///
-  /// In en, this message translates to:
-  /// **'Best {count}'**
-  String dailyGameBestStreak(String count);
 
   /// No description provided for @dailyGameClueDirector.
   ///
@@ -3480,35 +3462,17 @@ abstract class AppLocalizations {
   /// **'Out of guesses'**
   String get dailyGameLoseTitle;
 
-  /// No description provided for @dailyGameLoseSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Today\'s movie was {title}'**
-  String dailyGameLoseSubtitle(String title);
-
   /// No description provided for @dailyGameShareResult.
   ///
   /// In en, this message translates to:
   /// **'Share result'**
   String get dailyGameShareResult;
 
-  /// No description provided for @dailyGameRewatch.
-  ///
-  /// In en, this message translates to:
-  /// **'Rewatch'**
-  String get dailyGameRewatch;
-
   /// No description provided for @dailyGamePlayAgainTomorrow.
   ///
   /// In en, this message translates to:
   /// **'Come back tomorrow for a new movie'**
   String get dailyGamePlayAgainTomorrow;
-
-  /// No description provided for @dailyGameLoading.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading today\'s movie…'**
-  String get dailyGameLoading;
 
   /// No description provided for @dailyGameNoPool.
   ///
@@ -3569,6 +3533,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Patron'**
   String get patronBadgeLabel;
+
+  /// No description provided for @dailyGameToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get dailyGameToday;
+
+  /// No description provided for @dailyGamePuzzleFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Puzzle for {date}'**
+  String dailyGamePuzzleFor(String date);
+
+  /// No description provided for @dailyGameHowToPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'How to play'**
+  String get dailyGameHowToPlay;
+
+  /// No description provided for @dailyGameHowToIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Find the mystery movie in {max} guesses. Search for any movie and pick it — each guess shows how it compares to the mystery movie.'**
+  String dailyGameHowToIntro(String max);
+
+  /// No description provided for @dailyGameHowToGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Green: exact match'**
+  String get dailyGameHowToGreen;
+
+  /// No description provided for @dailyGameHowToGold.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold: close — shares a director, studio, cast member or genre, or the year is within 5, the rating within 0.5, or the box office within 50%'**
+  String get dailyGameHowToGold;
+
+  /// No description provided for @dailyGameHowToGray.
+  ///
+  /// In en, this message translates to:
+  /// **'Gray: no match. A \"?\" tile means the info is unknown for one of the movies.'**
+  String get dailyGameHowToGray;
+
+  /// No description provided for @dailyGameHowToArrows.
+  ///
+  /// In en, this message translates to:
+  /// **'↑ ↓: the mystery movie\'s year, box office or rating is higher / lower than your guess'**
+  String get dailyGameHowToArrows;
+
+  /// No description provided for @dailyGameHowToShared.
+  ///
+  /// In en, this message translates to:
+  /// **'For cast, genres, studio and director, a gold tile shows what the two movies share.'**
+  String get dailyGameHowToShared;
+
+  /// No description provided for @dailyGameHowToHints.
+  ///
+  /// In en, this message translates to:
+  /// **'Stuck? Hints unlock after guess {first} and {second}. A new movie every day — the calendar lets you play the past week too.'**
+  String dailyGameHowToHints(String first, String second);
+
+  /// No description provided for @dailyGameGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get dailyGameGotIt;
+
+  /// No description provided for @dailyGameHints.
+  ///
+  /// In en, this message translates to:
+  /// **'Hints'**
+  String get dailyGameHints;
+
+  /// No description provided for @dailyGameNextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Next hint after guess {count}'**
+  String dailyGameNextHint(String count);
+
+  /// No description provided for @dailyGameHintTopBilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-billed: {name}'**
+  String dailyGameHintTopBilled(String name);
+
+  /// No description provided for @dailyGameNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching movies'**
+  String get dailyGameNoResults;
+
+  /// No description provided for @dailyGameSearchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Search failed. Check your connection.'**
+  String get dailyGameSearchFailed;
+
+  /// No description provided for @dailyGameSolvedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Solved on the first guess!} other{Solved in {count} guesses}}'**
+  String dailyGameSolvedIn(int count);
+
+  /// No description provided for @dailyGameAnswerWas.
+  ///
+  /// In en, this message translates to:
+  /// **'The movie was'**
+  String get dailyGameAnswerWas;
+
+  /// No description provided for @dailyGameViewMovie.
+  ///
+  /// In en, this message translates to:
+  /// **'View movie'**
+  String get dailyGameViewMovie;
+
+  /// No description provided for @dailyGameGuessFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load that movie. Try again.'**
+  String get dailyGameGuessFailed;
+
+  /// No description provided for @dailyGameRowFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this guess'**
+  String get dailyGameRowFailed;
+
+  /// No description provided for @gamesHubTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Games'**
+  String get gamesHubTitle;
+
+  /// No description provided for @gamesHubDailyMovieSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guess the mystery movie from clues. New every day.'**
+  String get gamesHubDailyMovieSubtitle;
+
+  /// No description provided for @gamesHubStatusNotPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not played today'**
+  String get gamesHubStatusNotPlayed;
+
+  /// No description provided for @gamesHubStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get gamesHubStatusInProgress;
+
+  /// No description provided for @gamesHubStatusSolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Solved today'**
+  String get gamesHubStatusSolved;
+
+  /// No description provided for @gamesHubStatusMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Played today'**
+  String get gamesHubStatusMissed;
 }
 
 class _AppLocalizationsDelegate

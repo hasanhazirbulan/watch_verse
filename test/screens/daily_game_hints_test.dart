@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:watch_verse/screens/daily_game_screen.dart';
+import 'package:watch_verse/services/daily_game_clues.dart';
 
 void main() {
   group('dailyGameHintsUnlocked', () {

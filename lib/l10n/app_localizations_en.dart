@@ -1870,24 +1870,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dailyGameTitle => 'Daily Movie Game';
 
   @override
-  String get dailyGameDrawerLabel => 'Daily Movie Game';
-
-  @override
   String get dailyGameSearchHint => 'Search for a movie…';
 
   @override
   String dailyGameGuessesLeft(String count) {
     return '$count guesses left';
-  }
-
-  @override
-  String dailyGameStreak(String count) {
-    return 'Streak $count';
-  }
-
-  @override
-  String dailyGameBestStreak(String count) {
-    return 'Best $count';
   }
 
   @override
@@ -1927,21 +1914,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dailyGameLoseTitle => 'Out of guesses';
 
   @override
-  String dailyGameLoseSubtitle(String title) {
-    return 'Today\'s movie was $title';
-  }
-
-  @override
   String get dailyGameShareResult => 'Share result';
 
   @override
-  String get dailyGameRewatch => 'Rewatch';
-
-  @override
   String get dailyGamePlayAgainTomorrow => 'Come back tomorrow for a new movie';
-
-  @override
-  String get dailyGameLoading => 'Loading today\'s movie…';
 
   @override
   String get dailyGameNoPool =>
@@ -1973,4 +1949,108 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get patronBadgeLabel => 'Patron';
+
+  @override
+  String get dailyGameToday => 'Today';
+
+  @override
+  String dailyGamePuzzleFor(String date) {
+    return 'Puzzle for $date';
+  }
+
+  @override
+  String get dailyGameHowToPlay => 'How to play';
+
+  @override
+  String dailyGameHowToIntro(String max) {
+    return 'Find the mystery movie in $max guesses. Search for any movie and pick it — each guess shows how it compares to the mystery movie.';
+  }
+
+  @override
+  String get dailyGameHowToGreen => 'Green: exact match';
+
+  @override
+  String get dailyGameHowToGold =>
+      'Gold: close — shares a director, studio, cast member or genre, or the year is within 5, the rating within 0.5, or the box office within 50%';
+
+  @override
+  String get dailyGameHowToGray =>
+      'Gray: no match. A \"?\" tile means the info is unknown for one of the movies.';
+
+  @override
+  String get dailyGameHowToArrows =>
+      '↑ ↓: the mystery movie\'s year, box office or rating is higher / lower than your guess';
+
+  @override
+  String get dailyGameHowToShared =>
+      'For cast, genres, studio and director, a gold tile shows what the two movies share.';
+
+  @override
+  String dailyGameHowToHints(String first, String second) {
+    return 'Stuck? Hints unlock after guess $first and $second. A new movie every day — the calendar lets you play the past week too.';
+  }
+
+  @override
+  String get dailyGameGotIt => 'Got it';
+
+  @override
+  String get dailyGameHints => 'Hints';
+
+  @override
+  String dailyGameNextHint(String count) {
+    return 'Next hint after guess $count';
+  }
+
+  @override
+  String dailyGameHintTopBilled(String name) {
+    return 'Top-billed: $name';
+  }
+
+  @override
+  String get dailyGameNoResults => 'No matching movies';
+
+  @override
+  String get dailyGameSearchFailed => 'Search failed. Check your connection.';
+
+  @override
+  String dailyGameSolvedIn(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Solved in $count guesses',
+      one: 'Solved on the first guess!',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dailyGameAnswerWas => 'The movie was';
+
+  @override
+  String get dailyGameViewMovie => 'View movie';
+
+  @override
+  String get dailyGameGuessFailed => 'Couldn\'t load that movie. Try again.';
+
+  @override
+  String get dailyGameRowFailed => 'Couldn\'t load this guess';
+
+  @override
+  String get gamesHubTitle => 'Games';
+
+  @override
+  String get gamesHubDailyMovieSubtitle =>
+      'Guess the mystery movie from clues. New every day.';
+
+  @override
+  String get gamesHubStatusNotPlayed => 'Not played today';
+
+  @override
+  String get gamesHubStatusInProgress => 'In progress';
+
+  @override
+  String get gamesHubStatusSolved => 'Solved today';
+
+  @override
+  String get gamesHubStatusMissed => 'Played today';
 }

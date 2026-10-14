@@ -1876,24 +1876,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dailyGameTitle => 'Günlük Film Oyunu';
 
   @override
-  String get dailyGameDrawerLabel => 'Günlük Film Oyunu';
-
-  @override
   String get dailyGameSearchHint => 'Bir film ara…';
 
   @override
   String dailyGameGuessesLeft(String count) {
     return '$count tahmin hakkı kaldı';
-  }
-
-  @override
-  String dailyGameStreak(String count) {
-    return 'Seri $count';
-  }
-
-  @override
-  String dailyGameBestStreak(String count) {
-    return 'En iyi $count';
   }
 
   @override
@@ -1933,21 +1920,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dailyGameLoseTitle => 'Tahmin hakkın bitti';
 
   @override
-  String dailyGameLoseSubtitle(String title) {
-    return 'Bugünün filmi $title idi';
-  }
-
-  @override
   String get dailyGameShareResult => 'Sonucu paylaş';
 
   @override
-  String get dailyGameRewatch => 'Geçmiş günler';
-
-  @override
   String get dailyGamePlayAgainTomorrow => 'Yeni film için yarın tekrar gel';
-
-  @override
-  String get dailyGameLoading => 'Bugünün filmi yükleniyor…';
 
   @override
   String get dailyGameNoPool =>
@@ -1980,4 +1956,108 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get patronBadgeLabel => 'Patron';
+
+  @override
+  String get dailyGameToday => 'Bugün';
+
+  @override
+  String dailyGamePuzzleFor(String date) {
+    return '$date bulmacası';
+  }
+
+  @override
+  String get dailyGameHowToPlay => 'Nasıl oynanır';
+
+  @override
+  String dailyGameHowToIntro(String max) {
+    return 'Gizemli filmi $max tahminde bul. Herhangi bir filmi arayıp seç — her tahmin, gizemli filmle nasıl karşılaştırıldığını gösterir.';
+  }
+
+  @override
+  String get dailyGameHowToGreen => 'Yeşil: tam eşleşme';
+
+  @override
+  String get dailyGameHowToGold =>
+      'Altın: yakın — ortak bir yönetmen, stüdyo, oyuncu ya da tür var veya yıl 5, puan 0,5, hasılat %50 içinde';
+
+  @override
+  String get dailyGameHowToGray =>
+      'Gri: eşleşme yok. \"?\" olan kutu, filmlerden biri için bilginin bilinmediği anlamına gelir.';
+
+  @override
+  String get dailyGameHowToArrows =>
+      '↑ ↓: gizemli filmin yılı, hasılatı ya da puanı senin tahmininden yüksek / düşük';
+
+  @override
+  String get dailyGameHowToShared =>
+      'Oyuncular, türler, stüdyo ve yönetmende altın kutu iki filmin ortak noktasını gösterir.';
+
+  @override
+  String dailyGameHowToHints(String first, String second) {
+    return 'Takıldın mı? $first. ve $second. tahminden sonra ipucu açılır. Her gün yeni bir film — takvimden geçen haftayı da oynayabilirsin.';
+  }
+
+  @override
+  String get dailyGameGotIt => 'Anladım';
+
+  @override
+  String get dailyGameHints => 'İpuçları';
+
+  @override
+  String dailyGameNextHint(String count) {
+    return 'Sonraki ipucu $count. tahminden sonra';
+  }
+
+  @override
+  String dailyGameHintTopBilled(String name) {
+    return 'Başrol: $name';
+  }
+
+  @override
+  String get dailyGameNoResults => 'Eşleşen film yok';
+
+  @override
+  String get dailyGameSearchFailed => 'Arama başarısız. Bağlantını kontrol et.';
+
+  @override
+  String dailyGameSolvedIn(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tahminde bildin',
+      one: 'İlk tahminde bildin!',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dailyGameAnswerWas => 'Gizemli film:';
+
+  @override
+  String get dailyGameViewMovie => 'Filme git';
+
+  @override
+  String get dailyGameGuessFailed => 'Bu film yüklenemedi. Tekrar dene.';
+
+  @override
+  String get dailyGameRowFailed => 'Bu tahmin yüklenemedi';
+
+  @override
+  String get gamesHubTitle => 'Oyunlar';
+
+  @override
+  String get gamesHubDailyMovieSubtitle =>
+      'Gizemli filmi ipuçlarından tahmin et. Her gün yeni.';
+
+  @override
+  String get gamesHubStatusNotPlayed => 'Bugün oynanmadı';
+
+  @override
+  String get gamesHubStatusInProgress => 'Devam ediyor';
+
+  @override
+  String get gamesHubStatusSolved => 'Bugün bildin';
+
+  @override
+  String get gamesHubStatusMissed => 'Bugün oynandı';
 }

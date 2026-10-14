@@ -4,14 +4,42 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:watch_verse/models/game_clue_movie.dart';
 import 'package:watch_verse/services/api_service.dart';
 
-/// Max guesses per puzzle, and the guess counts at which an extra hint
-/// unlocks — matches spotle.movie's rules (10 guesses, hints after the 5th
-/// and 8th).
-const dailyGameMaxGuesses = 10;
-const dailyGameHintUnlockGuesses = [5, 8];
+export 'package:watch_verse/services/daily_game_clues.dart'
+    show dailyGameMaxGuesses, dailyGameHintUnlockGuesses;
 
-/// How many past days (including today) the "Rewatch" menu offers.
+/// How many past days (including today) the "Pick a day" menu offers.
 const dailyGameRewatchDays = 7;
+
+/// One player's progress on one day's puzzle (`users/{uid}/gamePlays/{dateKey}`).
+class DailyGamePlay {
+  final List<int> guessedIds;
+  final bool won;
+  final bool finished;
+  final int hintsUsed;
+
+  const DailyGamePlay({
+    this.guessedIds = const [],
+    this.won = false,
+    this.finished = false,
+    this.hintsUsed = 0,
+  });
+
+  static const empty = DailyGamePlay();
+
+  /// Lenient parse — a missing doc is simply an unplayed day.
+  factory DailyGamePlay.fromMap(Map<String, dynamic>? data) {
+    if (data == null) return empty;
+    return DailyGamePlay(
+      guessedIds: [
+        for (final e in (data['guessedIds'] as List?) ?? const [])
+          if (e is num) e.toInt(),
+      ],
+      won: data['won'] == true,
+      finished: data['finished'] == true,
+      hintsUsed: ((data['hintsUsed'] ?? 0) as num).toInt(),
+    );
+  }
+}
 
 /// Picks WatchVerse's daily mystery movie and tracks the signed-in user's
 /// progress on it.
@@ -23,27 +51,39 @@ const dailyGameRewatchDays = 7;
 /// client). Every device computes the same day index independently —
 /// `daysSinceReference % pool.length` — so the puzzle rotates at midnight EST
 /// for everyone without a cron job or webhook.
+///
+/// Days are addressed by that absolute day index (see [todayIndex]), not by
+/// "days ago": a screen left open across midnight keeps pointing at the
+/// puzzle it loaded, instead of silently writing the old movie's guesses
+/// into the new day's progress doc.
 class DailyGameService {
   DailyGameService._(
-      {FirebaseFirestore? firestore, FirebaseAuth? auth, APIservices? api})
+      {FirebaseFirestore? firestore,
+      FirebaseAuth? auth,
+      APIservices? api,
+      DateTime Function()? clock})
       : _db = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance,
-        _api = api ?? APIservices();
+        _api = api ?? APIservices(),
+        _clock = clock ?? DateTime.now;
   static final DailyGameService instance = DailyGameService._();
 
   /// Test-only factory: inject a fake Firestore/Auth (and optionally a stub
-  /// TMDB client) instead of touching real backends.
+  /// TMDB client and a fixed clock) instead of touching real backends.
   @visibleForTesting
   factory DailyGameService.test({
     required FirebaseFirestore firestore,
     required FirebaseAuth auth,
     APIservices? api,
+    DateTime Function()? clock,
   }) =>
-      DailyGameService._(firestore: firestore, auth: auth, api: api);
+      DailyGameService._(
+          firestore: firestore, auth: auth, api: api, clock: clock);
 
   final FirebaseFirestore _db;
   final FirebaseAuth _auth;
   final APIservices _api;
+  final DateTime Function() _clock;
 
   String? get _uid => _auth.currentUser?.uid;
 
@@ -63,15 +103,16 @@ class DailyGameService {
     return DateTime.utc(est.year, est.month, est.day);
   }
 
-  int _dayIndex(DateTime utcNow) =>
-      _estCalendarDate(utcNow).difference(_referenceDate).inDays;
+  /// Absolute index of today's puzzle. Read it once and hold on to it.
+  int get todayIndex =>
+      _estCalendarDate(_clock().toUtc()).difference(_referenceDate).inDays;
 
-  int get _todayIndex => _dayIndex(DateTime.now().toUtc());
+  /// The calendar date (UTC midnight) of puzzle [day] — for display.
+  DateTime dateForDay(int day) => _referenceDate.add(Duration(days: day));
 
-  /// `yyyy-mm-dd` for [daysAgo] (0 = today) — used both as the Firestore
-  /// `gamePlays` doc id and as the "Rewatch" menu's display date.
-  String dateKeyForDaysAgo(int daysAgo) {
-    final date = _referenceDate.add(Duration(days: _todayIndex - daysAgo));
+  /// `yyyy-mm-dd` for puzzle [day] — the Firestore `gamePlays` doc id.
+  String dateKeyForDay(int day) {
+    final date = dateForDay(day);
     final mm = date.month.toString().padLeft(2, '0');
     final dd = date.day.toString().padLeft(2, '0');
     return '${date.year}-$mm-$dd';
@@ -118,14 +159,31 @@ class DailyGameService {
     return ids;
   }
 
-  /// The mystery movie for [daysAgo] (0 = today, 1 = yesterday, ...), fully
-  /// resolved with all 8 clue attributes. Null when the pool is empty
-  /// (unseeded); throws when the pool can't be read or TMDB fails.
-  Future<GameClueMovie?> mysteryMovieForDaysAgo(int daysAgo) async {
+  /// The mystery movie for puzzle [day], fully resolved with all 8 clue
+  /// attributes. Null when the pool is empty (unseeded); throws when the
+  /// pool can't be read or TMDB fails.
+  Future<GameClueMovie?> mysteryMovieForDay(int day) async {
     final pool = await _pool();
     if (pool.isEmpty) return null;
-    final index = (_todayIndex - daysAgo) % pool.length;
-    return _api.getGameClueData(pool[index]);
+    return clueData(pool[day % pool.length]);
+  }
+
+  // -------------------------------------------------------- clue cache -----
+
+  final Map<int, Future<GameClueMovie>> _clueCache = {};
+
+  /// [APIservices.getGameClueData], memoized for the app session: every
+  /// guess row (and the mystery) is a TMDB call, and reopening the game or
+  /// switching days used to refetch all of them. Concurrent callers share
+  /// one in-flight request; a failure is evicted so a retry refetches.
+  Future<GameClueMovie> clueData(int movieId) {
+    return _clueCache.putIfAbsent(movieId, () {
+      final future = _api.getGameClueData(movieId);
+      future.then((_) {}, onError: (Object _) {
+        _clueCache.remove(movieId);
+      });
+      return future;
+    });
   }
 
   // ---------------------------------------------------------- progress -----
@@ -136,83 +194,39 @@ class DailyGameService {
     return _db.collection('users').doc(uid).collection('gamePlays');
   }
 
-  Stream<Map<String, dynamic>?> progressStream(int daysAgo) {
+  /// Live progress for puzzle [day]; [DailyGamePlay.empty] when signed out
+  /// or not played yet.
+  Stream<DailyGamePlay> progressStream(int day) {
     final col = _playsCol;
-    if (col == null) return Stream.value(null);
+    if (col == null) return Stream.value(DailyGamePlay.empty);
     return col
-        .doc(dateKeyForDaysAgo(daysAgo))
+        .doc(dateKeyForDay(day))
         .snapshots()
-        .map((d) => d.data());
+        .map((d) => DailyGamePlay.fromMap(d.data()));
   }
 
-  /// Appends [guessedMovieId] to today's (or a rewatch day's) guess list and
-  /// records the outcome. `finished` is true once the player has won or used
-  /// all [dailyGameMaxGuesses] guesses — the game screen decides which.
+  /// Appends [guessedMovieId] to puzzle [day]'s guess list and records the
+  /// outcome. `finished` is true once the player has won or used all
+  /// guesses — the game screen decides which.
   Future<void> recordGuess({
-    required int daysAgo,
+    required int day,
     required int guessedMovieId,
     required bool won,
     required bool finished,
   }) async {
     final col = _playsCol;
     if (col == null) return;
-    final ref = col.doc(dateKeyForDaysAgo(daysAgo));
-    await ref.set({
+    await col.doc(dateKeyForDay(day)).set({
       'guessedIds': FieldValue.arrayUnion([guessedMovieId]),
       'won': won,
       'finished': finished,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
-    if (daysAgo == 0 && finished) {
-      await _updateStreak(won: won);
-    }
   }
 
-  Future<void> useHint(int daysAgo, int hintsUsed) async {
+  Future<void> useHint(int day, int hintsUsed) async {
     await _playsCol
-        ?.doc(dateKeyForDaysAgo(daysAgo))
+        ?.doc(dateKeyForDay(day))
         .set({'hintsUsed': hintsUsed}, SetOptions(merge: true));
-  }
-
-  // ------------------------------------------------------------ streak -----
-
-  DocumentReference<Map<String, dynamic>>? get _userDoc {
-    final uid = _uid;
-    if (uid == null) return null;
-    return _db.collection('users').doc(uid);
-  }
-
-  Future<void> _updateStreak({required bool won}) async {
-    final ref = _userDoc;
-    if (ref == null) return;
-    final today = dateKeyForDaysAgo(0);
-    final yesterday = dateKeyForDaysAgo(1);
-    final snap = await ref.get();
-    final data = snap.data() ?? const <String, dynamic>{};
-    final lastWinDateKey = data['gameLastWinDateKey'] as String?;
-    final priorStreak = ((data['gameCurrentStreak'] ?? 0) as num).toInt();
-    final bestStreak = ((data['gameBestStreak'] ?? 0) as num).toInt();
-
-    final newStreak =
-        won ? (lastWinDateKey == yesterday ? priorStreak + 1 : 1) : 0;
-
-    await ref.set({
-      'gameCurrentStreak': newStreak,
-      'gameBestStreak': newStreak > bestStreak ? newStreak : bestStreak,
-      if (won) 'gameLastWinDateKey': today,
-    }, SetOptions(merge: true));
-  }
-
-  /// Live `(current, best)` streak, for the game screen's header.
-  Stream<(int, int)> streakStream() {
-    final ref = _userDoc;
-    if (ref == null) return Stream.value((0, 0));
-    return ref.snapshots().map((snap) {
-      final data = snap.data() ?? const <String, dynamic>{};
-      return (
-        ((data['gameCurrentStreak'] ?? 0) as num).toInt(),
-        ((data['gameBestStreak'] ?? 0) as num).toInt(),
-      );
-    });
   }
 }

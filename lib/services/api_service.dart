@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:http/http.dart' as http;
 import 'package:watch_verse/models/game_clue_movie.dart';
 import 'package:watch_verse/models/media.dart';
@@ -299,70 +300,61 @@ class APIservices {
   /// The 8 clue-tile attributes for the daily guessing game's mystery movie
   /// *and* every title the player guesses — both sides of every comparison
   /// go through this, so a guess is judged on exactly the same data shape as
-  /// the answer. Combines three calls TMDB doesn't offer as one: movie
-  /// details (genres/revenue/production company/rating — `/movie/{id}`
-  /// already fetches this for [getMovieDetailExtras], just discarding the
-  /// fields this needs), credits (cast + crew, only cast was kept before),
-  /// and release dates (US certification — nothing else in the app calls
-  /// this endpoint).
+  /// the answer. One request: `append_to_response` folds credits (cast +
+  /// directors) and release dates (US certification) into the details call,
+  /// which used to be three separate round trips per guess.
   Future<GameClueMovie> getGameClueData(int movieId) async {
-    final results = await Future.wait([
-      _getJson(_uri('/movie/$movieId')),
-      _getJson(_uri('/movie/$movieId/credits')),
-      _getJson(_uri('/movie/$movieId/release_dates')),
-    ]);
-    final details = results[0];
-    final credits = results[1];
-    final releaseDates = results[2];
+    final data = await _getJson(_uri('/movie/$movieId',
+        {'append_to_response': 'credits,release_dates'}));
+    return gameClueMovieFromJson(movieId, data);
+  }
 
-    final genres = (details['genres'] as List<dynamic>? ?? [])
-        .map((g) => (g as Map<String, dynamic>)['name'] as String? ?? '')
-        .where((g) => g.isNotEmpty)
-        .take(5)
+  /// Parses a `/movie/{id}?append_to_response=credits,release_dates`
+  /// response. Split out of [getGameClueData] so it's testable without HTTP.
+  @visibleForTesting
+  static GameClueMovie gameClueMovieFromJson(
+      int movieId, Map<String, dynamic> details) {
+    final credits = details['credits'] as Map<String, dynamic>? ?? const {};
+    final releaseDates =
+        details['release_dates'] as Map<String, dynamic>? ?? const {};
+
+    List<String> names(List<dynamic>? raw, {int? limit}) {
+      final out = <String>[];
+      for (final e in raw ?? const []) {
+        final name = (e as Map<String, dynamic>)['name'] as String? ?? '';
+        if (name.isNotEmpty && !out.contains(name)) out.add(name);
+        if (limit != null && out.length >= limit) break;
+      }
+      return out;
+    }
+
+    final directors = (credits['crew'] as List<dynamic>? ?? [])
+        .where((c) => (c as Map<String, dynamic>)['job'] == 'Director')
         .toList();
-
-    final companies = (details['production_companies'] as List<dynamic>? ?? []);
-    final productionCompany = companies.isEmpty
-        ? ''
-        : (companies.first as Map<String, dynamic>)['name'] as String? ?? '';
-
-    final crew = (credits['crew'] as List<dynamic>? ?? [])
-        .cast<Map<String, dynamic>>();
-    final director = crew.firstWhere(
-      (c) => c['job'] == 'Director',
-      orElse: () => const {},
-    )['name'] as String? ?? '';
-
-    final cast = (credits['cast'] as List<dynamic>? ?? [])
-        .cast<Map<String, dynamic>>()
-        .map((c) => c['name'] as String? ?? '')
-        .where((n) => n.isNotEmpty)
-        .take(5)
-        .toList();
-
-    final certification = _usCertification(releaseDates);
 
     final releaseDate = details['release_date'] as String? ?? '';
-    final releaseYear =
-        releaseDate.length >= 4 ? int.tryParse(releaseDate.substring(0, 4)) ?? 0 : 0;
+    final releaseYear = releaseDate.length >= 4
+        ? int.tryParse(releaseDate.substring(0, 4)) ?? 0
+        : 0;
 
     return GameClueMovie(
       id: movieId,
       title: details['title'] as String? ?? '',
       posterPath: details['poster_path'] as String? ?? '',
-      director: director,
-      productionCompany: productionCompany,
+      directors: names(directors),
+      productionCompanies:
+          names(details['production_companies'] as List<dynamic>?),
       releaseYear: releaseYear,
       revenue: (details['revenue'] as num?)?.toInt() ?? 0,
       voteAverage: (details['vote_average'] as num?)?.toDouble() ?? 0,
-      certification: certification,
-      genres: genres,
-      cast: cast,
+      certification: _usCertification(releaseDates),
+      genres: names(details['genres'] as List<dynamic>?),
+      cast: names(credits['cast'] as List<dynamic>?, limit: 5),
     );
   }
 
   /// First non-empty certification from the US entry of `/movie/{id}/release_dates`.
-  String _usCertification(Map<String, dynamic> releaseDatesResponse) {
+  static String _usCertification(Map<String, dynamic> releaseDatesResponse) {
     final entries = (releaseDatesResponse['results'] as List<dynamic>? ?? [])
         .cast<Map<String, dynamic>>();
     final us = entries.firstWhere(
@@ -398,6 +390,60 @@ class APIservices {
         .map((e) => MediaItem.fromMovieMap(e as Map<String, dynamic>))
         .where((m) => m.id != 0)
         .toList();
+  }
+
+  /// Guess search for the daily game: like [searchMovies], but filtered and
+  /// re-ranked by [rankGameSearchResults] so well-known released films come
+  /// first.
+  Future<List<MediaItem>> searchGameMovies(String query) async {
+    if (query.trim().isEmpty) return [];
+    final data = await _getJson(
+      _uri('/search/movie', {'query': query, 'include_adult': 'false'}),
+    );
+    final results = (data['results'] as List<dynamic>? ?? [])
+        .cast<Map<String, dynamic>>();
+    return rankGameSearchResults(results, query, DateTime.now())
+        .map(MediaItem.fromMovieMap)
+        .where((m) => m.id != 0)
+        .toList();
+  }
+
+  /// TMDB's raw `/search/movie` order mixes in zero-vote shorts, festival
+  /// one-offs and unreleased sequels, and often buries the famous film
+  /// under same-named obscure ones. The mystery always comes from a pool of
+  /// well-known titles (hundreds of votes), so: drop unreleased/undated and
+  /// barely-voted entries, then put exact title matches first and sort each
+  /// group by vote count (the popularity proxy the pool itself uses).
+  @visibleForTesting
+  static List<Map<String, dynamic>> rankGameSearchResults(
+      List<Map<String, dynamic>> raw, String query, DateTime now,
+      {int minVotes = 20}) {
+    final today = DateTime(now.year, now.month, now.day);
+    final q = query.trim().toLowerCase();
+    int votes(Map<String, dynamic> m) =>
+        (m['vote_count'] as num?)?.toInt() ?? 0;
+    bool exact(Map<String, dynamic> m) =>
+        ((m['title'] as String?) ?? '').toLowerCase() == q ||
+        ((m['original_title'] as String?) ?? '').toLowerCase() == q;
+
+    final kept = [
+      for (final (i, m) in raw.indexed)
+        if (_isReleasedBy(m, today) && votes(m) >= minVotes) (i, m),
+    ];
+    // List.sort isn't stable — fall back to TMDB's relevance order (the
+    // original index) between otherwise-equal entries.
+    kept.sort((a, b) {
+      final ea = exact(a.$2), eb = exact(b.$2);
+      if (ea != eb) return ea ? -1 : 1;
+      final byVotes = votes(b.$2).compareTo(votes(a.$2));
+      return byVotes != 0 ? byVotes : a.$1.compareTo(b.$1);
+    });
+    return [for (final (_, m) in kept) m];
+  }
+
+  static bool _isReleasedBy(Map<String, dynamic> movie, DateTime today) {
+    final date = DateTime.tryParse(movie['release_date'] as String? ?? '');
+    return date != null && !date.isAfter(today);
   }
 
   /// Exact lookup of an IMDb id (`tt0111161`) via `/find` — used by the

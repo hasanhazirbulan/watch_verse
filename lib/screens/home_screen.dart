@@ -4,9 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
-import 'package:watch_verse/screens/daily_game_screen.dart';
 import 'package:watch_verse/screens/discover_screen.dart';
 import 'package:watch_verse/screens/friends_activity_screen.dart';
+import 'package:watch_verse/screens/games_hub_screen.dart';
 import 'package:watch_verse/screens/history_screen.dart';
 import 'package:watch_verse/screens/lists_screen.dart';
 import 'package:watch_verse/screens/search_screen.dart';
@@ -215,16 +215,10 @@ class _HomeScreenState extends State<HomeScreen> {
               }
               showPaywallSheet(context);
             }),
-            // TEMPORARY: Pro gate removed — the WatchVerse Pro subscription
-            // products aren't finalized in App Store Connect yet, so no
-            // tester can ever pass the `isPro` check below to reach the
-            // game. Free for everyone until the subscription is live, then
-            // re-add the `if (!ProService.instance.isPro) { showPaywallSheet(...); return; }`
-            // guard that gated this before.
-            _drawerItem(Icons.theaters_rounded, l10n.dailyGameDrawerLabel, () {
+            _drawerItem(Icons.sports_esports_rounded, l10n.gamesHubTitle, () {
               _scaffoldKey.currentState?.closeDrawer();
               Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const DailyGameScreen()));
+                  MaterialPageRoute(builder: (_) => const GamesHubScreen()));
             }),
             _drawerItem(Icons.bookmarks_rounded, l10n.homeMyLists, () {
               _scaffoldKey.currentState?.closeDrawer();

@@ -1216,18 +1216,9 @@
   "proLegalFooter": "By subscribing you agree to our Terms of Service and Privacy Policy.",
   "proSubscriptionTerms": "Payment is charged to your Apple ID account at confirmation of purchase. Subscriptions renew automatically unless auto-renew is turned off at least 24 hours before the end of the current period. Manage or cancel anytime in Settings > [your name] > Subscriptions on your device.",
   "dailyGameTitle": "Daily Movie Game",
-  "dailyGameDrawerLabel": "Daily Movie Game",
   "dailyGameSearchHint": "Search for a movie…",
   "dailyGameGuessesLeft": "{count} guesses left",
   "@dailyGameGuessesLeft": {
-    "placeholders": { "count": { "type": "String" } }
-  },
-  "dailyGameStreak": "Streak {count}",
-  "@dailyGameStreak": {
-    "placeholders": { "count": { "type": "String" } }
-  },
-  "dailyGameBestStreak": "Best {count}",
-  "@dailyGameBestStreak": {
     "placeholders": { "count": { "type": "String" } }
   },
   "dailyGameClueDirector": "Director",
@@ -1242,14 +1233,8 @@
   "dailyGameShowHint": "Show hint",
   "dailyGameWinTitle": "You got it!",
   "dailyGameLoseTitle": "Out of guesses",
-  "dailyGameLoseSubtitle": "Today's movie was {title}",
-  "@dailyGameLoseSubtitle": {
-    "placeholders": { "title": { "type": "String" } }
-  },
   "dailyGameShareResult": "Share result",
-  "dailyGameRewatch": "Rewatch",
   "dailyGamePlayAgainTomorrow": "Come back tomorrow for a new movie",
-  "dailyGameLoading": "Loading today's movie…",
   "dailyGameNoPool": "Today's puzzle isn't ready yet — check back soon",
   "dailyGameRetry": "Try again",
   "dailyGameSignInPrompt": "Sign in to play the daily movie game.",
@@ -1259,5 +1244,50 @@
   "tvSeasonLoadFailed": "Couldn't load this season's episodes.",
   "discoverLoadMoreFailed": "Couldn't load more.",
   "retryAction": "Retry",
-  "patronBadgeLabel": "Patron"
+  "patronBadgeLabel": "Patron",
+  "dailyGameToday": "Today",
+  "dailyGamePuzzleFor": "Puzzle for {date}",
+  "@dailyGamePuzzleFor": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "dailyGameHowToPlay": "How to play",
+  "dailyGameHowToIntro": "Find the mystery movie in {max} guesses. Search for any movie and pick it — each guess shows how it compares to the mystery movie.",
+  "@dailyGameHowToIntro": {
+    "placeholders": { "max": { "type": "String" } }
+  },
+  "dailyGameHowToGreen": "Green: exact match",
+  "dailyGameHowToGold": "Gold: close — shares a director, studio, cast member or genre, or the year is within 5, the rating within 0.5, or the box office within 50%",
+  "dailyGameHowToGray": "Gray: no match. A \"?\" tile means the info is unknown for one of the movies.",
+  "dailyGameHowToArrows": "↑ ↓: the mystery movie's year, box office or rating is higher / lower than your guess",
+  "dailyGameHowToShared": "For cast, genres, studio and director, a gold tile shows what the two movies share.",
+  "dailyGameHowToHints": "Stuck? Hints unlock after guess {first} and {second}. A new movie every day — the calendar lets you play the past week too.",
+  "@dailyGameHowToHints": {
+    "placeholders": { "first": { "type": "String" }, "second": { "type": "String" } }
+  },
+  "dailyGameGotIt": "Got it",
+  "dailyGameHints": "Hints",
+  "dailyGameNextHint": "Next hint after guess {count}",
+  "@dailyGameNextHint": {
+    "placeholders": { "count": { "type": "String" } }
+  },
+  "dailyGameHintTopBilled": "Top-billed: {name}",
+  "@dailyGameHintTopBilled": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "dailyGameNoResults": "No matching movies",
+  "dailyGameSearchFailed": "Search failed. Check your connection.",
+  "dailyGameSolvedIn": "{count, plural, =1{Solved on the first guess!} other{Solved in {count} guesses}}",
+  "@dailyGameSolvedIn": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "dailyGameAnswerWas": "The movie was",
+  "dailyGameViewMovie": "View movie",
+  "dailyGameGuessFailed": "Couldn't load that movie. Try again.",
+  "dailyGameRowFailed": "Couldn't load this guess",
+  "gamesHubTitle": "Games",
+  "gamesHubDailyMovieSubtitle": "Guess the mystery movie from clues. New every day.",
+  "gamesHubStatusNotPlayed": "Not played today",
+  "gamesHubStatusInProgress": "In progress",
+  "gamesHubStatusSolved": "Solved today",
+  "gamesHubStatusMissed": "Played today"
 }

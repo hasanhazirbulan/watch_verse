@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -10,6 +11,52 @@ import 'package:watch_verse/screens/actor_guess_screen.dart';
 import 'package:watch_verse/services/actor_guess_logic.dart';
 import 'package:watch_verse/services/actor_guess_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+
+/// Like the real Firestore client offline / on a slow network: a guess is
+/// applied to the (fake) local cache straight away, so the progress stream
+/// shows it, but the write's future never completes (no server ack), or
+/// fails when [failWrites] is set.
+class _UnackedActorService implements ActorGuessService {
+  _UnackedActorService(this._inner, this._candidates);
+  final ActorGuessService _inner;
+  final List<ActorGuessCandidate> _candidates;
+  bool failWrites = false;
+  final recorded = <ActorGuessEntry>[];
+
+  @override
+  Future<ActorGuessPuzzle?> puzzleFor(DateTime utcNow) =>
+      _inner.puzzleFor(utcNow);
+
+  @override
+  Stream<ActorGuessProgress> progressStream(DateTime utcNow) =>
+      _inner.progressStream(utcNow);
+
+  @override
+  Future<void> recordGuess({
+    required DateTime utcNow,
+    required ActorGuessEntry guess,
+    required bool won,
+    required bool finished,
+  }) {
+    recorded.add(guess);
+    if (failWrites) return Future.error(Exception('permission-denied'));
+    _inner.recordGuess(
+      utcNow: utcNow,
+      guess: guess,
+      won: won,
+      finished: finished,
+    );
+    return Completer<void>().future;
+  }
+
+  @override
+  Future<List<ActorGuessCandidate>> searchActors(String query) async =>
+      _candidates;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      super.noSuchMethod(invocation);
+}
 
 Widget _app(Widget home) => MaterialApp(
   theme: AppTheme.dark,
@@ -139,5 +186,97 @@ void main() {
     expect(find.text('Share result'), findsOneWidget);
     expect(find.text('View filmography'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  group('guessing without a server ack', () {
+    const wrongA = ActorGuessCandidate(
+      id: -100,
+      name: 'Zz Wrong One',
+      profilePath: '',
+      knownFor: [],
+    );
+    const wrongB = ActorGuessCandidate(
+      id: -101,
+      name: 'Zz Wrong Two',
+      profilePath: '',
+      knownFor: [],
+    );
+
+    Future<void> flush(WidgetTester tester) async {
+      for (var i = 0; i < 3; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump();
+      }
+    }
+
+    Future<void> search(WidgetTester tester) async {
+      await tester.enterText(find.byType(TextField), 'zz');
+      await tester.pump(const Duration(milliseconds: 400));
+      await flush(tester);
+    }
+
+    bool fieldEnabled(WidgetTester tester) =>
+        tester.widget<TextField>(find.byType(TextField)).enabled ?? true;
+
+    testWidgets('the next guess unlocks from the local snapshot', (
+      tester,
+    ) async {
+      final unacked = _UnackedActorService(service, [wrongA, wrongB]);
+      await pumpSmall(
+        tester,
+        ActorGuessScreen(service: unacked, signedIn: true),
+      );
+
+      await search(tester);
+      await tester.tap(find.text('Zz Wrong One'));
+      await flush(tester);
+      // Shown locally, still unacked: guessing goes on.
+      expect(find.text('5 guesses left'), findsOneWidget);
+      expect(fieldEnabled(tester), isTrue);
+
+      await search(tester);
+      expect(
+        tester
+            .widget<ListTile>(
+              find.ancestor(
+                of: find.text('Zz Wrong One'),
+                matching: find.byType(ListTile),
+              ),
+            )
+            .enabled,
+        isFalse,
+      );
+      await tester.tap(find.text('Zz Wrong Two'));
+      await flush(tester);
+
+      expect(find.text('4 guesses left'), findsOneWidget);
+      expect(unacked.recorded.map((g) => g.id), [-100, -101]);
+      final doc = await firestore.doc(docPath).get();
+      expect((doc.data()!['guesses'] as List), hasLength(2));
+      expect(doc.data()!['finished'], false);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a rejected write shows the error and unlocks', (
+      tester,
+    ) async {
+      final failing = _UnackedActorService(service, [wrongA])
+        ..failWrites = true;
+      await pumpSmall(
+        tester,
+        ActorGuessScreen(service: failing, signedIn: true),
+      );
+
+      await search(tester);
+      await tester.tap(find.text('Zz Wrong One'));
+      await flush(tester);
+
+      expect(find.text('An error occurred.'), findsOneWidget);
+      expect(find.text('6 guesses left'), findsOneWidget);
+      expect(fieldEnabled(tester), isTrue);
+      expect(tester.takeException(), isNull);
+    });
   });
 }

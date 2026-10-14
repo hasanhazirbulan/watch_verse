@@ -90,7 +90,6 @@ class _FramesBoardState extends State<_FramesBoard> {
   bool _searching = false;
   bool _searchFailed = false;
   int _searchRequest = 0;
-  bool _saving = false;
 
   @override
   void initState() {
@@ -212,7 +211,12 @@ class _FramesBoardState extends State<_FramesBoard> {
 
   Future<void> _submit(FramesGuess guess) async {
     final state = _state;
-    if (state == null || _saving) return;
+    // Not gated on the save (same as Title Wordle): Firestore only
+    // completes a write once the server acks it, so Skip and the results
+    // used to go dead after every move until then (for good offline). The
+    // state is already updated locally and every save writes the whole
+    // state, so an overlapping save can't lose a move.
+    if (state == null) return;
     final next = state.submit(guess);
     if (next == null) return;
     FocusScope.of(context).unfocus();
@@ -220,7 +224,6 @@ class _FramesBoardState extends State<_FramesBoard> {
       _clearSearch();
       _state = next;
       _viewIndex = next.finished ? _viewIndex : next.stillsUnlocked - 1;
-      _saving = true;
     });
     try {
       await _store.save(_docId, next.toMap());
@@ -233,8 +236,6 @@ class _FramesBoardState extends State<_FramesBoard> {
           ),
         );
       }
-    } finally {
-      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -454,7 +455,7 @@ class _FramesBoardState extends State<_FramesBoard> {
         ),
         const SizedBox(width: 8),
         OutlinedButton(
-          onPressed: _saving ? null : () => _submit(const FramesGuess.skip()),
+          onPressed: () => _submit(const FramesGuess.skip()),
           child: Text(l10n.framesGameSkip),
         ),
       ],
@@ -512,7 +513,7 @@ class _FramesBoardState extends State<_FramesBoard> {
                   final already = state.hasGuessed(item.id);
                   return ListTile(
                     dense: true,
-                    enabled: !already && !_saving,
+                    enabled: !already,
                     leading: ClipRRect(
                       borderRadius: BorderRadius.circular(4),
                       child: SizedBox(

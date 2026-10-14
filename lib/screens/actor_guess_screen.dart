@@ -58,7 +58,13 @@ class _ActorGuessScreenState extends State<ActorGuessScreen> {
   bool _searching = false;
   bool _searchFailed = false;
   String _lastQuery = '';
-  bool _submitting = false;
+  // The guess just written, until the progress stream shows it. Firestore
+  // applies a write to its local cache (and fires the listener) right away,
+  // but the write's future only completes once the server acks it — waiting
+  // for that paused guessing on a slow network and locked it for good
+  // offline. Waiting for the local snapshot instead still guarantees the
+  // next guess is counted against a list that already holds this one.
+  int? _pendingGuessId;
 
   @override
   void initState() {
@@ -153,16 +159,24 @@ class _ActorGuessScreenState extends State<ActorGuessScreen> {
     _searchFailed = false;
   }
 
+  /// Whether a guess is still waiting to show up in [progress].
+  bool _awaitingGuess(ActorGuessProgress progress) {
+    final pending = _pendingGuessId;
+    return pending != null && !progress.guesses.any((g) => g.id == pending);
+  }
+
   Future<void> _guess(
     ActorGuessCandidate candidate,
     ActorGuessProgress progress,
   ) async {
     final puzzle = _puzzle;
-    if (puzzle == null || _submitting || progress.finished) return;
+    if (puzzle == null || _awaitingGuess(progress) || progress.finished) {
+      return;
+    }
     if (progress.guesses.any((g) => g.id == candidate.id)) return;
     _searchFocus.unfocus();
     setState(() {
-      _submitting = true;
+      _pendingGuessId = candidate.id;
       _clearSearch();
     });
     final won = isActorGuessCorrect(
@@ -180,6 +194,8 @@ class _ActorGuessScreenState extends State<ActorGuessScreen> {
         finished: finished,
       );
     } catch (e, st) {
+      // Firestore rolls the rejected write back out of its cache, so the
+      // stream drops the guess again; just unlock and say so.
       debugPrint('ActorGuess: saving guess failed: $e\n$st');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -187,7 +203,11 @@ class _ActorGuessScreenState extends State<ActorGuessScreen> {
         );
       }
     } finally {
-      if (mounted) setState(() => _submitting = false);
+      // Acked (or failed): nothing left to wait for, even if no snapshot
+      // with the guess ever arrived.
+      if (mounted && _pendingGuessId == candidate.id) {
+        setState(() => _pendingGuessId = null);
+      }
     }
   }
 
@@ -354,6 +374,7 @@ class _ActorGuessScreenState extends State<ActorGuessScreen> {
     required double maxResultsHeight,
   }) {
     final left = actorGuessMaxAttempts - progress.guesses.length;
+    final submitting = _awaitingGuess(progress);
     final showPanel = _lastQuery.length >= 2 && !_searching;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
@@ -368,13 +389,13 @@ class _ActorGuessScreenState extends State<ActorGuessScreen> {
           TextField(
             controller: _searchController,
             focusNode: _searchFocus,
-            enabled: !_submitting,
+            enabled: !submitting,
             onChanged: _onSearchChanged,
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
               hintText: l10n.actorGuessSearchHint,
               prefixIcon: const Icon(Icons.search_rounded),
-              suffixIcon: _searching || _submitting
+              suffixIcon: _searching || submitting
                   ? const Padding(
                       padding: EdgeInsets.all(12),
                       child: SizedBox(
@@ -453,7 +474,7 @@ class _ActorGuessScreenState extends State<ActorGuessScreen> {
     final already = progress.guesses.any((g) => g.id == c.id);
     return ListTile(
       dense: true,
-      enabled: !already && !_submitting,
+      enabled: !already && !_awaitingGuess(progress),
       onTap: already ? null : () => _guess(c, progress),
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(6),

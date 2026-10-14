@@ -286,6 +286,61 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Frames: Skip doesn\'t wait for the save', (tester) async {
+    _useSmallPhone(tester);
+    final answerId = dailyPoolEntry(
+      framesMoviePool,
+      gamePuzzleNumber(DateTime.now().toUtc()),
+    );
+    final client = MockClient((req) async {
+      if (req.url.path == '/3/movie/$answerId') {
+        return http.Response(
+          jsonEncode({
+            'id': answerId,
+            'title': 'Mystery Movie',
+            'release_date': '1999-03-31',
+            'poster_path': '',
+            'images': {
+              'backdrops': [
+                for (var i = 0; i < 8; i++)
+                  {
+                    'file_path': '/still$i.jpg',
+                    'iso_639_1': null,
+                    'width': 1920,
+                    'aspect_ratio': 1.778,
+                    'vote_count': i,
+                    'vote_average': 5.0,
+                  },
+              ],
+            },
+          }),
+          200,
+        );
+      }
+      return http.Response('{}', 404);
+    });
+    final unacked = _UnackedStore();
+    await tester.pumpWidget(
+      _wrap(
+        FramesGameScreen(
+          store: unacked,
+          tmdb: GamesTmdb(client: client, key: 'test'),
+        ),
+      ),
+    );
+    await _settle(tester);
+
+    await tester.tap(find.text('Skip'));
+    await tester.pump();
+    // The first save is still pending — Skip must keep working.
+    await tester.tap(find.text('Skip'));
+    await _settle(tester);
+    expect(find.text('4 guesses left'), findsOneWidget);
+    expect(unacked.saves, hasLength(2));
+    expect(unacked.saves.last['guesses'], hasLength(2));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Frames: load failure shows retry', (tester) async {
     _useSmallPhone(tester);
     final client = MockClient((_) async => http.Response('oops', 500));

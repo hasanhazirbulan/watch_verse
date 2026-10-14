@@ -4,6 +4,21 @@ All notable changes to this project are documented here. Format loosely follows 
 
 ## [Unreleased]
 
+### Added (2026-10-14)
+- **Games hub** (side menu → Games) with six free games, no streaks: the reworked Daily Movie game, **Frames** (guess from stills), **Title Wordle**, **Plot** (redacted synopsis), **Who's the Actor?** (daily, movie + TV modes where relevant) and **Higher or Lower** (endless rating/box-office rounds). Daily pools are bundled with the app (generators in `tool/`); progress syncs to `users/{uid}/gamePlays` under the existing rules.
+- **Patron badge** on own and public profiles.
+- On-device smoke tests in `integration_test/` (guest games, and signed-in games with a throwaway account that is deleted afterwards).
+
+### Changed (2026-10-14)
+- Daily Movie game: ↑/↓ direction on year/box office/rating, neutral "?" for unknown data, shared cast/genre/studio shown on partial matches, ranked search without unreleased/obscure titles, one cached TMDB call per guess, newest guess on top, how-to-play sheet, better hints (genres, top-billed actor), result card with poster + link, dated spoiler-free share text. Streak display and tracking removed.
+- Privacy Policy / Terms: Patron badge, all game results listed (Higher or Lower stays on device).
+
+### Fixed (2026-10-14)
+- Daily Movie game: guesses after midnight were saved to the next day's puzzle while still showing the old movie; the board was guessable before saved progress loaded.
+- Registration left a half-created account ("email already in use" on retry) when the profile write failed; the auth account is now rolled back.
+- Catching up on or removing a long-running show (500+ episodes) failed on Firestore's per-batch write limit; `removeShow` also left episode notes behind.
+- Profile/comment image uploads now send an image content type (required by the new `storage.rules`).
+
 ### Changed (2026-10-13)
 - Flutter 3.35.5 → 3.47.6 and every dependency upgraded to its latest major version. iOS plugins now build via Swift Package Manager (CocoaPods only installs Flutter itself) and the app uses the UIScene lifecycle. CI and Xcode Cloud pinned to 3.47.6.
 - Account deletion (`AccountDeletionService`) is now interruption-safe and resumable: it checks for a recent sign-in *before* touching any data, marks the profile `deletionPending`, purges everything (now including `followedLists` and `gamePlays`, previously missed), and if interrupted the app finishes the deletion on the next sign-in (`FinishDeletionScreen`) instead of leaving a live, half-empty account. Still client-side and non-atomic; uploaded images are not yet deleted (the shipped service has no Storage instance).

@@ -4379,6 +4379,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Which one is rated higher? Endless rounds'**
   String get gamesHubHigherLowerSubtitle;
+
+  /// No description provided for @streamingSettingsTile.
+  ///
+  /// In en, this message translates to:
+  /// **'My streaming services'**
+  String get streamingSettingsTile;
+
+  /// No description provided for @streamingSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My streaming services'**
+  String get streamingSetupTitle;
+
+  /// No description provided for @streamingSetupIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the services you subscribe to and we\'ll show what on your watchlist you can stream right now.'**
+  String get streamingSetupIntro;
+
+  /// No description provided for @streamingRegionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get streamingRegionLabel;
+
+  /// No description provided for @streamingSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search services'**
+  String get streamingSearchHint;
+
+  /// No description provided for @streamingSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No services selected} =1{1 service selected} other{{count} services selected}}'**
+  String streamingSelectedCount(int count);
+
+  /// No description provided for @streamingNoProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'No streaming services are listed for this region.'**
+  String get streamingNoProviders;
+
+  /// No description provided for @streamingSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save your services. Try again.'**
+  String get streamingSaveError;
+
+  /// No description provided for @streamingJustWatchCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Streaming data by JustWatch'**
+  String get streamingJustWatchCredit;
+
+  /// No description provided for @streamingFilterChip.
+  ///
+  /// In en, this message translates to:
+  /// **'On my services'**
+  String get streamingFilterChip;
+
+  /// No description provided for @streamingChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking {checked}/{total}…'**
+  String streamingChecking(int checked, int total);
+
+  /// No description provided for @streamingCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Couldn\'t check 1 title} other{Couldn\'t check {count} titles}}'**
+  String streamingCheckFailed(int count);
+
+  /// No description provided for @streamingFilterEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here is streaming on your services right now.'**
+  String get streamingFilterEmpty;
+
+  /// No description provided for @streamingNotSetUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your streaming services'**
+  String get streamingNotSetUpTitle;
+
+  /// No description provided for @streamingNotSetUpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us which services you subscribe to and we\'ll filter this list to what you can watch right now.'**
+  String get streamingNotSetUpBody;
+
+  /// No description provided for @streamingSetUpAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose services'**
+  String get streamingSetUpAction;
+
+  /// No description provided for @streamingOnYour.
+  ///
+  /// In en, this message translates to:
+  /// **'On your {services}'**
+  String streamingOnYour(String services);
 }
 
 class _AppLocalizationsDelegate

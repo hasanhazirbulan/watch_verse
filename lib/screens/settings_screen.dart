@@ -6,6 +6,7 @@ import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/screens/blocked_users_screen.dart';
 import 'package:watch_verse/screens/edit_profile_screen.dart';
 import 'package:watch_verse/screens/import_screen.dart';
+import 'package:watch_verse/screens/streaming_services_screen.dart';
 import 'package:watch_verse/services/account_deletion_service.dart';
 import 'package:watch_verse/services/export_service.dart';
 import 'package:watch_verse/services/legal_links.dart';
@@ -138,6 +139,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const BlockedUsersScreen())),
           ),
+          // Stored on the profile doc, so signed-in users only (a guest's
+          // watchlist is empty anyway).
+          if (FirebaseAuth.instance.currentUser != null) ...[
+            const SizedBox(height: 12),
+            _tile(
+              icon: Icons.live_tv_rounded,
+              label: l10n.streamingSettingsTile,
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const StreamingServicesScreen())),
+            ),
+          ],
           const SizedBox(height: 12),
           _tile(
             icon: _exporting

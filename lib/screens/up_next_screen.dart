@@ -6,13 +6,16 @@ import 'package:flutter/services.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/screens/episode_detail_screen.dart';
+import 'package:watch_verse/screens/streaming_services_screen.dart';
 import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/movie_service.dart';
+import 'package:watch_verse/services/streaming/streaming_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/widgets/streaming_widgets.dart';
 
 /// A tracked show with its full ordered episode list, plus watch-progress
 /// bookkeeping used to order the feed: how many aired episodes are watched,
@@ -79,6 +82,38 @@ class _UpNextScreenState extends State<UpNextScreen> {
   final APIservices _api = APIservices();
   late int _tab = widget.initialTab;
   int _myShowsFilter = 0;
+
+  // "On my services" (My Shows tab), combinable with the status filters.
+  bool _onMyServices = false;
+  final StreamingDeps _streaming = StreamingDeps.instance;
+  late final AvailabilityChecker _checker = AvailabilityChecker(
+      source: _streaming.source, cache: _streaming.cache);
+  // Held as a subscription (not a StreamBuilder) because the My Shows view
+  // mounts/unmounts with the tab and a profile stream can't be re-listened.
+  StreamSubscription<StreamingPrefs>? _prefsSub;
+  StreamingPrefs? _streamingPrefs;
+
+  @override
+  void initState() {
+    super.initState();
+    _prefsSub = _streaming.prefs.watch().listen(
+        (p) {
+          if (mounted) setState(() => _streamingPrefs = p);
+        },
+        onError: (Object e) {
+          debugPrint('UpNext: streaming prefs failed: $e');
+          if (mounted) {
+            setState(() => _streamingPrefs ??= StreamingPrefs.empty);
+          }
+        });
+  }
+
+  @override
+  void dispose() {
+    _prefsSub?.cancel();
+    _checker.dispose();
+    super.dispose();
+  }
 
   // Shows the user just swiped away to "stop watching". Hidden locally the
   // instant the swipe is confirmed so the card doesn't reappear while the
@@ -566,9 +601,17 @@ class _UpNextScreenState extends State<UpNextScreen> {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            itemCount: _showFilters.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (context, i) => _filterChip(i),
+            itemCount: _showFilters.length + 1,
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
+            itemBuilder: (context, i) => i == _showFilters.length
+                ? Center(
+                    child: StreamingFilterChip(
+                      active: _onMyServices,
+                      onTap: () =>
+                          setState(() => _onMyServices = !_onMyServices),
+                    ),
+                  )
+                : _filterChip(i),
           ),
         ),
         const SizedBox(height: 4),
@@ -576,11 +619,35 @@ class _UpNextScreenState extends State<UpNextScreen> {
           child: filtered.isEmpty
               ? _empty(Icons.tv_off_rounded, l10n.upNextNoShowsTitle,
                   l10n.upNextNoShowsSubtitle(_showFilters[_myShowsFilter]))
-              : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 100),
-                  itemCount: filtered.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) => _showCard(filtered[index]),
+              : Builder(
+                  builder: (context) {
+                    final prefs = _streamingPrefs;
+                    if (prefs == null && _onMyServices) {
+                      return asyncLoadingIndicator();
+                    }
+                    final p = prefs ?? StreamingPrefs.empty;
+                    return StreamingFilterView<Map<String, dynamic>>(
+                      items: filtered,
+                      refOf: (s) => TitleRef(
+                          MediaType.tv, ((s['id'] ?? 0) as num).toInt()),
+                      active: _onMyServices,
+                      prefs: p,
+                      region: p.effectiveRegion(_streaming.deviceCountry()),
+                      checker: _checker,
+                      onSetUp: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const StreamingServicesScreen())),
+                      builder: (context, visible, matchesOf) =>
+                          ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(12, 4, 12, 100),
+                        itemCount: visible.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 10),
+                        itemBuilder: (context, index) => _showCard(
+                            visible[index], matchesOf(visible[index])),
+                      ),
+                    );
+                  },
                 ),
         ),
       ],
@@ -625,7 +692,8 @@ class _UpNextScreenState extends State<UpNextScreen> {
     );
   }
 
-  Widget _showCard(Map<String, dynamic> data) {
+  Widget _showCard(Map<String, dynamic> data,
+      [List<WatchProvider> onMyServices = const []]) {
     final l10n = AppLocalizations.of(context)!;
     final total = (data['totalEpisodes'] ?? 0) as int;
     final watched = (data['watchedCount'] ?? 0) as int;
@@ -690,6 +758,12 @@ class _UpNextScreenState extends State<UpNextScreen> {
                           ],
                         ),
                       ),
+                    ),
+                  if (onMyServices.isNotEmpty)
+                    Positioned(
+                      right: 2,
+                      bottom: 8,
+                      child: StreamingBadge(providers: onMyServices),
                     ),
                 ],
               ),

@@ -2457,4 +2457,80 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get gamesHubHigherLowerSubtitle =>
       'Hangisinin puanı daha yüksek? Sonsuz tur';
+
+  @override
+  String get streamingSettingsTile => 'My streaming services';
+
+  @override
+  String get streamingSetupTitle => 'My streaming services';
+
+  @override
+  String get streamingSetupIntro =>
+      'Pick the services you subscribe to and we\'ll show what on your watchlist you can stream right now.';
+
+  @override
+  String get streamingRegionLabel => 'Region';
+
+  @override
+  String get streamingSearchHint => 'Search services';
+
+  @override
+  String streamingSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count services selected',
+      one: '1 service selected',
+      zero: 'No services selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get streamingNoProviders =>
+      'No streaming services are listed for this region.';
+
+  @override
+  String get streamingSaveError => 'Couldn\'t save your services. Try again.';
+
+  @override
+  String get streamingJustWatchCredit => 'Streaming data by JustWatch';
+
+  @override
+  String get streamingFilterChip => 'On my services';
+
+  @override
+  String streamingChecking(int checked, int total) {
+    return 'Checking $checked/$total…';
+  }
+
+  @override
+  String streamingCheckFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Couldn\'t check $count titles',
+      one: 'Couldn\'t check 1 title',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get streamingFilterEmpty =>
+      'Nothing here is streaming on your services right now.';
+
+  @override
+  String get streamingNotSetUpTitle => 'Choose your streaming services';
+
+  @override
+  String get streamingNotSetUpBody =>
+      'Tell us which services you subscribe to and we\'ll filter this list to what you can watch right now.';
+
+  @override
+  String get streamingSetUpAction => 'Choose services';
+
+  @override
+  String streamingOnYour(String services) {
+    return 'On your $services';
+  }
 }

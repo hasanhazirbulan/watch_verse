@@ -10,7 +10,9 @@ Widget asyncLoadingIndicator() =>
 /// previously not checking `hasError` at all, so failures (e.g. a TMDB call
 /// with no API key configured) silently rendered as an infinite spinner or
 /// an empty state instead of telling the user anything went wrong.
-Widget asyncErrorView(BuildContext context, Object error) {
+/// [onRetry] adds a Retry button (for one-shot loads that can be re-run).
+Widget asyncErrorView(BuildContext context, Object error,
+    {VoidCallback? onRetry}) {
   final colors = context.colors;
   final l10n = AppLocalizations.of(context)!;
   return Center(
@@ -24,6 +26,14 @@ Widget asyncErrorView(BuildContext context, Object error) {
           Text(l10n.asyncErrorMessage(error.toString()),
               textAlign: TextAlign.center,
               style: TextStyle(color: colors.textSecondary)),
+          if (onRetry != null) ...[
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text(l10n.retryAction),
+            ),
+          ],
         ],
       ),
     ),

@@ -5,6 +5,7 @@ All notable changes to this project are documented here. Format loosely follows 
 ## [Unreleased]
 
 ### Added (2026-10-14)
+- **My streaming services** (Settings, signed-in users): pick a region (defaults to the device's) and the services you subscribe to, from TMDB's JustWatch provider list. Stored on `users/{uid}` as `streamingRegion` / `streamingProviderIds`. The Watchlist and Up Next → My Shows get an **"On my services"** filter (flat-rate, free or with-ads streaming in your region; never rent/buy, never another region's data) with a logo badge on matching posters. Availability is checked 4 titles at a time with "Checking 12/80…" progress and a retry for failures, and cached per title in memory and on disk for 24h. Movie/TV "Where to Watch" now uses your chosen region, lists your services first ("On your Netflix") and credits JustWatch.
 - **Games hub** (side menu → Games) with six free games, no streaks: the reworked Daily Movie game, **Frames** (guess from stills), **Title Wordle**, **Plot** (redacted synopsis), **Who's the Actor?** (daily, movie + TV modes where relevant) and **Higher or Lower** (endless rating/box-office rounds). Daily pools are bundled with the app (generators in `tool/`); progress syncs to `users/{uid}/gamePlays` under the existing rules.
 - **Patron badge** on own and public profiles.
 - On-device smoke tests in `integration_test/` (guest games, and signed-in games with a throwaway account that is deleted afterwards).

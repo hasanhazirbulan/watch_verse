@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:watch_verse/services/games/plot_franchise_vocab.dart';
 import 'package:watch_verse/services/games/plot_guess_logic.dart';
 
 const _r = plotRedaction;
@@ -130,6 +131,101 @@ void main() {
       final r = PlotRedactor(genericCapitalized: {'FBI'});
       expect(r.redact('An FBI agent named Clarice hunts.', names: {'Clarice'}),
           'An FBI agent named $_r hunts.');
+    });
+  });
+
+  group('franchise redaction', () {
+    final plain = PlotRedactor();
+
+    test('franchise words hide only capitalized uses, even generic ones', () {
+      final r = PlotRedactor(genericCapitalized: {'Gotham', 'City'});
+      expect(
+        r.redact('He guards Gotham City on a dark night.',
+            franchise: ['Gotham', 'Night']),
+        'He guards $_r on a dark night.',
+      );
+    });
+
+    test('a sentence-initial everyday franchise word stays', () {
+      final r = PlotRedactor(everydayWords: {'force'});
+      expect(
+        r.redact('Force is strong. He trusts the Force.', franchise: ['Force']),
+        'Force is strong. He trusts the $_r.',
+      );
+    });
+
+    test('numbers like 007 can be franchise words', () {
+      expect(plain.redact('Agent 007 returns in 2 days.', franchise: ['007']),
+          'Agent $_r returns in 2 days.');
+    });
+
+    test('franchise phrases hide verbatim matches of ordinary words', () {
+      expect(
+        plain.redact('After the events of Captain America: Civil War, a '
+            'teen hero returns to the civil war museum.',
+            franchisePhrases: ['Captain America: Civil War']),
+        'After the events of $_r: $_r, a teen hero returns to the civil war '
+        'museum.',
+      );
+    });
+
+    // Fixture modeled on TMDB's data for The Dark Knight Rises: "Batman" is
+    // in neither its title nor its credits ("Bruce Wayne"), and "Gotham" /
+    // "Avengers"-style words show up across many films, so the generic rules
+    // used to keep them.
+    test('collection and universe vocabulary hides Batman and Gotham', () {
+      const overview = 'Following the death of Harvey Dent, Batman assumes '
+          'responsibility for his crimes and is hunted by the Gotham City '
+          'Police Department. Back on Earth, the Dark Knight returns.';
+      final universes = plotUniversesFor(
+        ['The Dark Knight Rises', 'The Dark Knight Collection', 'Batman Begins'],
+        texts: [overview],
+      );
+      expect(universes.map((u) => u.key), contains('dc'));
+      final vocab = plotFranchiseVocabulary(
+        universes: universes,
+        related: ['Batman Begins', 'The Dark Knight', "Earth's Mightiest"],
+        genericWords: {'earth', 'police', 'department', 'city'},
+      );
+      // Generic words from related titles ("Earth") are left out.
+      expect(vocab.words, isNot(contains('earth')));
+      final r = PlotRedactor(
+        genericCapitalized: {'Batman', 'Gotham', 'City', 'Police', 'Earth'},
+        everydayWords: {'back', 'police', 'department', 'city'},
+      );
+      expect(
+        r.redact(overview,
+            titles: ['The Dark Knight Rises', 'The Dark Knight Collection'],
+            names: {'Harvey', 'Dent'},
+            franchise: vocab.words,
+            franchisePhrases: vocab.phrases),
+        'Following the death of $_r, $_r assumes responsibility for his '
+        'crimes and is hunted by the $_r. Back on Earth, the $_r returns.',
+      );
+    });
+
+    test('universes are recognised from capitalized text mentions only', () {
+      expect(
+          plotUniversesFor(['Andor'],
+                  texts: ['He fights the tyrannical Galactic Empire.'])
+              .map((u) => u.key),
+          ['star-wars']);
+      // "a doctor who realizes" is not Doctor Who.
+      expect(
+          plotUniversesFor(['Alita'],
+              texts: ['She meets a kind doctor who repairs her.']),
+          isEmpty);
+      expect(plotUniversesFor(['Doctor Who']).map((u) => u.key),
+          ['doctor-who']);
+    });
+
+    test('related titles add phrases but not bare numbers', () {
+      final vocab = plotFranchiseVocabulary(
+          related: ['Iron Man 2', 'Captain America: Civil War']);
+      expect(vocab.words, isNot(contains('2')));
+      expect(vocab.words, containsAll(['iron', 'captain', 'civil']));
+      expect(vocab.phrases,
+          containsAll(['Captain America: Civil War', 'Civil War', 'Iron Man 2']));
     });
   });
 

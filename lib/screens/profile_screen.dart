@@ -7,6 +7,7 @@ import 'package:watch_verse/screens/follow_list_screen.dart';
 import 'package:watch_verse/screens/up_next_screen.dart';
 import 'package:watch_verse/screens/watch_stats_screen.dart';
 import 'package:watch_verse/screens/watched_movies_screen.dart';
+import 'package:watch_verse/screens/year_in_review_screen.dart';
 import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
@@ -87,6 +88,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _favoritesShowcase(),
             const SizedBox(height: 16),
             _statsRail(),
+            const SizedBox(height: 12),
+            _yearInReviewCard(l10n),
             const SizedBox(height: 16),
             _recentTrays(),
           ],
@@ -290,6 +293,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Entry point to the Year in Review recap (works any time of year — the
+  /// current year is shown "so far").
+  Widget _yearInReviewCard(AppLocalizations l10n) {
+    final year = DateTime.now().year;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const YearInReviewScreen())),
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            gradient: context.colors.brandGradient,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.auto_awesome_rounded, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.yirEntryTitle('$year'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800)),
+                    Text(l10n.yirEntrySubtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.85),
+                            fontSize: 12)),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: Colors.white),
+            ],
+          ),
+        ),
       ),
     );
   }

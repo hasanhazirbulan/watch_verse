@@ -4379,6 +4379,294 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Which one is rated higher? Endless rounds'**
   String get gamesHubHigherLowerSubtitle;
+
+  /// No description provided for @yirTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Year in Review'**
+  String get yirTitle;
+
+  /// No description provided for @yirEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your {year} in review'**
+  String yirEntryTitle(String year);
+
+  /// No description provided for @yirEntrySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Films, shows and hours, recapped'**
+  String get yirEntrySubtitle;
+
+  /// No description provided for @yirHeroSoFar.
+  ///
+  /// In en, this message translates to:
+  /// **'Your {year} so far'**
+  String yirHeroSoFar(String year);
+
+  /// No description provided for @yirHeroFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Your {year} in film & TV'**
+  String yirHeroFull(String year);
+
+  /// No description provided for @yirEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing logged in {year}'**
+  String yirEmptyTitle(String year);
+
+  /// No description provided for @yirEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Films you log and episodes you mark as watched during {year} will show up here.'**
+  String yirEmptyBody(String year);
+
+  /// No description provided for @yirFilmWatches.
+  ///
+  /// In en, this message translates to:
+  /// **'film watches'**
+  String get yirFilmWatches;
+
+  /// No description provided for @yirDistinctFilms.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 different film} other{{count} different films}}'**
+  String yirDistinctFilms(int count);
+
+  /// No description provided for @yirEpisodes.
+  ///
+  /// In en, this message translates to:
+  /// **'episodes'**
+  String get yirEpisodes;
+
+  /// No description provided for @yirShows.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{across 1 show} other{across {count} shows}}'**
+  String yirShows(int count);
+
+  /// No description provided for @yirHoursWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'hours watched'**
+  String get yirHoursWatched;
+
+  /// No description provided for @yirDaysEquivalent.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s about {days} days of screen time'**
+  String yirDaysEquivalent(String days);
+
+  /// No description provided for @yirRuntimeUnknownNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 watch has no known runtime and isn\'t in the hours.} other{{count} watches have no known runtime and aren\'t in the hours.}}'**
+  String yirRuntimeUnknownNote(int count);
+
+  /// No description provided for @yirRuntimeEstimatedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 episode length is estimated from its show\'s average.} other{{count} episode lengths are estimated from their show\'s average.}}'**
+  String yirRuntimeEstimatedNote(int count);
+
+  /// No description provided for @yirTopGenres.
+  ///
+  /// In en, this message translates to:
+  /// **'Top genres'**
+  String get yirTopGenres;
+
+  /// No description provided for @yirTopGenresCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'By time watched'**
+  String get yirTopGenresCaption;
+
+  /// No description provided for @yirBusiestMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Busiest month'**
+  String get yirBusiestMonth;
+
+  /// No description provided for @yirBusiestMonthValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} was your busiest month'**
+  String yirBusiestMonthValue(String month);
+
+  /// No description provided for @yirChartMinutesCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours watched per month'**
+  String get yirChartMinutesCaption;
+
+  /// No description provided for @yirChartCountCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Watches per month'**
+  String get yirChartCountCaption;
+
+  /// No description provided for @yirMonthInitials.
+  ///
+  /// In en, this message translates to:
+  /// **'JFMAMJJASOND'**
+  String get yirMonthInitials;
+
+  /// No description provided for @yirFavouriteDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Favourite day to watch: {day}'**
+  String yirFavouriteDay(String day);
+
+  /// No description provided for @yirDayMonday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get yirDayMonday;
+
+  /// No description provided for @yirDayTuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get yirDayTuesday;
+
+  /// No description provided for @yirDayWednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get yirDayWednesday;
+
+  /// No description provided for @yirDayThursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get yirDayThursday;
+
+  /// No description provided for @yirDayFriday.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get yirDayFriday;
+
+  /// No description provided for @yirDaySaturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get yirDaySaturday;
+
+  /// No description provided for @yirDaySunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get yirDaySunday;
+
+  /// No description provided for @yirTopRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest rated'**
+  String get yirTopRated;
+
+  /// No description provided for @yirTopRatedCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Your top-rated film this year} other{Your {count} top-rated films this year}}'**
+  String yirTopRatedCaption(int count);
+
+  /// No description provided for @yirTopShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Most watched show'**
+  String get yirTopShow;
+
+  /// No description provided for @yirEpisodeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 episode} other{{count} episodes}}'**
+  String yirEpisodeCount(int count);
+
+  /// No description provided for @yirBookends.
+  ///
+  /// In en, this message translates to:
+  /// **'First & latest'**
+  String get yirBookends;
+
+  /// No description provided for @yirFirstWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'First watch'**
+  String get yirFirstWatch;
+
+  /// No description provided for @yirLatestWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest watch'**
+  String get yirLatestWatch;
+
+  /// No description provided for @yirEpisodeCode.
+  ///
+  /// In en, this message translates to:
+  /// **'S{season} · E{episode}'**
+  String yirEpisodeCode(int season, int episode);
+
+  /// No description provided for @yirFunFacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Fun facts'**
+  String get yirFunFacts;
+
+  /// No description provided for @yirFactLongest.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest film: {title} ({duration})'**
+  String yirFactLongest(String title, String duration);
+
+  /// No description provided for @yirFactRewatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Most rewatched: {title}, {count} times'**
+  String yirFactRewatched(String title, int count);
+
+  /// No description provided for @yirFactRepeatWatches.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 repeat watch of a film you\'d already seen this year} other{{count} repeat watches of films you\'d already seen this year}}'**
+  String yirFactRepeatWatches(int count);
+
+  /// No description provided for @yirFactBusiestDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Biggest day: {date}, with {count} watches'**
+  String yirFactBusiestDay(String date, int count);
+
+  /// No description provided for @yirFactAverageRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Average rating: {rating} across {count, plural, =1{1 rated film} other{{count} rated films}}'**
+  String yirFactAverageRating(String rating, int count);
+
+  /// No description provided for @yirShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get yirShare;
+
+  /// No description provided for @yirShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'My {year} on WatchVerse'**
+  String yirShareText(String year);
+
+  /// No description provided for @yirShareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the image to share.'**
+  String get yirShareFailed;
+
+  /// No description provided for @yirYearPickerTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose year'**
+  String get yirYearPickerTooltip;
 }
 
 class _AppLocalizationsDelegate

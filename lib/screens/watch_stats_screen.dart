@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/pro_service.dart';
+import 'package:watch_verse/screens/year_in_review_screen.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/duration_format.dart';
@@ -38,7 +39,19 @@ class _WatchStatsScreenState extends State<WatchStatsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.statsScreenTitle)),
+      appBar: AppBar(
+        title: Text(l10n.statsScreenTitle),
+        actions: [
+          IconButton(
+            tooltip: l10n.yirTitle,
+            icon: const Icon(Icons.auto_awesome_rounded),
+            onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const YearInReviewScreen())),
+          ),
+        ],
+      ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: MovieService.instance.watchedStream(),
         builder: (context, movieSnap) {

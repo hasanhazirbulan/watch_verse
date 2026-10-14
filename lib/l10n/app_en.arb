@@ -1593,5 +1593,215 @@
   "plotGameSignInPrompt": "Sign in to play the daily Plot game.",
   "plotGameNoPuzzle": "Today's puzzle isn't available yet — check back soon.",
   "gamesHubPlotSubtitle": "Guess the movie or show from its redacted plot",
-  "gamesHubHigherLowerSubtitle": "Which one is rated higher? Endless rounds"
+  "gamesHubHigherLowerSubtitle": "Which one is rated higher? Endless rounds",
+  "yirTitle": "Year in Review",
+  "yirEntryTitle": "Your {year} in review",
+  "@yirEntryTitle": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "yirEntrySubtitle": "Films, shows and hours, recapped",
+  "yirHeroSoFar": "Your {year} so far",
+  "@yirHeroSoFar": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "yirHeroFull": "Your {year} in film & TV",
+  "@yirHeroFull": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "yirEmptyTitle": "Nothing logged in {year}",
+  "@yirEmptyTitle": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "yirEmptyBody": "Films you log and episodes you mark as watched during {year} will show up here.",
+  "@yirEmptyBody": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "yirFilmWatches": "film watches",
+  "yirDistinctFilms": "{count, plural, =1{1 different film} other{{count} different films}}",
+  "@yirDistinctFilms": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yirEpisodes": "episodes",
+  "yirShows": "{count, plural, =1{across 1 show} other{across {count} shows}}",
+  "@yirShows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yirHoursWatched": "hours watched",
+  "yirDaysEquivalent": "That's about {days} days of screen time",
+  "@yirDaysEquivalent": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "yirRuntimeUnknownNote": "{count, plural, =1{1 watch has no known runtime and isn't in the hours.} other{{count} watches have no known runtime and aren't in the hours.}}",
+  "@yirRuntimeUnknownNote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yirRuntimeEstimatedNote": "{count, plural, =1{1 episode length is estimated from its show's average.} other{{count} episode lengths are estimated from their show's average.}}",
+  "@yirRuntimeEstimatedNote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yirTopGenres": "Top genres",
+  "yirTopGenresCaption": "By time watched",
+  "yirBusiestMonth": "Busiest month",
+  "yirBusiestMonthValue": "{month} was your busiest month",
+  "@yirBusiestMonthValue": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "yirChartMinutesCaption": "Hours watched per month",
+  "yirChartCountCaption": "Watches per month",
+  "yirMonthInitials": "JFMAMJJASOND",
+  "yirFavouriteDay": "Favourite day to watch: {day}",
+  "@yirFavouriteDay": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "yirDayMonday": "Monday",
+  "yirDayTuesday": "Tuesday",
+  "yirDayWednesday": "Wednesday",
+  "yirDayThursday": "Thursday",
+  "yirDayFriday": "Friday",
+  "yirDaySaturday": "Saturday",
+  "yirDaySunday": "Sunday",
+  "yirTopRated": "Highest rated",
+  "yirTopRatedCaption": "{count, plural, =1{Your top-rated film this year} other{Your {count} top-rated films this year}}",
+  "@yirTopRatedCaption": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yirTopShow": "Most watched show",
+  "yirEpisodeCount": "{count, plural, =1{1 episode} other{{count} episodes}}",
+  "@yirEpisodeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yirBookends": "First & latest",
+  "yirFirstWatch": "First watch",
+  "yirLatestWatch": "Latest watch",
+  "yirEpisodeCode": "S{season} · E{episode}",
+  "@yirEpisodeCode": {
+    "placeholders": {
+      "season": {
+        "type": "int"
+      },
+      "episode": {
+        "type": "int"
+      }
+    }
+  },
+  "yirFunFacts": "Fun facts",
+  "yirFactLongest": "Longest film: {title} ({duration})",
+  "@yirFactLongest": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "yirFactRewatched": "Most rewatched: {title}, {count} times",
+  "@yirFactRewatched": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yirFactRepeatWatches": "{count, plural, =1{1 repeat watch of a film you'd already seen this year} other{{count} repeat watches of films you'd already seen this year}}",
+  "@yirFactRepeatWatches": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yirFactBusiestDay": "Biggest day: {date}, with {count} watches",
+  "@yirFactBusiestDay": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yirFactAverageRating": "Average rating: {rating} across {count, plural, =1{1 rated film} other{{count} rated films}}",
+  "@yirFactAverageRating": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yirShare": "Share",
+  "yirShareText": "My {year} on WatchVerse",
+  "@yirShareText": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "yirShareFailed": "Couldn't create the image to share.",
+  "yirYearPickerTooltip": "Choose year"
 }

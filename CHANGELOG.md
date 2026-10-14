@@ -8,6 +8,7 @@ All notable changes to this project are documented here. Format loosely follows 
 - **Games hub** (side menu → Games) with six free games, no streaks: the reworked Daily Movie game, **Frames** (guess from stills), **Title Wordle**, **Plot** (redacted synopsis), **Who's the Actor?** (daily, movie + TV modes where relevant) and **Higher or Lower** (endless rating/box-office rounds). Daily pools are bundled with the app (generators in `tool/`); progress syncs to `users/{uid}/gamePlays` under the existing rules.
 - **Patron badge** on own and public profiles.
 - On-device smoke tests in `integration_test/` (guest games, and signed-in games with a throwaway account that is deleted afterwards).
+- **Year in Review** (Profile → "Your {year} in review", or the ✨ action on Watch Stats): a per-year recap built only from dated data — film watches (diary incl. rewatches + quick-add marks), episodes, hours, top genres, busiest month/favourite weekday, highest-rated films, most-watched show, first/latest watch and a few fun facts. Year picker for past years; current year shows "so far". Each card shares as a PNG. Aggregation is pure (`lib/services/year_in_review.dart`) with its derivations and approximations documented there.
 
 ### Changed (2026-10-14)
 - **The app is English-only now**, whatever the device language (`locale: Locale('en')` in `main.dart`). TMDB content and the game pools are English, so the Turkish UI around them read as half-translated. `app_tr.arb` is kept but unused.

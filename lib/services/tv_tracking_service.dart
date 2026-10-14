@@ -210,6 +210,36 @@ class TvTrackingService {
     return snap.docs.map((d) => d.data()).toList();
   }
 
+  /// Watched-episode docs of one show whose `watchedAt` is in
+  /// `[start, end)`, read once (Year in Review). A single-field range filter
+  /// on the subcollection, so Firestore's automatic index covers it.
+  Future<List<Map<String, dynamic>>> watchedEpisodesBetweenOnce(
+      int showId, DateTime start, DateTime end) async {
+    final ref = _showRef(showId);
+    if (ref == null) return [];
+    final snap = await ref
+        .collection('watched')
+        .where('watchedAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(start),
+            isLessThan: Timestamp.fromDate(end))
+        .get();
+    return snap.docs.map((d) => d.data()).toList();
+  }
+
+  /// Activity-timeline entries with `at` in `[start, end)`, read once
+  /// (Year in Review uses the `kind: 'episode'` ones for exact runtimes).
+  Future<List<Map<String, dynamic>>> activityBetweenOnce(
+      DateTime start, DateTime end) async {
+    final col = _activityCol;
+    if (col == null) return [];
+    final snap = await col
+        .where('at',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(start),
+            isLessThan: Timestamp.fromDate(end))
+        .get();
+    return snap.docs.map((d) => d.data()).toList();
+  }
+
   // -------------------------------------------------------------- writes ----
 
   /// Adds a show to tracking without marking any episode (status: watchlist).

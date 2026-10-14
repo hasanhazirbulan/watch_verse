@@ -2457,4 +2457,238 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get gamesHubHigherLowerSubtitle =>
       'Hangisinin puanı daha yüksek? Sonsuz tur';
+
+  @override
+  String get yirTitle => 'Year in Review';
+
+  @override
+  String yirEntryTitle(String year) {
+    return 'Your $year in review';
+  }
+
+  @override
+  String get yirEntrySubtitle => 'Films, shows and hours, recapped';
+
+  @override
+  String yirHeroSoFar(String year) {
+    return 'Your $year so far';
+  }
+
+  @override
+  String yirHeroFull(String year) {
+    return 'Your $year in film & TV';
+  }
+
+  @override
+  String yirEmptyTitle(String year) {
+    return 'Nothing logged in $year';
+  }
+
+  @override
+  String yirEmptyBody(String year) {
+    return 'Films you log and episodes you mark as watched during $year will show up here.';
+  }
+
+  @override
+  String get yirFilmWatches => 'film watches';
+
+  @override
+  String yirDistinctFilms(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count different films',
+      one: '1 different film',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get yirEpisodes => 'episodes';
+
+  @override
+  String yirShows(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'across $count shows',
+      one: 'across 1 show',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get yirHoursWatched => 'hours watched';
+
+  @override
+  String yirDaysEquivalent(String days) {
+    return 'That\'s about $days days of screen time';
+  }
+
+  @override
+  String yirRuntimeUnknownNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count watches have no known runtime and aren\'t in the hours.',
+      one: '1 watch has no known runtime and isn\'t in the hours.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String yirRuntimeEstimatedNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count episode lengths are estimated from their show\'s average.',
+      one: '1 episode length is estimated from its show\'s average.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get yirTopGenres => 'Top genres';
+
+  @override
+  String get yirTopGenresCaption => 'By time watched';
+
+  @override
+  String get yirBusiestMonth => 'Busiest month';
+
+  @override
+  String yirBusiestMonthValue(String month) {
+    return '$month was your busiest month';
+  }
+
+  @override
+  String get yirChartMinutesCaption => 'Hours watched per month';
+
+  @override
+  String get yirChartCountCaption => 'Watches per month';
+
+  @override
+  String get yirMonthInitials => 'JFMAMJJASOND';
+
+  @override
+  String yirFavouriteDay(String day) {
+    return 'Favourite day to watch: $day';
+  }
+
+  @override
+  String get yirDayMonday => 'Monday';
+
+  @override
+  String get yirDayTuesday => 'Tuesday';
+
+  @override
+  String get yirDayWednesday => 'Wednesday';
+
+  @override
+  String get yirDayThursday => 'Thursday';
+
+  @override
+  String get yirDayFriday => 'Friday';
+
+  @override
+  String get yirDaySaturday => 'Saturday';
+
+  @override
+  String get yirDaySunday => 'Sunday';
+
+  @override
+  String get yirTopRated => 'Highest rated';
+
+  @override
+  String yirTopRatedCaption(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Your $count top-rated films this year',
+      one: 'Your top-rated film this year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get yirTopShow => 'Most watched show';
+
+  @override
+  String yirEpisodeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count episodes',
+      one: '1 episode',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get yirBookends => 'First & latest';
+
+  @override
+  String get yirFirstWatch => 'First watch';
+
+  @override
+  String get yirLatestWatch => 'Latest watch';
+
+  @override
+  String yirEpisodeCode(int season, int episode) {
+    return 'S$season · E$episode';
+  }
+
+  @override
+  String get yirFunFacts => 'Fun facts';
+
+  @override
+  String yirFactLongest(String title, String duration) {
+    return 'Longest film: $title ($duration)';
+  }
+
+  @override
+  String yirFactRewatched(String title, int count) {
+    return 'Most rewatched: $title, $count times';
+  }
+
+  @override
+  String yirFactRepeatWatches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count repeat watches of films you\'d already seen this year',
+      one: '1 repeat watch of a film you\'d already seen this year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String yirFactBusiestDay(String date, int count) {
+    return 'Biggest day: $date, with $count watches';
+  }
+
+  @override
+  String yirFactAverageRating(String rating, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rated films',
+      one: '1 rated film',
+    );
+    return 'Average rating: $rating across $_temp0';
+  }
+
+  @override
+  String get yirShare => 'Share';
+
+  @override
+  String yirShareText(String year) {
+    return 'My $year on WatchVerse';
+  }
+
+  @override
+  String get yirShareFailed => 'Couldn\'t create the image to share.';
+
+  @override
+  String get yirYearPickerTooltip => 'Choose year';
 }

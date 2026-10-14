@@ -3569,6 +3569,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Patron'**
   String get patronBadgeLabel;
+
+  /// No description provided for @gamesCommonMovies.
+  ///
+  /// In en, this message translates to:
+  /// **'Movies'**
+  String get gamesCommonMovies;
+
+  /// No description provided for @gamesCommonTv.
+  ///
+  /// In en, this message translates to:
+  /// **'TV Shows'**
+  String get gamesCommonTv;
+
+  /// No description provided for @gamesCommonPuzzleNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Puzzle #{number}'**
+  String gamesCommonPuzzleNumber(String number);
+
+  /// No description provided for @gamesCommonShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share result'**
+  String get gamesCommonShare;
+
+  /// No description provided for @gamesCommonViewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get gamesCommonViewDetails;
+
+  /// No description provided for @gamesCommonComeBackTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'A new puzzle arrives tomorrow.'**
+  String get gamesCommonComeBackTomorrow;
+
+  /// No description provided for @gamesCommonGuestNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Playing as a guest — sign in to save your results.'**
+  String get gamesCommonGuestNote;
+
+  /// No description provided for @gamesCommonLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load today\'s puzzle.'**
+  String get gamesCommonLoadError;
+
+  /// No description provided for @gamesCommonRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get gamesCommonRetry;
+
+  /// No description provided for @gamesCommonSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save your progress. Check your connection.'**
+  String get gamesCommonSaveFailed;
+
+  /// No description provided for @gamesCommonWin.
+  ///
+  /// In en, this message translates to:
+  /// **'You got it!'**
+  String get gamesCommonWin;
+
+  /// No description provided for @gamesCommonLose.
+  ///
+  /// In en, this message translates to:
+  /// **'Not this time'**
+  String get gamesCommonLose;
+
+  /// No description provided for @gamesCommonSolvedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Solved in {count}/{total}'**
+  String gamesCommonSolvedIn(String count, String total);
+
+  /// No description provided for @gamesCommonAnswerWas.
+  ///
+  /// In en, this message translates to:
+  /// **'The answer was {title}'**
+  String gamesCommonAnswerWas(String title);
+
+  /// No description provided for @gamesCommonGuessesLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} guesses left'**
+  String gamesCommonGuessesLeft(String count);
+
+  /// No description provided for @framesGameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Frames'**
+  String get framesGameTitle;
+
+  /// No description provided for @framesGameIntroMovie.
+  ///
+  /// In en, this message translates to:
+  /// **'Name the movie from its stills. Each wrong guess or skip reveals another frame.'**
+  String get framesGameIntroMovie;
+
+  /// No description provided for @framesGameIntroTv.
+  ///
+  /// In en, this message translates to:
+  /// **'Name the TV show from its stills. Each wrong guess or skip reveals another frame.'**
+  String get framesGameIntroTv;
+
+  /// No description provided for @framesGameSearchHintMovie.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a movie…'**
+  String get framesGameSearchHintMovie;
+
+  /// No description provided for @framesGameSearchHintTv.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a TV show…'**
+  String get framesGameSearchHintTv;
+
+  /// No description provided for @framesGameSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get framesGameSkip;
+
+  /// No description provided for @framesGameFrameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Frame {number}'**
+  String framesGameFrameLabel(String number);
+
+  /// No description provided for @framesGameSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get framesGameSkipped;
+
+  /// No description provided for @framesGameAlreadyGuessed.
+  ///
+  /// In en, this message translates to:
+  /// **'Already guessed'**
+  String get framesGameAlreadyGuessed;
+
+  /// No description provided for @framesGameNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches'**
+  String get framesGameNoResults;
+
+  /// No description provided for @titleWordleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title Wordle'**
+  String get titleWordleTitle;
+
+  /// No description provided for @titleWordleIntroMovie.
+  ///
+  /// In en, this message translates to:
+  /// **'Guess today\'s movie title in 6 tries. Type letters only — word breaks are already shown.'**
+  String get titleWordleIntroMovie;
+
+  /// No description provided for @titleWordleIntroTv.
+  ///
+  /// In en, this message translates to:
+  /// **'Guess today\'s TV show title in 6 tries. Type letters only — word breaks are already shown.'**
+  String get titleWordleIntroTv;
+
+  /// No description provided for @titleWordleLetterCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} letters'**
+  String titleWordleLetterCount(String count);
+
+  /// No description provided for @titleWordleNotEnoughLetters.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough letters'**
+  String get titleWordleNotEnoughLetters;
+
+  /// No description provided for @titleWordleSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit guess'**
+  String get titleWordleSubmit;
+
+  /// No description provided for @titleWordleDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete letter'**
+  String get titleWordleDelete;
 }
 
 class _AppLocalizationsDelegate

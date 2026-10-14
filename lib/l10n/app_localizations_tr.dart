@@ -2289,4 +2289,172 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get gamesHubTitleWordleSubtitle =>
       'Film ya da dizi adını Wordle usulü tahmin et';
+
+  @override
+  String get higherLowerTitle => 'Yüksek mi Düşük mü';
+
+  @override
+  String get higherLowerIntro =>
+      'Sıradaki yapım daha yüksek mi, daha düşük mü? Doğru bildikçe skorun artsın.';
+
+  @override
+  String get higherLowerPickCategory => 'Bir kategori seç';
+
+  @override
+  String get higherLowerCategoryMovieRating => 'Film puanı';
+
+  @override
+  String get higherLowerCategoryBoxOffice => 'Gişe hasılatı';
+
+  @override
+  String get higherLowerCategoryTvRating => 'Dizi puanı';
+
+  @override
+  String get higherLowerCategoryRatingDesc => 'TMDB kullanıcı puanı';
+
+  @override
+  String get higherLowerCategoryBoxOfficeDesc => 'Dünya geneli hasılat';
+
+  @override
+  String higherLowerBest(int score) {
+    return 'En iyi: $score';
+  }
+
+  @override
+  String higherLowerScore(int score) {
+    return 'Skor: $score';
+  }
+
+  @override
+  String higherLowerPrompt(String title) {
+    return '$title ile kıyasla daha yüksek mi, düşük mü?';
+  }
+
+  @override
+  String get higherLowerHigher => 'Daha yüksek';
+
+  @override
+  String get higherLowerLower => 'Daha düşük';
+
+  @override
+  String get higherLowerCorrect => 'Doğru!';
+
+  @override
+  String get higherLowerWrong => 'Yanlış!';
+
+  @override
+  String get higherLowerGameOver => 'Oyun bitti';
+
+  @override
+  String higherLowerFinalScore(int score) {
+    return 'Skorun: $score';
+  }
+
+  @override
+  String get higherLowerNewBest => 'Yeni kişisel rekor!';
+
+  @override
+  String get higherLowerPlayAgain => 'Tekrar oyna';
+
+  @override
+  String get higherLowerChangeCategory => 'Kategori değiştir';
+
+  @override
+  String get higherLowerTiesNote => 'Eşitlikler doğru sayılır.';
+
+  @override
+  String get plotGameTitle => 'Konu';
+
+  @override
+  String get plotGameModeMovie => 'Film';
+
+  @override
+  String get plotGameModeTv => 'Dizi';
+
+  @override
+  String get plotGameIntro =>
+      'Bugünün yapımını konusundan tahmin et. İsimler gizli — her yanlış tahmin ya da pas yeni bir ipucu açar.';
+
+  @override
+  String get plotGameSearchMovieHint => 'Filmi tahmin et…';
+
+  @override
+  String get plotGameSearchTvHint => 'Diziyi tahmin et…';
+
+  @override
+  String get plotGameSkip => 'Pas geç';
+
+  @override
+  String get plotGameSkipped => 'Pas geçildi';
+
+  @override
+  String plotGameAttemptsLeft(int count) {
+    return '$count tahmin hakkın kaldı';
+  }
+
+  @override
+  String get plotGameCluePlot => 'Konu';
+
+  @override
+  String get plotGameClueMorePlot => 'Konunun devamı';
+
+  @override
+  String get plotGameClueYear => 'Yıl';
+
+  @override
+  String get plotGameClueGenres => 'Türler';
+
+  @override
+  String get plotGameClueActor => 'Başrol oyuncusu';
+
+  @override
+  String get plotGameClueSecondActor => 'Diğer oyuncu';
+
+  @override
+  String get plotGameClueTagline => 'Slogan';
+
+  @override
+  String get plotGameNextClueLocked => 'Yanlış bir tahminden sonra açılır';
+
+  @override
+  String get plotGameAlreadyGuessed => 'Zaten tahmin ettin';
+
+  @override
+  String get plotGameNoResults => 'Sonuç yok';
+
+  @override
+  String get plotGameWinTitle => 'Bildin!';
+
+  @override
+  String get plotGameLoseTitle => 'Tahmin hakkın bitti';
+
+  @override
+  String plotGameSolvedIn(int count, int max) {
+    return '$count/$max tahminde bildin';
+  }
+
+  @override
+  String get plotGameViewDetails => 'Detayları gör';
+
+  @override
+  String get plotGameShare => 'Sonucu paylaş';
+
+  @override
+  String get plotGameComeBack => 'Yeni konu için yarın tekrar gel.';
+
+  @override
+  String get plotGameSignInPrompt =>
+      'Günlük Konu oyununu oynamak için giriş yap.';
+
+  @override
+  String get plotGameNoPuzzle =>
+      'Bugünün bulmacası henüz hazır değil — daha sonra tekrar bak.';
+
+  @override
+  String get gamesHubPlotSubtitle =>
+      'Filmi ya da diziyi gizlenmiş konusundan tahmin et';
+
+  @override
+  String get gamesHubHigherLowerSubtitle =>
+      'Hangisinin puanı daha yüksek? Sonsuz tur';
 }

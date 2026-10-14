@@ -3,6 +3,8 @@ import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/screens/actor_guess_screen.dart';
 import 'package:watch_verse/screens/daily_game_screen.dart';
 import 'package:watch_verse/screens/games/frames_game_screen.dart';
+import 'package:watch_verse/screens/games/higher_lower_screen.dart';
+import 'package:watch_verse/screens/games/plot_guess_screen.dart';
 import 'package:watch_verse/screens/games/title_wordle_screen.dart';
 
 /// One card on the Games hub (`GamesHubScreen`). Strings are functions of
@@ -48,9 +50,21 @@ final List<GameEntry> gameRegistry = [
     builder: (_) => const TitleWordleScreen(),
   ),
   GameEntry(
+    icon: Icons.description_rounded,
+    title: (l10n) => l10n.plotGameTitle,
+    subtitle: (l10n) => l10n.gamesHubPlotSubtitle,
+    builder: (_) => const PlotGuessScreen(),
+  ),
+  GameEntry(
     icon: Icons.face_retouching_natural_rounded,
     title: (l10n) => l10n.actorGuessTitle,
     subtitle: (l10n) => l10n.actorGuessHubSubtitle,
     builder: (_) => const ActorGuessScreen(),
+  ),
+  GameEntry(
+    icon: Icons.swap_vert_rounded,
+    title: (l10n) => l10n.higherLowerTitle,
+    subtitle: (l10n) => l10n.gamesHubHigherLowerSubtitle,
+    builder: (_) => const HigherLowerScreen(),
   ),
 ];

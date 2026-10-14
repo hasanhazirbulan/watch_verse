@@ -4079,6 +4079,306 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Guess the movie or show title, Wordle style'**
   String get gamesHubTitleWordleSubtitle;
+
+  /// No description provided for @higherLowerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher or Lower'**
+  String get higherLowerTitle;
+
+  /// No description provided for @higherLowerIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the next title higher or lower? Keep guessing right to build your score.'**
+  String get higherLowerIntro;
+
+  /// No description provided for @higherLowerPickCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a category'**
+  String get higherLowerPickCategory;
+
+  /// No description provided for @higherLowerCategoryMovieRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Movie rating'**
+  String get higherLowerCategoryMovieRating;
+
+  /// No description provided for @higherLowerCategoryBoxOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'Box office'**
+  String get higherLowerCategoryBoxOffice;
+
+  /// No description provided for @higherLowerCategoryTvRating.
+  ///
+  /// In en, this message translates to:
+  /// **'TV show rating'**
+  String get higherLowerCategoryTvRating;
+
+  /// No description provided for @higherLowerCategoryRatingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'TMDB user score'**
+  String get higherLowerCategoryRatingDesc;
+
+  /// No description provided for @higherLowerCategoryBoxOfficeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Worldwide gross'**
+  String get higherLowerCategoryBoxOfficeDesc;
+
+  /// No description provided for @higherLowerBest.
+  ///
+  /// In en, this message translates to:
+  /// **'Best: {score}'**
+  String higherLowerBest(int score);
+
+  /// No description provided for @higherLowerScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Score: {score}'**
+  String higherLowerScore(int score);
+
+  /// No description provided for @higherLowerPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher or lower than {title}?'**
+  String higherLowerPrompt(String title);
+
+  /// No description provided for @higherLowerHigher.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher'**
+  String get higherLowerHigher;
+
+  /// No description provided for @higherLowerLower.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower'**
+  String get higherLowerLower;
+
+  /// No description provided for @higherLowerCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct!'**
+  String get higherLowerCorrect;
+
+  /// No description provided for @higherLowerWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong!'**
+  String get higherLowerWrong;
+
+  /// No description provided for @higherLowerGameOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Game over'**
+  String get higherLowerGameOver;
+
+  /// No description provided for @higherLowerFinalScore.
+  ///
+  /// In en, this message translates to:
+  /// **'You scored {score}'**
+  String higherLowerFinalScore(int score);
+
+  /// No description provided for @higherLowerNewBest.
+  ///
+  /// In en, this message translates to:
+  /// **'New personal best!'**
+  String get higherLowerNewBest;
+
+  /// No description provided for @higherLowerPlayAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Play again'**
+  String get higherLowerPlayAgain;
+
+  /// No description provided for @higherLowerChangeCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Change category'**
+  String get higherLowerChangeCategory;
+
+  /// No description provided for @higherLowerTiesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Ties count as correct.'**
+  String get higherLowerTiesNote;
+
+  /// No description provided for @plotGameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plot'**
+  String get plotGameTitle;
+
+  /// No description provided for @plotGameModeMovie.
+  ///
+  /// In en, this message translates to:
+  /// **'Movie'**
+  String get plotGameModeMovie;
+
+  /// No description provided for @plotGameModeTv.
+  ///
+  /// In en, this message translates to:
+  /// **'TV'**
+  String get plotGameModeTv;
+
+  /// No description provided for @plotGameIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Guess today\'s title from its plot. Names are hidden — every miss or skip reveals another clue.'**
+  String get plotGameIntro;
+
+  /// No description provided for @plotGameSearchMovieHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Guess the movie…'**
+  String get plotGameSearchMovieHint;
+
+  /// No description provided for @plotGameSearchTvHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Guess the show…'**
+  String get plotGameSearchTvHint;
+
+  /// No description provided for @plotGameSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get plotGameSkip;
+
+  /// No description provided for @plotGameSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get plotGameSkipped;
+
+  /// No description provided for @plotGameAttemptsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} guesses left'**
+  String plotGameAttemptsLeft(int count);
+
+  /// No description provided for @plotGameCluePlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Plot'**
+  String get plotGameCluePlot;
+
+  /// No description provided for @plotGameClueMorePlot.
+  ///
+  /// In en, this message translates to:
+  /// **'More plot'**
+  String get plotGameClueMorePlot;
+
+  /// No description provided for @plotGameClueYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get plotGameClueYear;
+
+  /// No description provided for @plotGameClueGenres.
+  ///
+  /// In en, this message translates to:
+  /// **'Genres'**
+  String get plotGameClueGenres;
+
+  /// No description provided for @plotGameClueActor.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-billed actor'**
+  String get plotGameClueActor;
+
+  /// No description provided for @plotGameClueSecondActor.
+  ///
+  /// In en, this message translates to:
+  /// **'Also starring'**
+  String get plotGameClueSecondActor;
+
+  /// No description provided for @plotGameClueTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Tagline'**
+  String get plotGameClueTagline;
+
+  /// No description provided for @plotGameNextClueLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocks after a miss'**
+  String get plotGameNextClueLocked;
+
+  /// No description provided for @plotGameAlreadyGuessed.
+  ///
+  /// In en, this message translates to:
+  /// **'Already guessed'**
+  String get plotGameAlreadyGuessed;
+
+  /// No description provided for @plotGameNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches'**
+  String get plotGameNoResults;
+
+  /// No description provided for @plotGameWinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You got it!'**
+  String get plotGameWinTitle;
+
+  /// No description provided for @plotGameLoseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of guesses'**
+  String get plotGameLoseTitle;
+
+  /// No description provided for @plotGameSolvedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Solved in {count}/{max}'**
+  String plotGameSolvedIn(int count, int max);
+
+  /// No description provided for @plotGameViewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get plotGameViewDetails;
+
+  /// No description provided for @plotGameShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share result'**
+  String get plotGameShare;
+
+  /// No description provided for @plotGameComeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Come back tomorrow for a new plot.'**
+  String get plotGameComeBack;
+
+  /// No description provided for @plotGameSignInPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to play the daily Plot game.'**
+  String get plotGameSignInPrompt;
+
+  /// No description provided for @plotGameNoPuzzle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s puzzle isn\'t available yet — check back soon.'**
+  String get plotGameNoPuzzle;
+
+  /// No description provided for @gamesHubPlotSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guess the movie or show from its redacted plot'**
+  String get gamesHubPlotSubtitle;
+
+  /// No description provided for @gamesHubHigherLowerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Which one is rated higher? Endless rounds'**
+  String get gamesHubHigherLowerSubtitle;
 }
 
 class _AppLocalizationsDelegate

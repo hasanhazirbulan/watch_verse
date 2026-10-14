@@ -1498,5 +1498,100 @@
   "titleWordleSubmit": "Submit guess",
   "titleWordleDelete": "Delete letter",
   "gamesHubFramesSubtitle": "Guess the movie or show from its stills",
-  "gamesHubTitleWordleSubtitle": "Guess the movie or show title, Wordle style"
+  "gamesHubTitleWordleSubtitle": "Guess the movie or show title, Wordle style",
+  "higherLowerTitle": "Higher or Lower",
+  "higherLowerIntro": "Is the next title higher or lower? Keep guessing right to build your score.",
+  "higherLowerPickCategory": "Pick a category",
+  "higherLowerCategoryMovieRating": "Movie rating",
+  "higherLowerCategoryBoxOffice": "Box office",
+  "higherLowerCategoryTvRating": "TV show rating",
+  "higherLowerCategoryRatingDesc": "TMDB user score",
+  "higherLowerCategoryBoxOfficeDesc": "Worldwide gross",
+  "higherLowerBest": "Best: {score}",
+  "@higherLowerBest": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "higherLowerScore": "Score: {score}",
+  "@higherLowerScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "higherLowerPrompt": "Higher or lower than {title}?",
+  "@higherLowerPrompt": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "higherLowerHigher": "Higher",
+  "higherLowerLower": "Lower",
+  "higherLowerCorrect": "Correct!",
+  "higherLowerWrong": "Wrong!",
+  "higherLowerGameOver": "Game over",
+  "higherLowerFinalScore": "You scored {score}",
+  "@higherLowerFinalScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "higherLowerNewBest": "New personal best!",
+  "higherLowerPlayAgain": "Play again",
+  "higherLowerChangeCategory": "Change category",
+  "higherLowerTiesNote": "Ties count as correct.",
+  "plotGameTitle": "Plot",
+  "plotGameModeMovie": "Movie",
+  "plotGameModeTv": "TV",
+  "plotGameIntro": "Guess today's title from its plot. Names are hidden — every miss or skip reveals another clue.",
+  "plotGameSearchMovieHint": "Guess the movie…",
+  "plotGameSearchTvHint": "Guess the show…",
+  "plotGameSkip": "Skip",
+  "plotGameSkipped": "Skipped",
+  "plotGameAttemptsLeft": "{count} guesses left",
+  "@plotGameAttemptsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "plotGameCluePlot": "Plot",
+  "plotGameClueMorePlot": "More plot",
+  "plotGameClueYear": "Year",
+  "plotGameClueGenres": "Genres",
+  "plotGameClueActor": "Top-billed actor",
+  "plotGameClueSecondActor": "Also starring",
+  "plotGameClueTagline": "Tagline",
+  "plotGameNextClueLocked": "Unlocks after a miss",
+  "plotGameAlreadyGuessed": "Already guessed",
+  "plotGameNoResults": "No matches",
+  "plotGameWinTitle": "You got it!",
+  "plotGameLoseTitle": "Out of guesses",
+  "plotGameSolvedIn": "Solved in {count}/{max}",
+  "@plotGameSolvedIn": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "plotGameViewDetails": "View details",
+  "plotGameShare": "Share result",
+  "plotGameComeBack": "Come back tomorrow for a new plot.",
+  "plotGameSignInPrompt": "Sign in to play the daily Plot game.",
+  "plotGameNoPuzzle": "Today's puzzle isn't available yet — check back soon.",
+  "gamesHubPlotSubtitle": "Guess the movie or show from its redacted plot",
+  "gamesHubHigherLowerSubtitle": "Which one is rated higher? Endless rounds"
 }

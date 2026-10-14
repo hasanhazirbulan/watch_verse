@@ -2281,4 +2281,171 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get gamesHubTitleWordleSubtitle =>
       'Guess the movie or show title, Wordle style';
+
+  @override
+  String get higherLowerTitle => 'Higher or Lower';
+
+  @override
+  String get higherLowerIntro =>
+      'Is the next title higher or lower? Keep guessing right to build your score.';
+
+  @override
+  String get higherLowerPickCategory => 'Pick a category';
+
+  @override
+  String get higherLowerCategoryMovieRating => 'Movie rating';
+
+  @override
+  String get higherLowerCategoryBoxOffice => 'Box office';
+
+  @override
+  String get higherLowerCategoryTvRating => 'TV show rating';
+
+  @override
+  String get higherLowerCategoryRatingDesc => 'TMDB user score';
+
+  @override
+  String get higherLowerCategoryBoxOfficeDesc => 'Worldwide gross';
+
+  @override
+  String higherLowerBest(int score) {
+    return 'Best: $score';
+  }
+
+  @override
+  String higherLowerScore(int score) {
+    return 'Score: $score';
+  }
+
+  @override
+  String higherLowerPrompt(String title) {
+    return 'Higher or lower than $title?';
+  }
+
+  @override
+  String get higherLowerHigher => 'Higher';
+
+  @override
+  String get higherLowerLower => 'Lower';
+
+  @override
+  String get higherLowerCorrect => 'Correct!';
+
+  @override
+  String get higherLowerWrong => 'Wrong!';
+
+  @override
+  String get higherLowerGameOver => 'Game over';
+
+  @override
+  String higherLowerFinalScore(int score) {
+    return 'You scored $score';
+  }
+
+  @override
+  String get higherLowerNewBest => 'New personal best!';
+
+  @override
+  String get higherLowerPlayAgain => 'Play again';
+
+  @override
+  String get higherLowerChangeCategory => 'Change category';
+
+  @override
+  String get higherLowerTiesNote => 'Ties count as correct.';
+
+  @override
+  String get plotGameTitle => 'Plot';
+
+  @override
+  String get plotGameModeMovie => 'Movie';
+
+  @override
+  String get plotGameModeTv => 'TV';
+
+  @override
+  String get plotGameIntro =>
+      'Guess today\'s title from its plot. Names are hidden — every miss or skip reveals another clue.';
+
+  @override
+  String get plotGameSearchMovieHint => 'Guess the movie…';
+
+  @override
+  String get plotGameSearchTvHint => 'Guess the show…';
+
+  @override
+  String get plotGameSkip => 'Skip';
+
+  @override
+  String get plotGameSkipped => 'Skipped';
+
+  @override
+  String plotGameAttemptsLeft(int count) {
+    return '$count guesses left';
+  }
+
+  @override
+  String get plotGameCluePlot => 'Plot';
+
+  @override
+  String get plotGameClueMorePlot => 'More plot';
+
+  @override
+  String get plotGameClueYear => 'Year';
+
+  @override
+  String get plotGameClueGenres => 'Genres';
+
+  @override
+  String get plotGameClueActor => 'Top-billed actor';
+
+  @override
+  String get plotGameClueSecondActor => 'Also starring';
+
+  @override
+  String get plotGameClueTagline => 'Tagline';
+
+  @override
+  String get plotGameNextClueLocked => 'Unlocks after a miss';
+
+  @override
+  String get plotGameAlreadyGuessed => 'Already guessed';
+
+  @override
+  String get plotGameNoResults => 'No matches';
+
+  @override
+  String get plotGameWinTitle => 'You got it!';
+
+  @override
+  String get plotGameLoseTitle => 'Out of guesses';
+
+  @override
+  String plotGameSolvedIn(int count, int max) {
+    return 'Solved in $count/$max';
+  }
+
+  @override
+  String get plotGameViewDetails => 'View details';
+
+  @override
+  String get plotGameShare => 'Share result';
+
+  @override
+  String get plotGameComeBack => 'Come back tomorrow for a new plot.';
+
+  @override
+  String get plotGameSignInPrompt => 'Sign in to play the daily Plot game.';
+
+  @override
+  String get plotGameNoPuzzle =>
+      'Today\'s puzzle isn\'t available yet — check back soon.';
+
+  @override
+  String get gamesHubPlotSubtitle =>
+      'Guess the movie or show from its redacted plot';
+
+  @override
+  String get gamesHubHigherLowerSubtitle =>
+      'Which one is rated higher? Endless rounds';
 }

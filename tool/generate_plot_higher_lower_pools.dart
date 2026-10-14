@@ -23,12 +23,21 @@
 // plus the system word list (/usr/share/dict/words, if present): title
 // words and character names always go; other capitalized words go unless
 // they're everyday vocabulary or show up across many unrelated titles.
+//
+// Franchise giveaways ("Batman" in The Dark Knight Rises, "Gotham", "Jedi",
+// "the Avengers" in Civil War) are hidden via the title's TMDB collection
+// (other films' titles and top-billed characters) and the curated universes
+// in lib/services/games/plot_franchise_vocab.dart, which also pull in every
+// other title of the same universe ("Captain America: Civil War" in
+// Spider-Man: Homecoming). TMDB keywords only help detect the universe
+// ("marvel cinematic universe (mcu)"): they're too generic to redact by.
 
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:watch_verse/services/games/plot_franchise_vocab.dart';
 import 'package:watch_verse/services/games/plot_guess_logic.dart';
 
 const _seed = 20261014;
@@ -53,6 +62,9 @@ const _genericGroupThreshold = 6;
 /// Lower-case words used in at least this many overviews count as everyday
 /// vocabulary even when capitalized mid-sentence ("the Resistance").
 const _everydayMinDocs = 3;
+
+/// Characters taken from each *other* film in a title's collection.
+const _otherPartsBilling = 10;
 
 // TMDB TV genres that aren't scripted shows people would know by plot.
 const _excludedTvGenres = '10763|10764|10766|10767'; // news|reality|soap|talk
@@ -91,6 +103,11 @@ Future<void> main(List<String> args) async {
       {'append_to_response': 'credits'});
   final tvDetails = await _detailsFor(tvList.take(_tvDetailCount).toList(),
       (id) => '/tv/$id', {'append_to_response': 'aggregate_credits'});
+
+  stdout.writeln('Fetching keywords and collections…');
+  final movieKeywords = await _keywordsFor(movieDetails, isTv: false);
+  final tvKeywords = await _keywordsFor(tvDetails, isTv: true);
+  final collections = await _collectionsFor(movieDetails);
 
   // ------------------------------------------------------- Higher/Lower --
   Map<String, dynamic> hlItem(Map<String, dynamic> m, num value) => {
@@ -136,19 +153,61 @@ Future<void> main(List<String> args) async {
       '${hlRevenue.length} box office, ${hlTvRating.length} TV ratings');
 
   // --------------------------------------------------------------- Plot ---
+  final movieById = {for (final m in movieDetails) m['id']: m};
+  final tvById = {for (final m in tvDetails) m['id']: m};
+  final franchises = <String, _Franchise>{
+    for (final m in movieList)
+      'm${m['id']}': _franchiseOf(movieById[m['id']] ?? m,
+          isTv: false,
+          keywords: movieKeywords[m['id']] ?? const [],
+          collections: collections),
+    for (final m in tvList)
+      't${m['id']}': _franchiseOf(tvById[m['id']] ?? m,
+          isTv: true,
+          keywords: tvKeywords[m['id']] ?? const [],
+          collections: collections),
+  };
+  // Every title in a universe gives away the others: "Captain America: Civil
+  // War" in Spider-Man: Homecoming, "Rebels" in Andor.
+  final universeTitles = <String, Set<String>>{};
+  for (final f in franchises.values) {
+    for (final u in f.universes) {
+      universeTitles.putIfAbsent(u.key, () => {}).add(f.title);
+    }
+  }
+  for (final f in franchises.values) {
+    for (final u in f.universes) {
+      f.related.addAll(universeTitles[u.key]!.where((t) => t != f.title));
+    }
+  }
+  stdout.writeln('Universes: ${[
+    for (final e in universeTitles.entries) '${e.key} ${e.value.length}'
+  ].join(', ')}');
+  // Generic-word stats count each collection as one group (as before) …
   final redactor = _buildRedactor([
-    for (final m in movieList) (m, _movieGroup(m, movieDetails)),
-    for (final m in tvList) (m, 't${m['id']}'),
+    for (final m in movieList) (m, franchises['m${m['id']}']!.collectionGroup),
+    for (final m in tvList) (m, franchises['t${m['id']}']!.collectionGroup),
   ]);
+  // … while related titles' words are filtered with each universe as one
+  // group: "Avengers" (only Marvel) stays a giveaway, "Earth" / "World" /
+  // "America" (from "Earth's Mightiest Heroes", "The Dark World", "Captain
+  // America") are used by plenty of unrelated films and stay visible.
+  final universeGeneric = plotTitleWords(_genericCapitalized([
+    for (final m in movieList) (m, franchises['m${m['id']}']!.universeGroup),
+    for (final m in tvList) (m, franchises['t${m['id']}']!.universeGroup),
+  ]));
+  for (final f in franchises.values) {
+    f.finish(universeGeneric, redactor.everydayWords);
+  }
 
   final moviePuzzles = <Map<String, dynamic>>[];
   for (final m in movieDetails) {
-    final p = _plotPuzzle(redactor, m, isTv: false);
+    final p = _plotPuzzle(redactor, m, franchises['m${m['id']}']!, isTv: false);
     if (p != null) moviePuzzles.add(p);
   }
   final tvPuzzles = <Map<String, dynamic>>[];
   for (final m in tvDetails) {
-    final p = _plotPuzzle(redactor, m, isTv: true);
+    final p = _plotPuzzle(redactor, m, franchises['t${m['id']}']!, isTv: true);
     if (p != null) tvPuzzles.add(p);
   }
   final plotMovie = _pick(moviePuzzles, _plotMoviePoolSize, salt: 4);
@@ -175,31 +234,123 @@ Future<void> main(List<String> args) async {
 
 // ------------------------------------------------------------------ plot ---
 
-String _movieGroup(Map<String, dynamic> m, List<Map<String, dynamic>> details) {
-  final d = details.where((e) => e['id'] == m['id']).firstOrNull;
-  final coll = d?['belongs_to_collection'];
-  return coll is Map ? 'c${coll['id']}' : 'm${m['id']}';
+/// Per-title franchise context: giveaways beyond the title and the title's
+/// own credits.
+class _Franchise {
+  _Franchise({
+    required this.title,
+    required this.collectionGroup,
+    required this.universeGroup,
+    required this.universes,
+    required this.related,
+    required this.characters,
+  });
+  final String title;
+
+  /// The group the title counts as for generic-word stats: its collection
+  /// (or itself) / its universe (or collection, or itself).
+  final String collectionGroup;
+  final String universeGroup;
+
+  final List<PlotUniverse> universes;
+
+  /// Titles of the rest of its collection and universe ("Batman Begins").
+  final List<String> related;
+
+  /// Top-billed character credits from the rest of its collection.
+  final List<String> characters;
+
+  /// What `PlotRedactor.redact` gets as `franchise` / extra `names`.
+  late final ({List<String> words, List<String> phrases}) vocabulary;
+  late final Set<String> names;
+
+  void finish(Set<String> universeGeneric, Set<String> everydayWords) {
+    vocabulary = plotFranchiseVocabulary(
+        universes: universes, related: related, genericWords: universeGeneric);
+    // Other films' casts include walk-ons ("Secret Service Agent", "Ex-Deputy
+    // So & So"): keep only tokens that aren't everyday or generic words.
+    names = {
+      for (final n in plotNameTokens(characters))
+        if (!everydayWords.contains(n.toLowerCase()) &&
+            !universeGeneric.contains(n.toLowerCase()))
+          n,
+    };
+  }
+}
+
+_Franchise _franchiseOf(Map<String, dynamic> m,
+    {required bool isTv,
+    required List<String> keywords,
+    required Map<Object?, _Collection> collections}) {
+  final coll = m['belongs_to_collection'];
+  final collection = coll is Map ? collections[coll['id']] : null;
+  final others = [
+    for (final p in collection?.parts ?? const <_CollectionPart>[])
+      if (p.id != m['id']) p,
+  ];
+  final titles = [
+    (isTv ? m['name'] : m['title']) as String? ?? '',
+    (isTv ? m['original_name'] : m['original_title']) as String? ?? '',
+    if (collection != null) collection.name,
+  ];
+  final texts = [
+    (m['overview'] as String?) ?? '',
+    (m['tagline'] as String?) ?? '',
+  ];
+  final universes = plotUniversesFor(
+      [...titles, for (final p in others) p.title, ...keywords],
+      texts: texts);
+  final collectionGroup =
+      coll is Map ? 'c${coll['id']}' : '${isTv ? 't' : 'm'}${m['id']}';
+  return _Franchise(
+    title: titles.first,
+    collectionGroup: collectionGroup,
+    universeGroup:
+        universes.isNotEmpty ? 'u${universes.first.key}' : collectionGroup,
+    universes: universes,
+    related: [for (final p in others) p.title],
+    // Characters from the rest of the collection ("Bruce Wayne / Batman" in
+    // Batman Begins when The Dark Knight Rises only credits "Bruce Wayne").
+    characters: [
+      for (final p in others) ...p.characters.take(_otherPartsBilling),
+    ],
+  );
+}
+
+final _upper = RegExp(r'^\p{Lu}', unicode: true);
+
+/// An overview's words, hyphenated ones split, possessive "'s" dropped.
+Iterable<String> _overviewWords(Map<String, dynamic> m) sync* {
+  final word = RegExp(r"[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*", unicode: true);
+  for (final match in word.allMatches((m['overview'] as String?) ?? '')) {
+    for (final w in match.group(0)!.split('-')) {
+      final base = w.replaceAll(RegExp(r"['’]s$"), '');
+      if (base.isNotEmpty) yield base;
+    }
+  }
+}
+
+/// Capitalized words used across at least [_genericGroupThreshold] groups.
+Set<String> _genericCapitalized(List<(Map<String, dynamic>, String)> corpus) {
+  final capGroups = <String, Set<String>>{};
+  for (final (m, group) in corpus) {
+    for (final w in _overviewWords(m)) {
+      if (_upper.hasMatch(w)) capGroups.putIfAbsent(w, () => {}).add(group);
+    }
+  }
+  return {
+    for (final e in capGroups.entries)
+      if (e.value.length >= _genericGroupThreshold) e.key,
+  };
 }
 
 PlotRedactor _buildRedactor(List<(Map<String, dynamic>, String)> corpus) {
-  final word = RegExp(r"[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*", unicode: true);
-  final upper = RegExp(r'^\p{Lu}', unicode: true);
-  final capGroups = <String, Set<String>>{};
   final lowerDocs = <String, int>{};
-  for (final (m, group) in corpus) {
-    final text = (m['overview'] as String?) ?? '';
-    final lowerHere = <String>{};
-    for (final match in word.allMatches(text)) {
-      for (var w in match.group(0)!.split('-')) {
-        w = w.replaceAll(RegExp(r"['’]s$"), '');
-        if (w.isEmpty) continue;
-        if (upper.hasMatch(w)) {
-          capGroups.putIfAbsent(w, () => {}).add(group);
-        } else {
-          lowerHere.add(w);
-        }
-      }
-    }
+  for (final (m, _) in corpus) {
+    final lowerHere = <String>{
+      for (final w in _overviewWords(m))
+        if (!_upper.hasMatch(w)) w,
+    };
     for (final w in lowerHere) {
       lowerDocs[w] = (lowerDocs[w] ?? 0) + 1;
     }
@@ -215,10 +366,7 @@ PlotRedactor _buildRedactor(List<(Map<String, dynamic>, String)> corpus) {
         'proper nouns will only be caught via credits/title words');
   }
   return PlotRedactor(
-    genericCapitalized: {
-      for (final e in capGroups.entries)
-        if (e.value.length >= _genericGroupThreshold) e.key,
-    },
+    genericCapitalized: _genericCapitalized(corpus),
     everydayWords: {
       for (final e in lowerDocs.entries)
         if (e.value >= _everydayMinDocs) e.key,
@@ -227,9 +375,10 @@ PlotRedactor _buildRedactor(List<(Map<String, dynamic>, String)> corpus) {
   );
 }
 
-Map<String, dynamic>? _plotPuzzle(PlotRedactor redactor, Map<String, dynamic> m,
+Map<String, dynamic>? _plotPuzzle(
+    PlotRedactor redactor, Map<String, dynamic> m, _Franchise franchise,
     {required bool isTv}) {
-  final overview = ((m['overview'] as String?) ?? '').trim();
+  final overview = _undotAcronyms(((m['overview'] as String?) ?? '').trim());
   final title = (isTv ? m['name'] : m['title']) as String? ?? '';
   final year = _year(isTv ? m['first_air_date'] : m['release_date']);
   final poster = (m['poster_path'] as String?) ?? '';
@@ -269,7 +418,7 @@ Map<String, dynamic>? _plotPuzzle(PlotRedactor redactor, Map<String, dynamic> m,
   // Documentaries credit people as themselves ("Himself") — then the
   // person's own name is the giveaway.
   final selfRe = RegExp(r'\b(Himself|Herself|Themselves|Self)\b');
-  final names = plotNameTokens([
+  final names = {...franchise.names, ...plotNameTokens([
     ...characters,
     for (final c in cast.take(10))
       if (selfRe.hasMatch(isTv
@@ -278,11 +427,19 @@ Map<String, dynamic>? _plotPuzzle(PlotRedactor redactor, Map<String, dynamic> m,
               .join(' ')
           : (c['character'] as String? ?? '')))
         c['name'] as String? ?? '',
-  ]);
+  ])};
 
-  final redacted = redactor.redact(overview, titles: titles, names: names);
-  final tagline = redactor.redact(((m['tagline'] as String?) ?? '').trim(),
-      titles: titles, names: names);
+  final redacted = redactor.redact(overview,
+      titles: titles,
+      names: names,
+      franchise: franchise.vocabulary.words,
+      franchisePhrases: franchise.vocabulary.phrases);
+  final tagline = redactor.redact(
+      _undotAcronyms(((m['tagline'] as String?) ?? '').trim()),
+      titles: titles,
+      names: names,
+      franchise: franchise.vocabulary.words,
+      franchisePhrases: franchise.vocabulary.phrases);
 
   // Reject puzzles that redaction gutted: too many blocks to be fair.
   final words = RegExp(r'\S+').allMatches(redacted).length;
@@ -302,6 +459,13 @@ Map<String, dynamic>? _plotPuzzle(PlotRedactor redactor, Map<String, dynamic> m,
     'posterPath': poster,
   };
 }
+
+/// "S.H.I.E.L.D." → "SHIELD", so the redactor sees one word it can hide
+/// (it skips single letters). Keeps a sentence-ending dot.
+String _undotAcronyms(String text) => text.replaceAllMapped(
+    RegExp(r'\b((?:\p{Lu}\.){5,})(?=(\s+\p{Lu}|\s*$)?)', unicode: true),
+    (m) =>
+        m[1]!.replaceAll('.', '') + (m[2] != null ? '.' : ''));
 
 // ----------------------------------------------------------------- utils ---
 
@@ -451,6 +615,72 @@ Future<List<Map<String, dynamic>>> _detailsFor(
     out[i] = await _get(path(items[i]['id']), params);
   });
   return out.whereType<Map<String, dynamic>>().toList();
+}
+
+/// TMDB keyword names per title id (lower-case, e.g. "gotham city").
+Future<Map<Object?, List<String>>> _keywordsFor(
+    List<Map<String, dynamic>> details,
+    {required bool isTv}) async {
+  final out = <Object?, List<String>>{};
+  await _parallel(details, (m) async {
+    final id = m['id'];
+    final data = await _get('/${isTv ? 'tv' : 'movie'}/$id/keywords', {});
+    out[id] = [
+      for (final k in ((data[isTv ? 'results' : 'keywords'] as List?) ??
+          const []))
+        ((k['name'] as String?) ?? '').toLowerCase(),
+    ];
+  });
+  return out;
+}
+
+/// Every collection the movies belong to, with its parts' titles and the
+/// top-billed character names of each part (credits fetched only for parts
+/// that aren't already among [details]).
+Future<Map<Object?, _Collection>> _collectionsFor(
+    List<Map<String, dynamic>> details) async {
+  final byId = {for (final m in details) m['id']: m};
+  final ids = {
+    for (final m in details)
+      if (m['belongs_to_collection'] is Map) m['belongs_to_collection']['id'],
+  }.toList();
+  final out = <Object?, _Collection>{};
+  await _parallel(ids, (cid) async {
+    final data = await _get('/collection/$cid', {});
+    final parts = <_CollectionPart>[];
+    for (final p in ((data['parts'] as List?) ?? const [])
+        .cast<Map<String, dynamic>>()) {
+      final pid = p['id'];
+      final title = (p['title'] as String?) ?? '';
+      if (title.isEmpty) continue;
+      // Unreleased/announced parts have no credits worth fetching.
+      final released = ((p['release_date'] as String?) ?? '').isNotEmpty;
+      var cast = byId[pid]?['credits']?['cast'] as List?;
+      if (cast == null && released) {
+        cast = (await _get('/movie/$pid/credits', {}))['cast'] as List?;
+      }
+      final sorted = ((cast ?? const []).cast<Map<String, dynamic>>().toList()
+        ..sort((a, b) => (a['order'] as num).compareTo(b['order'] as num)));
+      parts.add(_CollectionPart(pid, title, [
+        for (final c in sorted.take(15)) (c['character'] as String?) ?? '',
+      ]));
+    }
+    out[cid] = _Collection((data['name'] as String?) ?? '', parts);
+  });
+  return out;
+}
+
+class _Collection {
+  _Collection(this.name, this.parts);
+  final String name;
+  final List<_CollectionPart> parts;
+}
+
+class _CollectionPart {
+  _CollectionPart(this.id, this.title, this.characters);
+  final Object? id;
+  final String title;
+  final List<String> characters;
 }
 
 Future<void> _parallel<T>(List<T> jobs, Future<void> Function(T) worker,

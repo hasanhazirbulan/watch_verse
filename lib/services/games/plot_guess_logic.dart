@@ -73,6 +73,7 @@ const _roleWords = {
 
 final _wordRe = RegExp(r"[\p{L}\p{N}]+(?:['’\-][\p{L}\p{N}]+)*", unicode: true);
 final _upperStart = RegExp(r'^\p{Lu}', unicode: true);
+final _wordChar = RegExp(r'[\p{L}\p{N}]', unicode: true);
 final _possessive = RegExp(r"['’]s$", caseSensitive: false);
 // Gap between two redacted words that still reads as one name
 // ("Harry Potter", "Spider - Man", "Bonnie & Clyde").
@@ -128,8 +129,8 @@ Set<String> plotNameTokens(Iterable<String> characters) {
 }
 
 /// Hides the giveaways in a TMDB overview: the title's words, character
-/// names, and capitalized proper nouns (places, organizations, made-up
-/// words) that aren't everyday vocabulary.
+/// names, franchise/universe words, and capitalized proper nouns (places,
+/// organizations, made-up words) that aren't everyday vocabulary.
 ///
 /// The vocabulary sets come from the pool generator, which builds them from
 /// a few thousand overviews plus a system dictionary; the defaults (empty)
@@ -155,12 +156,26 @@ class PlotRedactor {
   /// means sentence-initial words are only hidden for title/name matches.
   final Set<String> dictionaryWords;
 
+  /// [titles] hide their words in any case. [franchise] — the franchise's
+  /// other titles and universe terms ("Batman Begins", "Gotham", "Jedi") —
+  /// hides only *capitalized* uses of its words, even when they'd otherwise
+  /// pass as generic ("the Avengers", "Gotham City", "the Galactic Empire"),
+  /// so "a new hope" in an unrelated sense stays readable. A sentence-initial
+  /// franchise word that is also everyday vocabulary ("Force", "Empire") is
+  /// kept, since the capital there says nothing.
+  ///
+  /// [franchisePhrases] ("Captain America: Civil War", "Galactic Empire")
+  /// are hidden wherever they appear verbatim (case-sensitive), even when
+  /// every word in them is ordinary.
   String redact(
     String text, {
     Iterable<String> titles = const [],
     Iterable<String> names = const [],
+    Iterable<String> franchise = const [],
+    Iterable<String> franchisePhrases = const [],
   }) {
     final titleWords = plotTitleWords(titles);
+    final franchiseWords = plotTitleWords(franchise);
     final nameSet = names is Set<String> ? names : names.toSet();
 
     final tokens = <_Token>[];
@@ -176,9 +191,11 @@ class PlotRedactor {
         base: base,
         suffix: possessive == null ? '' : token.substring(possessive.start),
         sentenceStart: sentenceStart,
-        hide: _shouldHide(base, sentenceStart, titleWords, nameSet),
+        hide: _shouldHide(
+            base, sentenceStart, titleWords, franchiseWords, nameSet),
       ));
     }
+    _hidePhrases(text, tokens, franchisePhrases);
 
     // A capitalized word right next to a hidden one is almost always the
     // rest of the same name ("Blade Runner Rick Deckard", "Captain Kirk",
@@ -230,6 +247,27 @@ class PlotRedactor {
     return out.toString();
   }
 
+  static void _hidePhrases(
+      String text, List<_Token> tokens, Iterable<String> phrases) {
+    if (tokens.isEmpty) return;
+    final plain = text.replaceAll('’', "'");
+    for (final raw in phrases) {
+      final phrase = raw.trim().replaceAll('’', "'");
+      if (phrase.isEmpty) continue;
+      for (var i = plain.indexOf(phrase); i >= 0;
+          i = plain.indexOf(phrase, i + 1)) {
+        final end = i + phrase.length;
+        final boundedBefore = i == 0 || !_wordChar.hasMatch(plain[i - 1]);
+        final boundedAfter =
+            end >= plain.length || !_wordChar.hasMatch(plain[end]);
+        if (!boundedBefore || !boundedAfter) continue;
+        for (final t in tokens) {
+          if (t.start >= i && t.end <= end + 2) t.hide = true;
+        }
+      }
+    }
+  }
+
   static bool _isNameLike(String base) =>
       base.length >= 2 &&
       _upperStart.hasMatch(base) &&
@@ -238,22 +276,37 @@ class PlotRedactor {
       base != base.toUpperCase();
 
   bool _shouldHide(String base, bool sentenceStart, Set<String> titleWords,
-      Set<String> names) {
+      Set<String> franchiseWords, Set<String> names) {
     final parts = base.split('-');
     if (parts.length > 1) {
       // "Spider-Man": hide the whole compound if any part is a giveaway, but
       // don't treat an ordinary lower-case compound as a proper noun.
-      return parts.any((p) =>
-          p.isNotEmpty &&
-          (_isTitleWord(p, titleWords) ||
-              names.contains(p) ||
-              (_upperStart.hasMatch(p) &&
-                  _isUnknownProperNoun(p, sentenceStart && p == parts.first))));
+      return parts.any((p) {
+        if (p.isEmpty) return false;
+        final first = sentenceStart && p == parts.first;
+        return _isTitleWord(p, titleWords) ||
+            names.contains(p) ||
+            _isFranchiseWord(p, first, franchiseWords) ||
+            (_upperStart.hasMatch(p) && _isUnknownProperNoun(p, first));
+      });
     }
     if (_isTitleWord(base, titleWords)) return true;
+    if (_isFranchiseWord(base, sentenceStart, franchiseWords)) return true;
     if (!_upperStart.hasMatch(base)) return false;
     if (names.contains(base)) return true;
     return _isUnknownProperNoun(base, sentenceStart);
+  }
+
+  bool _isFranchiseWord(
+      String word, bool sentenceStart, Set<String> franchiseWords) {
+    if (franchiseWords.isEmpty || word.length < 2) return false;
+    // Capitalized, or a number like "007".
+    if (!RegExp(r'^[\p{Lu}\p{N}]', unicode: true).hasMatch(word) ||
+        _alwaysKeep.contains(word)) {
+      return false;
+    }
+    if (!franchiseWords.contains(_normalizeWord(word))) return false;
+    return !(sentenceStart && everydayWords.contains(word.toLowerCase()));
   }
 
   bool _isTitleWord(String word, Set<String> titleWords) {

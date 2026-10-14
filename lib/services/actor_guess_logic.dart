@@ -355,28 +355,3 @@ String actorGuessShareText({
       : 'X/$actorGuessMaxAttempts';
   return 'WatchVerse · $gameTitle · $dateKey\n$squares $score';
 }
-
-/// Turkish names for the birth countries in the bundled pool (stored in
-/// English by `tool/actor_guess_build_pool.js`). Unknown names and other
-/// locales fall through unchanged.
-const _countryNamesTr = {
-  'USA': 'ABD', 'UK': 'Birleşik Krallık', 'Canada': 'Kanada',
-  'Australia': 'Avustralya', 'Ireland': 'İrlanda', 'France': 'Fransa',
-  'Denmark': 'Danimarka', 'Sweden': 'İsveç', 'Germany': 'Almanya',
-  'New Zealand': 'Yeni Zelanda', 'Spain': 'İspanya',
-  'Puerto Rico': 'Porto Riko', 'Ukraine': 'Ukrayna',
-  'South Africa': 'Güney Afrika', 'Israel': 'İsrail', 'Austria': 'Avusturya',
-  'Netherlands': 'Hollanda', 'Benin': 'Benin', 'Italy': 'İtalya',
-  'Romania': 'Romanya', 'Brazil': 'Brezilya', 'South Korea': 'Güney Kore',
-  'Chile': 'Şili', 'Cuba': 'Küba', 'Nigeria': 'Nijerya',
-  'Guatemala': 'Guatemala', 'Channel Islands': 'Manş Adaları',
-  'Guyana': 'Guyana', 'Mexico': 'Meksika', 'Lebanon': 'Lübnan',
-  'Japan': 'Japonya', 'China': 'Çin', 'Colombia': 'Kolombiya',
-  'India': 'Hindistan', 'Oman': 'Umman', 'Bermuda': 'Bermuda',
-  'Turkey': 'Türkiye', 'Russia': 'Rusya', 'Poland': 'Polonya',
-  'Norway': 'Norveç', 'Belgium': 'Belçika', 'Switzerland': 'İsviçre',
-  'Greece': 'Yunanistan', 'Argentina': 'Arjantin', 'Hungary': 'Macaristan',
-};
-
-String localizedCountry(String country, String languageCode) =>
-    languageCode == 'tr' ? (_countryNamesTr[country] ?? country) : country;

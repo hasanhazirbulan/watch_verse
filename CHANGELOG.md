@@ -17,6 +17,12 @@ All notable changes to this project are documented here. Format loosely follows 
 - Privacy Policy / Terms: Patron badge, all game results listed (Higher or Lower stays on device).
 
 ### Fixed (2026-10-14)
+- Daily Movie, Who's the Actor? and Frames no longer lock guessing until the server confirms each save (stuck offline); Year in Review share images pre-load posters.
+- Plot puzzles: franchise/universe names (Batman, Gotham, Jedi, Avengers, Galactic Empire, …) are now redacted; pools regenerated.
+- Settings/Privacy Policy/README no longer claim push notifications aren't sent — they are (GitHub Actions job, verified).
+
+### Added (2026-10-14, later)
+- Push notification when a movie on your watchlist is released today (Settings toggle).
 - Games review: Higher or Lower lost a new best when leaving during the reveal, and called equal-looking box-office values a miss; Title Wordle's keyboard was locked until each save confirmed (dead offline); dark-theme tile text was unreadable in Wordle/Frames; Daily game share could post a too-low score; Frames/Wordle puzzle #1 moved to 2026-10-14 so no day repeats.
 - Streaming: detail screens said "On your Netflix" for titles only on US Netflix or only to rent/buy; now only real flat-rate/free availability in your region counts.
 - Marking a 500+ episode season watched failed (Firestore batch cap).

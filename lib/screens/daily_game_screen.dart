@@ -38,7 +38,17 @@ Stream<String?> dailyGameTodayStatus(AppLocalizations l10n) {
 /// mystery movie is picked and how progress is stored, and
 /// `daily_game_clues.dart` for the comparison rules.
 class DailyGameScreen extends StatefulWidget {
-  const DailyGameScreen({super.key});
+  const DailyGameScreen({super.key, this.service, this.api, this.signedIn});
+
+  /// Test hooks: a service backed by fake Firestore/Auth, a stub TMDB
+  /// client, and whether to treat the user as signed in. Production passes
+  /// none of them.
+  @visibleForTesting
+  final DailyGameService? service;
+  @visibleForTesting
+  final APIservices? api;
+  @visibleForTesting
+  final bool? signedIn;
 
   @override
   State<DailyGameScreen> createState() => _DailyGameScreenState();
@@ -47,8 +57,8 @@ class DailyGameScreen extends StatefulWidget {
 class _DailyGameScreenState extends State<DailyGameScreen> {
   static const _howToSeenPrefsKey = 'dailyGameHowToSeen';
 
-  final _svc = DailyGameService.instance;
-  final _api = APIservices();
+  late final _svc = widget.service ?? DailyGameService.instance;
+  late final _api = widget.api ?? APIservices();
   final _searchController = TextEditingController();
   final _searchFocus = FocusNode();
   Timer? _debounce;
@@ -59,7 +69,8 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
   // Guests have no Firebase account, and both the movie pool
   // (gameConfig) and progress (gamePlays) are sign-in-only in
   // firestore.rules — loading would just fail with permission-denied.
-  final bool _isGuest = FirebaseAuth.instance.currentUser == null;
+  late final bool _isGuest =
+      !(widget.signedIn ?? FirebaseAuth.instance.currentUser != null);
 
   /// Absolute puzzle index being played (see `DailyGameService.todayIndex`)
   /// — pinned when chosen, so leaving the screen open past midnight can't
@@ -80,9 +91,17 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
   // Bumped on every _loadMystery() so a slow response for a previously
   // selected day can't overwrite the mystery of the day now selected.
   int _mysteryRequest = 0;
-  // Blocks a second guess while the first one's clue fetch + write is still
-  // in flight (both would otherwise compute the same guess count).
+  // Blocks a second guess while the first one's clue fetch is in flight
+  // (both would otherwise compute the same guess count).
   bool _submittingGuess = false;
+  // The guess just written (and its day), until the progress stream shows
+  // it. Firestore applies a write to its local cache (and fires the
+  // listener) right away, but the write's future only completes once the
+  // server acks it: waiting for that paused guessing on a slow network and
+  // locked it for good offline. Waiting for the local snapshot instead
+  // still guarantees the next guess is counted against a list that already
+  // holds this one.
+  ({int day, int id})? _pendingGuess;
   // One Firestore listener per selected day instead of a fresh subscription
   // on every rebuild (every search keystroke rebuilds this screen).
   int? _progressDay;
@@ -196,9 +215,19 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
     }
   }
 
+  /// Whether a guess is in flight for the shown day: its clue is still
+  /// loading, or it's written but not in [play] yet.
+  bool _guessBusy(DailyGamePlay play) {
+    if (_submittingGuess) return true;
+    final pending = _pendingGuess;
+    return pending != null &&
+        pending.day == _day &&
+        !play.guessedIds.contains(pending.id);
+  }
+
   Future<void> _guess(MediaItem item, DailyGamePlay play) async {
     final mystery = _mystery;
-    if (_submittingGuess ||
+    if (_guessBusy(play) ||
         mystery == null ||
         play.finished ||
         play.guessedIds.contains(item.id)) {
@@ -236,17 +265,39 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
       final newGuessCount = play.guessedIds.length + 1;
       final won = item.id == mystery.id;
       final finished = won || newGuessCount >= dailyGameMaxGuesses;
-      await _svc.recordGuess(
-        day: day,
-        guessedMovieId: item.id,
-        won: won,
-        finished: finished,
-      );
+      final pending = (day: day, id: item.id);
+      setState(() {
+        _submittingGuess = false;
+        _pendingGuess = pending;
+      });
+      // Not awaited for the unlock (see [_pendingGuess]). A rejected write
+      // is rolled back out of Firestore's cache, so the stream drops the
+      // guess again and only the error needs showing.
+      _svc
+          .recordGuess(
+            day: day,
+            guessedMovieId: item.id,
+            won: won,
+            finished: finished,
+          )
+          .catchError((Object e, StackTrace st) {
+            debugPrint('DailyGame: saving guess failed: $e\n$st');
+            messenger.showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
+          })
+          .whenComplete(() {
+            // Acked (or failed): nothing left to wait for, even if no
+            // snapshot with the guess ever arrived.
+            if (mounted && _pendingGuess == pending) {
+              setState(() => _pendingGuess = null);
+            }
+          });
     } catch (e, st) {
       debugPrint('DailyGame: guess failed: $e\n$st');
       messenger.showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
     } finally {
-      if (mounted) setState(() => _submittingGuess = false);
+      if (mounted && _submittingGuess) {
+        setState(() => _submittingGuess = false);
+      }
     }
   }
 
@@ -415,7 +466,7 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
         return Column(
           children: [
             _statusBar(context, l10n, play),
-            if (!play.finished) _searchField(context, l10n),
+            if (!play.finished) _searchField(context, l10n, play),
             Expanded(
               child: showSearchPanel
                   ? _searchPanel(context, l10n, play)
@@ -483,20 +534,22 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
     );
   }
 
-  Widget _searchField(BuildContext context, AppLocalizations l10n) {
+  Widget _searchField(
+      BuildContext context, AppLocalizations l10n, DailyGamePlay play) {
+    final busy = _guessBusy(play);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: TextField(
         controller: _searchController,
         focusNode: _searchFocus,
         onChanged: _onSearchChanged,
-        enabled: !_submittingGuess,
+        enabled: !busy,
         autocorrect: false,
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
           hintText: l10n.dailyGameSearchHint,
           prefixIcon: const Icon(Icons.search_rounded),
-          suffixIcon: _searching || _submittingGuess
+          suffixIcon: _searching || busy
               ? const Padding(
                   padding: EdgeInsets.all(12),
                   child: SizedBox(
@@ -552,7 +605,7 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
               ? Text(l10n.dailyGameGuessedAlready,
                   style: TextStyle(color: context.colors.textMuted, fontSize: 12))
               : null,
-          enabled: !already && !_submittingGuess,
+          enabled: !already && !_guessBusy(play),
           onTap: () => _guess(item, play),
         );
       },

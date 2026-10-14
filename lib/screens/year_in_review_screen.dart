@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -816,6 +817,24 @@ class _YearInReviewScreenState extends State<YearInReviewScreen> {
   }
 }
 
+/// Loads [providers] into the image cache before a card is captured, giving
+/// up after [timeout] so a slow or dead connection can't hold the share
+/// forever. Failed loads are swallowed: the card is shared anyway, with the
+/// placeholder for that poster.
+@visibleForTesting
+Future<void> precacheForCapture(
+  BuildContext context,
+  Iterable<ImageProvider> providers, {
+  Duration timeout = const Duration(seconds: 5),
+}) async {
+  final loads = [
+    for (final p in providers)
+      precacheImage(p, context, onError: (_, _) {}),
+  ];
+  if (loads.isEmpty) return;
+  await Future.wait(loads).timeout(timeout, onTimeout: () => const []);
+}
+
 /// One recap card plus a share button. The card (not the button) sits in a
 /// [RepaintBoundary] so it can be rendered to a PNG and handed to the system
 /// share sheet; a small "WatchVerse · year" footer is drawn inside the card
@@ -841,6 +860,40 @@ class _ShareableCardState extends State<_ShareableCard> {
   final _boundaryKey = GlobalKey();
   bool _sharing = false;
 
+  /// The images of every [TmdbImage] inside the card, as the same provider
+  /// [TmdbImage]'s `CachedNetworkImage` resolves (equal providers share one
+  /// image-cache entry, so precaching one also fills the card's poster).
+  List<ImageProvider> _cardImages() {
+    final urls = <String>{};
+    void visit(Element e) {
+      final w = e.widget;
+      if (w is TmdbImage && w.url != null) urls.add(w.url!);
+      e.visitChildElements(visit);
+    }
+
+    final root = _boundaryKey.currentContext;
+    if (root is Element) visit(root);
+    return [for (final url in urls) CachedNetworkImageProvider(url)];
+  }
+
+  /// Waits for the card's posters so the PNG doesn't show loading
+  /// placeholders.
+  Future<void> _waitForImages() async {
+    final images = _cardImages();
+    if (images.isEmpty) return;
+    final cache = PaintingBinding.instance.imageCache;
+    // A poster that only arrives now cross-fades in over the placeholder
+    // (CachedNetworkImage's default fadeOutDuration is 1s); one that was
+    // already loaded is drawn as is.
+    final settled = images.every((p) {
+      final status = cache.statusForKey(p);
+      return status.tracked && !status.pending;
+    });
+    await precacheForCapture(context, images);
+    if (!settled) await Future<void>.delayed(const Duration(seconds: 1));
+    await WidgetsBinding.instance.endOfFrame;
+  }
+
   Future<void> _share(BuildContext buttonContext) async {
     final l10n = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
@@ -851,6 +904,8 @@ class _ShareableCardState extends State<_ShareableCard> {
         : box.localToGlobal(Offset.zero) & box.size;
     setState(() => _sharing = true);
     try {
+      await _waitForImages();
+      if (!mounted) return;
       final boundary =
           _boundaryKey.currentContext?.findRenderObject()
               as RenderRepaintBoundary?;
@@ -933,11 +988,21 @@ class _ShareableCardState extends State<_ShareableCard> {
             builder: (buttonContext) => IconButton(
               tooltip: l10n.yirShare,
               onPressed: _sharing ? null : () => _share(buttonContext),
-              icon: Icon(
-                Icons.ios_share_rounded,
-                size: 20,
-                color: onGradient ? Colors.white : colors.textSecondary,
-              ),
+              // Posters can take a few seconds to load before the capture.
+              icon: _sharing
+                  ? SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: onGradient ? Colors.white : colors.primary,
+                      ),
+                    )
+                  : Icon(
+                      Icons.ios_share_rounded,
+                      size: 20,
+                      color: onGradient ? Colors.white : colors.textSecondary,
+                    ),
             ),
           ),
         ),

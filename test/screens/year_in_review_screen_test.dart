@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart' show SynchronousFuture;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
@@ -21,6 +24,25 @@ class _FakeSource implements YearInReviewSource {
     }
     return input;
   }
+}
+
+/// An image that never finishes loading (a stalled connection) or that
+/// fails (404 / offline).
+class _StuckImage extends ImageProvider<_StuckImage> {
+  const _StuckImage({this.fail = false});
+  final bool fail;
+
+  @override
+  Future<_StuckImage> obtainKey(ImageConfiguration configuration) =>
+      SynchronousFuture(this);
+
+  @override
+  ImageStreamCompleter loadImage(_StuckImage key, ImageDecoderCallback d) =>
+      OneFrameImageStreamCompleter(
+        fail
+            ? Future<ImageInfo>.error(Exception('404'))
+            : Completer<ImageInfo>().future,
+      );
 }
 
 final _now = DateTime(2026, 10, 14, 12);
@@ -173,5 +195,25 @@ void main() {
     await _settle(tester);
     expect(find.text('Your 2026 so far'), findsOneWidget);
     expect(source.requested.length, 2);
+  });
+
+  testWidgets('precacheForCapture gives up on stuck or failed posters', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const SizedBox());
+    final context = tester.element(find.byType(SizedBox));
+    var done = false;
+    unawaited(
+      precacheForCapture(context, const [
+        _StuckImage(),
+        _StuckImage(fail: true),
+      ]).then((_) => done = true),
+    );
+    await tester.pump(const Duration(seconds: 4));
+    expect(done, isFalse);
+    await tester.pump(const Duration(seconds: 1));
+    expect(done, isTrue);
+    expect(tester.takeException(), isNull);
+    PaintingBinding.instance.imageCache.clear();
   });
 }

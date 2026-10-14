@@ -143,3 +143,5 @@ Picked up after a long gap. Found: `pubspec.yaml` had an uncommitted `+16` versi
 - On-device smoke test: `flutter test integration_test/games_smoke_test.dart --dart-define-from-file=secrets.json -d <sim>` (guest-playable games, real TMDB) — passes. Signed-in games (Daily, Plot, Actor) not yet played on a device.
 - Known: Title Wordle TV pool is 307 (repeats after ~10 months); Plot text/genres are English for Turkish users.
 - Build `1.0.0+21` (games) uploaded to TestFlight 2026-10-14; review still runs on build 20.
+
+- [x] **English-only app (owner decision, 2026-10-14):** `main.dart` forces `Locale('en')`. Turkish strings stay in `app_tr.arb` (unused) — don't spend effort translating TMDB data or keeping tr strings polished unless this is reversed.

@@ -20,7 +20,7 @@ Widget _app(Widget home) => MaterialApp(
       theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('tr'),
+      locale: const Locale('en'),
       home: home,
     );
 
@@ -65,7 +65,7 @@ void main() {
     _dumpTexts('frames-movie');
     expect(tester.takeException(), isNull);
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    final tv = find.text('Dizi');
+    final tv = find.text('TV Shows');
     if (tv.evaluate().isNotEmpty) {
       await tester.tap(tv.first);
       await _wait(tester, 12);

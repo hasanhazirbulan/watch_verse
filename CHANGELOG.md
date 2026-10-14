@@ -10,6 +10,7 @@ All notable changes to this project are documented here. Format loosely follows 
 - On-device smoke tests in `integration_test/` (guest games, and signed-in games with a throwaway account that is deleted afterwards).
 
 ### Changed (2026-10-14)
+- **The app is English-only now**, whatever the device language (`locale: Locale('en')` in `main.dart`). TMDB content and the game pools are English, so the Turkish UI around them read as half-translated. `app_tr.arb` is kept but unused.
 - Daily Movie game: ↑/↓ direction on year/box office/rating, neutral "?" for unknown data, shared cast/genre/studio shown on partial matches, ranked search without unreleased/obscure titles, one cached TMDB call per guess, newest guess on top, how-to-play sheet, better hints (genres, top-billed actor), result card with poster + link, dated spoiler-free share text. Streak display and tracking removed.
 - Privacy Policy / Terms: Patron badge, all game results listed (Higher or Lower stays on device).
 

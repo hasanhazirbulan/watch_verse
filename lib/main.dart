@@ -76,6 +76,11 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      // English everywhere, whatever the device language: TMDB content
+      // (titles, plots, genres, game pools) is English, so a Turkish UI
+      // around it read as a half-translated app. app_tr.arb is kept so this
+      // is a one-line switch if Turkish ever comes back.
+      locale: const Locale('en'),
       home: const SplashWrapper(),
       routes: {
         '/login': (context) => const LoginScreen(),

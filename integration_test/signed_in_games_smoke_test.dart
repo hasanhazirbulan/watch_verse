@@ -21,7 +21,7 @@ Widget _app(Widget home) => MaterialApp(
       theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('tr'),
+      locale: const Locale('en'),
       home: home,
     );
 
@@ -92,7 +92,7 @@ void main() {
     await tester.pumpWidget(_app(const DailyGameScreen()));
     await _wait(tester, 8);
     // First visit opens the how-to sheet; close it.
-    final gotIt = find.text('Anladım');
+    final gotIt = find.text('Got it');
     if (gotIt.evaluate().isNotEmpty) {
       await tester.tap(gotIt.first);
       await _wait(tester, 2);

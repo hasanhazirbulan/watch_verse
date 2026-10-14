@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 
 /// Erases everything the app stores about one user, so "Delete account" in
@@ -22,41 +21,30 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 ///    from someone else's `following` list needs either a rules change or a
 ///    Cloud Function running with the Admin SDK.
 ///
-/// Storage deletions are best-effort: a missing object is not an error (the
-/// user may never have uploaded a photo), and a storage failure must not
-/// abort the Firestore purge that carries the bulk of the personal data.
+/// There are no Cloud Storage files to delete: the project has no bucket
+/// (Spark plan), the profile photo is stored inline on `users/{uid}`, and
+/// comment attachments are external GIF links.
 class AccountDeletionService {
   AccountDeletionService._({
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
-    FirebaseStorage? storage,
     DateTime Function()? now,
   })  : _db = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance,
-        _storage = storage,
         _now = now ?? DateTime.now;
 
-  /// Production instance. Storage must be wired in here: `_storage` is
-  /// nullable only so tests can skip the file steps, and leaving it null in
-  /// production silently skipped deleting profile/comment images.
-  static final AccountDeletionService instance =
-      AccountDeletionService._(storage: FirebaseStorage.instance);
+  static final AccountDeletionService instance = AccountDeletionService._();
 
-  /// Test-only factory. [storage] is nullable so Firestore-level purging can
-  /// be verified without a Storage fake — pass null to skip the file steps.
   @visibleForTesting
   factory AccountDeletionService.test({
     required FirebaseFirestore firestore,
     required FirebaseAuth auth,
-    FirebaseStorage? storage,
     DateTime Function()? now,
   }) =>
-      AccountDeletionService._(
-          firestore: firestore, auth: auth, storage: storage, now: now);
+      AccountDeletionService._(firestore: firestore, auth: auth, now: now);
 
   final FirebaseFirestore _db;
   final FirebaseAuth _auth;
-  final FirebaseStorage? _storage;
   final DateTime Function() _now;
 
   /// Test hook: runs after every subcollection is purged but before the
@@ -186,29 +174,6 @@ class AccountDeletionService {
     }
   }
 
-  /// Deletes the profile picture and every image attached to a comment.
-  /// Best-effort: object-not-found and permission errors are swallowed so a
-  /// storage hiccup cannot strand a half-deleted account.
-  Future<void> _purgeStoredFiles(String uid) async {
-    final storage = _storage;
-    if (storage == null) return;
-
-    try {
-      await storage.ref('profile_images/$uid.jpg').delete();
-    } on FirebaseException catch (_) {
-      // No profile photo was ever uploaded, or it is already gone.
-    }
-
-    try {
-      final images = await storage.ref('comment_images/$uid').listAll();
-      for (final item in images.items) {
-        await item.delete();
-      }
-    } on FirebaseException catch (_) {
-      // Nothing uploaded, or the folder is already empty.
-    }
-  }
-
   /// How recent the last sign-in must be before [deleteAccount] will touch
   /// anything. Firebase rejects `user.delete()` with `requires-recent-login`
   /// once the sign-in is older than ~5 minutes; this is deliberately tighter
@@ -317,7 +282,6 @@ class AccountDeletionService {
       await _purgeComments(uid);
       await _purgeFollowGraph(uid); // reads this user's own `following` field — must run before the profile doc is deleted
       await _purgeWatchPolls(uid);
-      await _purgeStoredFiles(uid);
       await _purgeOwnData(uid);
       await debugInterruptAfterPurge?.call();
       // Last Firestore write: the marker goes away only together with the

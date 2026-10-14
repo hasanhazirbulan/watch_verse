@@ -1794,12 +1794,6 @@ abstract class AppLocalizations {
   /// **'Add'**
   String get commentsAddAction;
 
-  /// No description provided for @commentsUploadPhoto.
-  ///
-  /// In en, this message translates to:
-  /// **'Upload photo'**
-  String get commentsUploadPhoto;
-
   /// No description provided for @commentsSearchGifs.
   ///
   /// In en, this message translates to:

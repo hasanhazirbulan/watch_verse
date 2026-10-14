@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/screens/gif_picker_screen.dart';
@@ -42,7 +40,6 @@ class _CommentsScreenState extends State<CommentsScreen> {
   late final Stream<List<String>> _blocked =
       SocialService.instance.blockedStream();
 
-  File? _pendingImage; // uploaded on send
   String? _pendingUrl; // pasted GIF/image URL
   bool _sending = false;
 
@@ -52,28 +49,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
     super.dispose();
   }
 
-  bool get _hasAttachment => _pendingImage != null || _pendingUrl != null;
-
-  Future<void> _pickPhoto() async {
-    try {
-      final picked = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1200,
-        imageQuality: 85,
-      );
-      if (picked == null || !mounted) return;
-      setState(() {
-        _pendingImage = File(picked.path);
-        _pendingUrl = null;
-      });
-    } catch (e) {
-      // e.g. photo-library access denied — used to fail with no feedback.
-      debugPrint('Comments: image pick failed: $e');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(AppLocalizations.of(context)!.errorGeneric)));
-    }
-  }
+  bool get _hasAttachment => _pendingUrl != null;
 
   Future<void> _pickGif() async {
     final url = await Navigator.push<String>(
@@ -83,7 +59,6 @@ class _CommentsScreenState extends State<CommentsScreen> {
     if (url != null && url.isNotEmpty && mounted) {
       setState(() {
         _pendingUrl = url;
-        _pendingImage = null;
       });
     }
   }
@@ -100,7 +75,6 @@ class _CommentsScreenState extends State<CommentsScreen> {
     if (url != null && url.isNotEmpty && mounted) {
       setState(() {
         _pendingUrl = url;
-        _pendingImage = null;
       });
     }
   }
@@ -119,15 +93,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ListTile(
-                leading: Icon(Icons.photo_library_rounded,
-                    color: context.colors.primary),
-                title: Text(l10n.commentsUploadPhoto),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _pickPhoto();
-                },
-              ),
+              // No photo uploads: the Firebase project is on the Spark plan,
+              // which has no Cloud Storage bucket. GIFs are links, not files.
               // Once a Giphy key is configured, show proper GIF search and
               // drop the fiddly "paste a link" fallback entirely.
               if (GiphyService.isConfigured)
@@ -162,10 +129,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
     if (text.isEmpty && !_hasAttachment) return;
     setState(() => _sending = true);
     try {
-      String? imageUrl = _pendingUrl;
-      if (_pendingImage != null) {
-        imageUrl = await _svc.uploadImage(_pendingImage!);
-      }
+      final imageUrl = _pendingUrl;
       await _svc.add(
         type: widget.mediaType,
         id: widget.mediaId,
@@ -175,7 +139,6 @@ class _CommentsScreenState extends State<CommentsScreen> {
       if (!mounted) return;
       _controller.clear();
       setState(() {
-        _pendingImage = null;
         _pendingUrl = null;
         _sending = false;
       });
@@ -309,23 +272,18 @@ class _CommentsScreenState extends State<CommentsScreen> {
               child: SizedBox(
                 width: 64,
                 height: 64,
-                child: _pendingImage != null
-                    ? Image.file(_pendingImage!, fit: BoxFit.cover)
-                    : Image.network(_pendingUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                            color: context.colors.surfaceAlt,
-                            child: const Icon(Icons.broken_image_rounded))),
+                child: Image.network(_pendingUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                        color: context.colors.surfaceAlt,
+                        child: const Icon(Icons.broken_image_rounded))),
               ),
             ),
             Positioned(
               top: -8,
               right: -8,
               child: GestureDetector(
-                onTap: () => setState(() {
-                  _pendingImage = null;
-                  _pendingUrl = null;
-                }),
+                onTap: () => setState(() => _pendingUrl = null),
                 child: Container(
                   padding: const EdgeInsets.all(2),
                   decoration: const BoxDecoration(

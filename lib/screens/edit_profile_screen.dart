@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
@@ -10,6 +8,7 @@ import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/theme/avatar_backgrounds.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/paywall_sheet.dart';
+import 'package:watch_verse/utils/avatar_image.dart';
 
 /// Dedicated profile-photo/name editor, reached from Settings and kept off
 /// the main profile view so that screen stays a read-only summary. Fetches
@@ -100,20 +99,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
     try {
+      // Small square JPEG stored inline on the profile doc — the project is
+      // on the Spark plan, which has no Cloud Storage bucket (see
+      // utils/avatar_image.dart). 192px at q70 is ~10 KB.
       final picked = await ImagePicker().pickImage(
         source: ImageSource.gallery,
-        maxWidth: 600,
-        imageQuality: 80,
+        maxWidth: 192,
+        maxHeight: 192,
+        imageQuality: 70,
       );
       if (picked == null || !mounted) return;
       setState(() => _uploadingPhoto = true);
-      final ref = FirebaseStorage.instance.ref(
-        'profile_images/${user.uid}.jpg',
-      );
-      // storage.rules only accepts image/* — don't rely on the SDK guessing.
-      await ref.putFile(
-          File(picked.path), SettableMetadata(contentType: 'image/jpeg'));
-      final url = await ref.getDownloadURL();
+      final url = avatarDataUri(await picked.readAsBytes());
+      if (url == null) {
+        throw StateError('photo is too large after compression');
+      }
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'photoURL': url,
       }, SetOptions(merge: true));
@@ -209,9 +209,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           child: CircleAvatar(
                             radius: 52,
                             backgroundColor: context.colors.surfaceAlt,
-                            backgroundImage: _photoURL.isNotEmpty
-                                ? NetworkImage(_photoURL)
-                                : null,
+                            backgroundImage: avatarImageProvider(_photoURL),
                             child: _uploadingPhoto
                                 ? const CircularProgressIndicator()
                                 : (_photoURL.isEmpty

@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:watch_verse/models/media.dart';
 
 /// A single public comment on a movie or show. Comments can carry text and an
@@ -146,21 +144,5 @@ class CommentService {
       'reportedBy': me,
       'at': FieldValue.serverTimestamp(),
     });
-  }
-
-  /// Uploads a comment image/GIF and returns its download URL.
-  Future<String?> uploadImage(File file) async {
-    final me = uid;
-    if (me == null) return null;
-    final ext = file.path.split('.').last.toLowerCase();
-    final safeExt = (ext == 'gif' || ext == 'png' || ext == 'webp') ? ext : 'jpg';
-    final ref = FirebaseStorage.instance.ref(
-        'comment_images/$me/${DateTime.now().millisecondsSinceEpoch}.$safeExt');
-    // Explicit type: storage.rules only accepts image/* uploads, and the
-    // SDK's guess from the extension isn't something to bet uploads on.
-    const types = {'gif': 'image/gif', 'png': 'image/png', 'webp': 'image/webp'};
-    await ref.putFile(
-        file, SettableMetadata(contentType: types[safeExt] ?? 'image/jpeg'));
-    return ref.getDownloadURL();
   }
 }

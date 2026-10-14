@@ -3,6 +3,7 @@ import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/screens/public_profile_screen.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/avatar_image.dart';
 
 /// Circular user avatar with an initial-letter fallback.
 class UserAvatar extends StatelessWidget {
@@ -22,7 +23,7 @@ class UserAvatar extends StatelessWidget {
     return CircleAvatar(
       radius: radius,
       backgroundColor: context.colors.surfaceAlt,
-      backgroundImage: has ? NetworkImage(photoURL!) : null,
+      backgroundImage: has ? avatarImageProvider(photoURL) : null,
       child: has
           ? null
           : Text(

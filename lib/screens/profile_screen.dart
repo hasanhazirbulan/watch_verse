@@ -17,6 +17,7 @@ import 'package:watch_verse/theme/avatar_backgrounds.dart';
 import 'package:watch_verse/utils/duration_format.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/utils/avatar_image.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -123,7 +124,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 radius: 40,
                 backgroundColor: context.colors.surfaceAlt,
                 backgroundImage:
-                    photoURL.isNotEmpty ? NetworkImage(photoURL) : null,
+                    avatarImageProvider(photoURL),
                 child: photoURL.isEmpty
                     ? Text(
                         (user.email ?? '?').substring(0, 1).toUpperCase(),

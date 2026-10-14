@@ -981,9 +981,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commentsAddAction => 'Add';
 
   @override
-  String get commentsUploadPhoto => 'Upload photo';
-
-  @override
   String get commentsSearchGifs => 'Search GIFs';
 
   @override

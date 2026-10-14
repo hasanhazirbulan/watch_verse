@@ -282,7 +282,6 @@
   "commentsAddLinkTitle": "GIF / görsel bağlantısı ekle",
   "commentsLinkHint": "https://…",
   "commentsAddAction": "Ekle",
-  "commentsUploadPhoto": "Fotoğraf yükle",
   "commentsSearchGifs": "GIF ara",
   "commentsAddGifByLink": "Bağlantıyla GIF / görsel ekle",
   "commentsCouldNotPost": "Gönderilemedi: {error}",

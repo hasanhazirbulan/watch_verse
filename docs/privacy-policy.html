@@ -157,7 +157,7 @@
 <ul>
   <li>Who you follow, and who follows you.</li>
   <li>Users you have blocked.</li>
-  <li>Comments you post on titles (including any photo or GIF you attach), and
+  <li>Comments you post on titles (including any GIF you attach by link), and
       likes you give to comments.</li>
   <li>&ldquo;What should we watch?&rdquo; group polls you create or are
       invited to, and your votes in them.</li>
@@ -205,7 +205,7 @@
 <div class="callout">
   <p>
     <strong>We do not collect</strong> your contacts, your location, your
-    photos beyond a profile picture or comment image you deliberately choose,
+    photos beyond a profile picture you deliberately choose,
     or your device's advertising identifier.
   </p>
 </div>
@@ -278,9 +278,11 @@
 </p>
 
 <p>
-  <strong>Images.</strong> Profile photos and images attached to comments are
-  stored at links that anyone who has the link can open, including people
-  without a WatchVerse account.
+  <strong>Images.</strong> Your profile photo is a small, compressed copy of
+  the picture you choose, stored on your profile record (so it is visible to
+  other signed-in users, as above) and copied onto comments you
+  post. GIFs in comments are links to the GIF provider; WatchVerse does not
+  store them.
 </p>
 
 <p>
@@ -329,8 +331,8 @@
   <tbody>
     <tr>
       <td><strong>Google Firebase</strong><br>(Authentication, Firestore,
-          Storage, Cloud Messaging, Analytics, Crashlytics)</td>
-      <td>Hosts the account system, database, profile and comment images,
+          Cloud Messaging, Analytics, Crashlytics)</td>
+      <td>Hosts the account system, database (including profile photos),
           push notification tokens, app-usage analytics, and crash
           reporting</td>
       <td>All account, library, and social data described above, plus
@@ -391,10 +393,9 @@
       when you sign out, and deleted with your account.</li>
   <li><strong>Comments</strong> — kept until you delete them individually, or
       until you delete your account.</li>
-  <li><strong>Uploaded images</strong> (profile picture, comment images) —
-      replacing your profile picture overwrites the old one, but deleting a
-      comment or your account does not currently delete the image file. Email
-      us and we will delete them.</li>
+  <li><strong>Profile photo</strong> — replacing it overwrites the old one; it
+      is deleted with your profile record, and its copies on your comments
+      are deleted with those comments.</li>
   <li><strong>Aggregate poll counts</strong> — kept indefinitely, but they
       contain no identifier and cannot be traced back to you.</li>
 </ul>
@@ -428,9 +429,6 @@
 <div class="callout">
   <p><strong>What in-app deletion does not currently remove:</strong></p>
   <ul>
-    <li><strong>Uploaded images.</strong> Your profile picture and any images
-        you uploaded to comments stay in storage after the account is deleted.
-        Email us and we will delete them.</li>
     <li><strong>Moderation reports.</strong> If you have used the report
         button to flag someone else's comment, that record is kept. It
         contains the reported comment's ID, your account ID and a timestamp,

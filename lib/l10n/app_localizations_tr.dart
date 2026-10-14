@@ -984,9 +984,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commentsAddAction => 'Ekle';
 
   @override
-  String get commentsUploadPhoto => 'Fotoğraf yükle';
-
-  @override
   String get commentsSearchGifs => 'GIF ara';
 
   @override

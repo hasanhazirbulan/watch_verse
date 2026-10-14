@@ -1,20 +1,11 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:watch_verse/services/account_deletion_service.dart';
 
-class _MockStorage extends Mock implements FirebaseStorage {}
-
-class _MockRef extends Mock implements Reference {}
-
-class _MockListResult extends Mock implements ListResult {}
-
 /// Covers data-layer fixes to account deletion that the original suite
-/// (account_deletion_service_test.dart) didn't exercise: Storage purging,
-/// a followed user who already deleted their own account, episode notes
+/// (account_deletion_service_test.dart) didn't exercise: a followed user who already deleted their own account, episode notes
 /// orphaned by removeShow(), and "what should we watch?" polls.
 void main() {
   const uid = 'user-1';
@@ -23,7 +14,7 @@ void main() {
 
   late FakeFirebaseFirestore firestore;
 
-  AccountDeletionService serviceWith({FirebaseStorage? storage}) =>
+  AccountDeletionService serviceWith() =>
       AccountDeletionService.test(
         firestore: firestore,
         auth: MockFirebaseAuth(
@@ -36,56 +27,10 @@ void main() {
                       .millisecondsSinceEpoch)),
           signedIn: true,
         ),
-        storage: storage,
         now: () => now,
       );
 
   setUp(() => firestore = FakeFirebaseFirestore());
-
-  test('deletes the profile photo and every comment image from Storage',
-      () async {
-    final storage = _MockStorage();
-    final profileRef = _MockRef();
-    final folderRef = _MockRef();
-    final img1 = _MockRef();
-    final img2 = _MockRef();
-    final listing = _MockListResult();
-
-    when(() => storage.ref('profile_images/$uid.jpg')).thenReturn(profileRef);
-    when(() => storage.ref('comment_images/$uid')).thenReturn(folderRef);
-    when(() => profileRef.delete()).thenAnswer((_) async {});
-    when(() => folderRef.listAll()).thenAnswer((_) async => listing);
-    when(() => listing.items).thenReturn([img1, img2]);
-    when(() => img1.delete()).thenAnswer((_) async {});
-    when(() => img2.delete()).thenAnswer((_) async {});
-
-    await serviceWith(storage: storage).deleteAccount();
-
-    verify(() => profileRef.delete()).called(1);
-    verify(() => img1.delete()).called(1);
-    verify(() => img2.delete()).called(1);
-  });
-
-  test('a missing profile photo does not stop the rest of the deletion',
-      () async {
-    final storage = _MockStorage();
-    final profileRef = _MockRef();
-    final folderRef = _MockRef();
-    when(() => storage.ref(any())).thenAnswer((inv) =>
-        inv.positionalArguments.first == 'profile_images/$uid.jpg'
-            ? profileRef
-            : folderRef);
-    when(() => profileRef.delete()).thenThrow(
-        FirebaseException(plugin: 'firebase_storage', code: 'object-not-found'));
-    when(() => folderRef.listAll()).thenThrow(
-        FirebaseException(plugin: 'firebase_storage', code: 'object-not-found'));
-    await firestore.collection('users').doc(uid).set({'name': 'Me'});
-
-    await serviceWith(storage: storage).deleteAccount();
-
-    expect((await firestore.collection('users').doc(uid).get()).exists,
-        isFalse);
-  });
 
   test(
       'does not recreate the profile of a followed user who already deleted '

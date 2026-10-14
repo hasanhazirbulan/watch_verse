@@ -44,7 +44,6 @@ dependencies:
   http: ^1.2.2
   curved_navigation_bar: ^1.0.3
   flutter_launcher_icons: ^0.14.2
-  firebase_storage: ^13.6.0
   image_picker: ^1.1.2
   flutter_rating_bar: ^4.0.0
   cloud_firestore: ^6.10.0

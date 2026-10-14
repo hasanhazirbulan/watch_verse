@@ -708,7 +708,6 @@
   "commentsAddLinkTitle": "Add GIF / image link",
   "commentsLinkHint": "https://…",
   "commentsAddAction": "Add",
-  "commentsUploadPhoto": "Upload photo",
   "commentsSearchGifs": "Search GIFs",
   "commentsAddGifByLink": "Add GIF / image by link",
   "commentsCouldNotPost": "Could not post: {error}",

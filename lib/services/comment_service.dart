@@ -156,7 +156,11 @@ class CommentService {
     final safeExt = (ext == 'gif' || ext == 'png' || ext == 'webp') ? ext : 'jpg';
     final ref = FirebaseStorage.instance.ref(
         'comment_images/$me/${DateTime.now().millisecondsSinceEpoch}.$safeExt');
-    await ref.putFile(file);
+    // Explicit type: storage.rules only accepts image/* uploads, and the
+    // SDK's guess from the extension isn't something to bet uploads on.
+    const types = {'gif': 'image/gif', 'png': 'image/png', 'webp': 'image/webp'};
+    await ref.putFile(
+        file, SettableMetadata(contentType: types[safeExt] ?? 'image/jpeg'));
     return ref.getDownloadURL();
   }
 }

@@ -110,7 +110,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final ref = FirebaseStorage.instance.ref(
         'profile_images/${user.uid}.jpg',
       );
-      await ref.putFile(File(picked.path));
+      // storage.rules only accepts image/* — don't rely on the SDK guessing.
+      await ref.putFile(
+          File(picked.path), SettableMetadata(contentType: 'image/jpeg'));
       final url = await ref.getDownloadURL();
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'photoURL': url,

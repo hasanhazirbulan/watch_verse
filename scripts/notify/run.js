@@ -19,6 +19,7 @@
  * Modes (set via the NOTIFY_MODE env var, one per scheduled run):
  *   episode-tomorrow  — shows with nextEpisodeAirDate == tomorrow
  *   episode-today     — shows with nextEpisodeAirDate == today
+ *   movie-release     — watchlist movies with releaseDate == today
  *   activity-poll     — new activity since the last run: immediate
  *                        "shared watch" push, or enqueued into the
  *                        recipient's daily digest
@@ -78,6 +79,36 @@ async function notifyEpisodes({ prefField, dayOffset, type, title, bodyFor }) {
       mediaType: 'tv',
     });
   }
+}
+
+/** "In theaters today" for movies on someone's watchlist whose TMDB release
+ *  date is today. Loops over users and queries each user's own `movies`
+ *  subcollection (single-field equality, auto-indexed at collection scope)
+ *  instead of a collection-group query, which would need an index deploy.
+ *  Fine at this app's size; switch to a collectionGroup query + a
+ *  COLLECTION_GROUP override on movies.releaseDate if it grows. */
+async function notifyMovieReleases() {
+  const date = isoDateOffset(0);
+  const users = await db.collection('users').select('fcmToken', 'notifyMovieRelease').get();
+  let sent = 0;
+  for (const user of users.docs) {
+    const prefs = user.data();
+    if (!prefs.fcmToken || prefs.notifyMovieRelease === false) continue;
+    const movies = await user.ref.collection('movies').where('releaseDate', '==', date).get();
+    for (const doc of movies.docs) {
+      const m = doc.data();
+      if (m.status !== 'watchlist') continue;
+      await sendToUser(user.id, 'Out today', `${m.title} from your watchlist is released today. 🍿`, {
+        type: 'movie-release',
+        id: String(m.id),
+        title: m.title || '',
+        posterPath: m.posterPath || '',
+        mediaType: 'movie',
+      });
+      sent++;
+    }
+  }
+  console.log(`[movie-release] ${sent} notification(s) for ${date}`);
 }
 
 /** Adds one event to [uid]'s daily activity digest (count + up to 3 distinct
@@ -211,6 +242,9 @@ async function main() {
         title: 'New episode today',
         bodyFor: (name) => `${name}'s new episode is out today! 🎬`,
       });
+      break;
+    case 'movie-release':
+      await notifyMovieReleases();
       break;
     case 'activity-poll':
       await pollActivity();

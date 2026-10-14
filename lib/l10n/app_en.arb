@@ -1847,5 +1847,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "settingsNotifyMovieRelease": "Watchlist movies released today"
 }

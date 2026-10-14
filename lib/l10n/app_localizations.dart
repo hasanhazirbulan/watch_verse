@@ -4763,6 +4763,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'On your {services}'**
   String streamingOnYour(String services);
+
+  /// No description provided for @settingsNotifyMovieRelease.
+  ///
+  /// In en, this message translates to:
+  /// **'Watchlist movies released today'**
+  String get settingsNotifyMovieRelease;
 }
 
 class _AppLocalizationsDelegate

@@ -192,6 +192,7 @@ class NotificationService {
         return;
       case 'episode-tomorrow':
       case 'episode-today':
+      case 'movie-release':
       case 'shared-watch':
         final id = int.tryParse(data['id'] ?? '');
         if (id == null) return;

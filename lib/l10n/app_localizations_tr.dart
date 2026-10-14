@@ -2763,4 +2763,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String streamingOnYour(String services) {
     return 'On your $services';
   }
+
+  @override
+  String get settingsNotifyMovieRelease => 'Watchlist movies released today';
 }

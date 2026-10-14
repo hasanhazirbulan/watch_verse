@@ -8,6 +8,7 @@ name: WatchVerse Notifications
 #
 # All times below are UTC; Europe/Istanbul is UTC+3 year-round (no DST).
 #   06:00 UTC = 09:00 Istanbul -> episode-tomorrow
+#   06:10 UTC = 09:10 Istanbul -> movie-release
 #   16:00 UTC = 19:00 Istanbul -> digest-flush
 #   17:00 UTC = 20:00 Istanbul -> episode-today
 #   every 30 minutes           -> activity-poll (shared-watch / digest queue)
@@ -15,6 +16,7 @@ name: WatchVerse Notifications
 on:
   schedule:
     - cron: "0 6 * * *"
+    - cron: "10 6 * * *"
     - cron: "0 16 * * *"
     - cron: "0 17 * * *"
     - cron: "*/30 * * * *"
@@ -27,6 +29,7 @@ on:
         options:
           - episode-tomorrow
           - episode-today
+          - movie-release
           - digest-flush
           - activity-poll
 
@@ -52,6 +55,7 @@ jobs:
           else
             case "${{ github.event.schedule }}" in
               "0 6 * * *") echo "value=episode-tomorrow" >> "$GITHUB_OUTPUT" ;;
+              "10 6 * * *") echo "value=movie-release" >> "$GITHUB_OUTPUT" ;;
               "0 16 * * *") echo "value=digest-flush" >> "$GITHUB_OUTPUT" ;;
               "0 17 * * *") echo "value=episode-today" >> "$GITHUB_OUTPUT" ;;
               "*/30 * * * *") echo "value=activity-poll" >> "$GITHUB_OUTPUT" ;;

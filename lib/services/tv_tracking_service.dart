@@ -273,45 +273,65 @@ class TvTrackingService {
     final Future<void> commit;
     try {
       final current = await watchedKeys(show.id);
-      final batch = _db.batch();
+      final ops = <void Function(WriteBatch)>[];
       var minutesDelta = 0;
       for (final ep in episodes) {
         if (!current.contains(ep.key)) {
-          batch.set(ref.collection('watched').doc(ep.key), {
-            'season': ep.seasonNumber,
-            'episode': ep.episodeNumber,
-            'watchedAt': FieldValue.serverTimestamp(),
-          });
+          ops.add((b) => b.set(ref.collection('watched').doc(ep.key), {
+                'season': ep.seasonNumber,
+                'episode': ep.episodeNumber,
+                'watchedAt': FieldValue.serverTimestamp(),
+              }));
           current.add(ep.key);
           minutesDelta += ep.runtime;
         }
       }
-      batch.set(ref, {
-        ..._metadata(show),
-        'watchedCount': current.length,
-        if (minutesDelta > 0)
-          'watchedMinutes': FieldValue.increment(minutesDelta),
-        'status': _statusFor(current.length, show.numberOfEpisodes),
-        'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-      commit = batch.commit();
+      final count = current.length;
+      ops.add((b) => b.set(ref, {
+            ..._metadata(show),
+            'watchedCount': count,
+            if (minutesDelta > 0)
+              'watchedMinutes': FieldValue.increment(minutesDelta),
+            'status': _statusFor(count, show.numberOfEpisodes),
+            'updatedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true)));
+      commit = _commitChunked(ops);
     } finally {
       unlock();
     }
     await commit;
   }
 
-  /// Removes a show and all of its watched-episode records.
+  /// Removes a show and all of its watched-episode records and notes.
   Future<void> removeShow(int showId) async {
     final ref = _showRef(showId);
     if (ref == null) return;
     final watched = await ref.collection('watched').get();
-    final batch = _db.batch();
-    for (final doc in watched.docs) {
-      batch.delete(doc.reference);
+    final notes = await ref.collection('notes').get();
+    await _commitChunked([
+      for (final doc in [...watched.docs, ...notes.docs])
+        (WriteBatch b) => b.delete(doc.reference),
+      (WriteBatch b) => b.delete(ref),
+    ]);
+  }
+
+  /// Firestore caps a batch at 500 writes; long-running shows (One Piece,
+  /// The Simpsons) exceed that when caught up or removed in one go. Applies
+  /// [ops] in batches of 450, the last op landing in the final batch — so
+  /// callers put the parent show doc's count update last. Every batch is
+  /// committed before awaiting any, so all writes hit the local cache at
+  /// once (same as a single batch) for whoever reads next under the lock.
+  Future<void> _commitChunked(List<void Function(WriteBatch)> ops) {
+    const size = 450;
+    final commits = <Future<void>>[];
+    for (var i = 0; i < ops.length; i += size) {
+      final batch = _db.batch();
+      for (final op in ops.skip(i).take(size)) {
+        op(batch);
+      }
+      commits.add(batch.commit());
     }
-    batch.delete(ref);
-    await batch.commit();
+    return Future.wait(commits);
   }
 
   /// Toggles a single episode's watched state, keeping the denormalized

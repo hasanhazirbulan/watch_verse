@@ -145,3 +145,4 @@ Picked up after a long gap. Found: `pubspec.yaml` had an uncommitted `+16` versi
 - Build `1.0.0+21` (games) uploaded to TestFlight 2026-10-14; review still runs on build 20.
 
 - [x] **English-only app (owner decision, 2026-10-14):** `main.dart` forces `Locale('en')`. Turkish strings stay in `app_tr.arb` (unused) — don't spend effort translating TMDB data or keeping tr strings polished unless this is reversed.
+- [x] **Year in Review** (Profile card + Watch Stats icon; `lib/services/year_in_review.dart`, shareable PNG cards) and **My streaming services** (Settings; `users/{uid}.streamingRegion/streamingProviderIds`; "On my services" chip on Watchlist + My Shows; JustWatch credit) — merged 2026-10-14, smoke-tested on the simulator with a throwaway account (live TMDB region/provider lists load; YIR empty state). Not yet seen with real history data. Build `1.0.0+23` to TestFlight.

@@ -15,6 +15,8 @@ import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/screens/actor_guess_screen.dart';
 import 'package:watch_verse/screens/daily_game_screen.dart';
 import 'package:watch_verse/screens/games/plot_guess_screen.dart';
+import 'package:watch_verse/screens/streaming_services_screen.dart';
+import 'package:watch_verse/screens/year_in_review_screen.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 
 Widget _app(Widget home) => MaterialApp(
@@ -84,8 +86,10 @@ void main() {
     for (final d in plays.docs) {
       await d.reference.delete();
     }
+    // The streaming test writes prefs onto users/{uid}; remove the doc too.
+    await FirebaseFirestore.instance.collection('users').doc(u.uid).delete();
     await u.delete();
-    debugPrint('SMOKE cleaned up ${plays.size} gamePlays doc(s) + user');
+    debugPrint('SMOKE cleaned up ${plays.size} gamePlays doc(s) + profile doc + user');
   });
 
   testWidgets('Daily movie game loads and accepts a guess', (tester) async {
@@ -115,6 +119,30 @@ void main() {
     await _wait(tester, 6);
     _dumpTexts('actor');
     await _guess(tester, 'actor', 'Tom Hanks');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('My streaming services loads regions + providers live',
+      (tester) async {
+    await tester.pumpWidget(_app(const StreamingServicesScreen()));
+    await _wait(tester, 10);
+    _dumpTexts('streaming');
+    expect(tester.takeException(), isNull);
+    final boxes = find.byType(CheckboxListTile);
+    debugPrint('SMOKE[streaming] provider rows: ${boxes.evaluate().length}');
+    if (boxes.evaluate().isNotEmpty) {
+      await tester.tap(boxes.first);
+      await _wait(tester, 3);
+      _dumpTexts('streaming-after-pick');
+    }
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Year in Review opens for an account with no history',
+      (tester) async {
+    await tester.pumpWidget(_app(const YearInReviewScreen()));
+    await _wait(tester, 8);
+    _dumpTexts('yir');
     expect(tester.takeException(), isNull);
   });
 }

@@ -3001,4 +3001,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get plotGameNewClue => 'New clue';
+
+  @override
+  String get profileRemovePhoto => 'Remove photo';
 }

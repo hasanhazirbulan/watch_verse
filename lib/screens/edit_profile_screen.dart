@@ -129,6 +129,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  Future<void> _removePhoto() async {
+    setState(() => _uploadingPhoto = true);
+    try {
+      await ProfilePhotoService.instance.removePhoto();
+      if (!mounted) return;
+      setState(() {
+        _photoURL = '';
+        _uploadingPhoto = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
+      setState(() => _uploadingPhoto = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.profileUpdatePhotoError(e.toString()))),
+      );
+    }
+  }
+
   Future<void> _save() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -241,6 +260,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ],
                     ),
                   ),
+                  if (_photoURL.isNotEmpty)
+                    TextButton(
+                      onPressed: _uploadingPhoto ? null : _removePhoto,
+                      child: Text(
+                        l10n.profileRemovePhoto,
+                        style: TextStyle(color: context.colors.textSecondary),
+                      ),
+                    ),
                   const SizedBox(height: 20),
                   Align(
                     alignment: Alignment.centerLeft,

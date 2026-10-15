@@ -5105,6 +5105,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New clue'**
   String get plotGameNewClue;
+
+  /// No description provided for @profileRemovePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get profileRemovePhoto;
 }
 
 class _AppLocalizationsDelegate

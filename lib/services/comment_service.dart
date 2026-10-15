@@ -96,7 +96,9 @@ class CommentService {
     if (text.trim().isEmpty && (imageUrl == null || imageUrl.isEmpty)) return;
 
     // Prefer the user's WatchVerse profile name/photo over the raw auth record.
-    String name = user.displayName ?? user.email?.split('@').first ?? 'User';
+    // Never fall back to the email: comments are public.
+    final authName = user.displayName?.trim() ?? '';
+    String name = authName.isNotEmpty ? authName : 'WatchVerse user';
     String? photo = user.photoURL;
     try {
       final prof = await _db.collection('users').doc(user.uid).get();

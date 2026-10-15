@@ -225,9 +225,9 @@
       Apple ID, and stores that on your device so that subscriber features
       unlock. The one exception is the Patron badge: if you are a Patron
       subscriber, the app sets a &ldquo;Patron&rdquo; flag on your profile
-      record so other users can see the badge. That flag is currently not
-      removed automatically if your subscription later ends; it is deleted
-      with your account, or on request. No purchase history, billing address,
+      record so other users can see the badge. The app clears that flag when
+      StoreKit reports that your Patron subscription has ended or was
+      refunded, and it is deleted with your account, or on request. No purchase history, billing address,
       or card information reaches us.</li>
 </ul>
 

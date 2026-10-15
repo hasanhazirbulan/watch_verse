@@ -5027,6 +5027,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{Couldn\'t load 1 show} other{Couldn\'t load {count} shows}}'**
   String fitsTonightShowsFailed(int count);
+
+  /// No description provided for @gamesCommonYourGuesses.
+  ///
+  /// In en, this message translates to:
+  /// **'Your guesses'**
+  String get gamesCommonYourGuesses;
+
+  /// No description provided for @gamesCommonSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get gamesCommonSkipped;
+
+  /// No description provided for @gamesCommonVerdictCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct'**
+  String get gamesCommonVerdictCorrect;
+
+  /// No description provided for @gamesCommonVerdictWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Not it'**
+  String get gamesCommonVerdictWrong;
+
+  /// No description provided for @gamesCommonVerdictSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get gamesCommonVerdictSkipped;
+
+  /// No description provided for @titleWordleLegendCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Right spot'**
+  String get titleWordleLegendCorrect;
+
+  /// No description provided for @titleWordleLegendPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong spot'**
+  String get titleWordleLegendPresent;
+
+  /// No description provided for @titleWordleLegendAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in title'**
+  String get titleWordleLegendAbsent;
+
+  /// No description provided for @framesGameFrameOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Frame {number} of {total}'**
+  String framesGameFrameOf(Object number, Object total);
+
+  /// No description provided for @gamesHubToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today · {date}'**
+  String gamesHubToday(Object date);
+
+  /// No description provided for @gamesHubResetNote.
+  ///
+  /// In en, this message translates to:
+  /// **'New daily puzzles every day at midnight ET'**
+  String get gamesHubResetNote;
+
+  /// No description provided for @gamesHubDailySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily puzzles'**
+  String get gamesHubDailySection;
+
+  /// No description provided for @gamesHubEndlessSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Play anytime'**
+  String get gamesHubEndlessSection;
+
+  /// No description provided for @gamesHubStatusSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to play'**
+  String get gamesHubStatusSignIn;
+
+  /// No description provided for @plotGameNewClue.
+  ///
+  /// In en, this message translates to:
+  /// **'New clue'**
+  String get plotGameNewClue;
 }
 
 class _AppLocalizationsDelegate

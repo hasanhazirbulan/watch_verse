@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
+import 'package:watch_verse/screens/games/game_common_widgets.dart';
 import 'package:watch_verse/screens/person_screen.dart';
 import 'package:watch_verse/services/actor_guess_logic.dart';
 import 'package:watch_verse/services/actor_guess_service.dart';
@@ -756,122 +757,47 @@ class _ActorGuessScreenState extends State<ActorGuessScreen> {
     ActorGuessProgress progress,
   ) {
     final won = progress.won;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: won ? context.colors.success : context.colors.surfaceAlt,
-          width: 1.5,
+    final count = progress.guesses.length;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: GameResultPanel(
+        won: won,
+        guessCount: count,
+        maxGuesses: actorGuessMaxAttempts,
+        title: puzzle.name,
+        year: '',
+        posterPath: puzzle.profilePath,
+        pips: [
+          for (var i = 0; i < count; i++)
+            won && i == count - 1 ? GamePip.correct : GamePip.wrong,
+        ],
+        headline: won ? l10n.actorGuessWinTitle : l10n.actorGuessLoseTitle,
+        summary: won
+            ? l10n.actorGuessWinSubtitle('$count', '$actorGuessMaxAttempts')
+            : l10n.actorGuessAnswerWas(puzzle.name),
+        detailsLabel: l10n.actorGuessViewFilmography,
+        comeBackText: l10n.actorGuessComeBackTomorrow,
+        image: TmdbImage(
+          url: Tmdb.poster(puzzle.profilePath, size: 'w185'),
+          placeholderIcon: Icons.person_rounded,
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _profilePhoto(context, puzzle, blurred: false, width: 84),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      won ? l10n.actorGuessWinTitle : l10n.actorGuessLoseTitle,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      won
-                          ? l10n.actorGuessWinSubtitle(
-                              '${progress.guesses.length}',
-                              '$actorGuessMaxAttempts',
-                            )
-                          : l10n.actorGuessAnswerWas(puzzle.name),
-                      style: TextStyle(color: context.colors.textSecondary),
-                    ),
-                    if (won) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        puzzle.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => PersonScreen(
-                            personId: puzzle.id,
-                            name: puzzle.name,
-                          ),
-                        ),
-                      ),
-                      child: Text(l10n.actorGuessViewFilmography),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            l10n.actorGuessComeBackTomorrow,
-            style: TextStyle(color: context.colors.textMuted, fontSize: 12),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: context.colors.brandGradient,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Material(
-                type: MaterialType.transparency,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(14),
-                  onTap: () => SharePlus.instance.share(
-                    ShareParams(
-                      text: actorGuessShareText(
-                        gameTitle: l10n.actorGuessTitle,
-                        dateKey: actorGuessDateKey(_now),
-                        guessCount: progress.guesses.length,
-                        won: won,
-                      ),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 13),
-                    child: Center(
-                      child: Text(
-                        l10n.actorGuessShareResult,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+        onShare: () => SharePlus.instance.share(
+          ShareParams(
+            text: actorGuessShareText(
+              gameTitle: l10n.actorGuessTitle,
+              dateKey: actorGuessDateKey(_now),
+              guessCount: count,
+              won: won,
             ),
           ),
-        ],
+        ),
+        onDetails: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                PersonScreen(personId: puzzle.id, name: puzzle.name),
+          ),
+        ),
       ),
     );
   }

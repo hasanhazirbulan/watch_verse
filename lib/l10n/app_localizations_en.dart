@@ -2949,4 +2949,53 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get gamesCommonYourGuesses => 'Your guesses';
+
+  @override
+  String get gamesCommonSkipped => 'Skipped';
+
+  @override
+  String get gamesCommonVerdictCorrect => 'Correct';
+
+  @override
+  String get gamesCommonVerdictWrong => 'Not it';
+
+  @override
+  String get gamesCommonVerdictSkipped => 'Skipped';
+
+  @override
+  String get titleWordleLegendCorrect => 'Right spot';
+
+  @override
+  String get titleWordleLegendPresent => 'Wrong spot';
+
+  @override
+  String get titleWordleLegendAbsent => 'Not in title';
+
+  @override
+  String framesGameFrameOf(Object number, Object total) {
+    return 'Frame $number of $total';
+  }
+
+  @override
+  String gamesHubToday(Object date) {
+    return 'Today · $date';
+  }
+
+  @override
+  String get gamesHubResetNote => 'New daily puzzles every day at midnight ET';
+
+  @override
+  String get gamesHubDailySection => 'Daily puzzles';
+
+  @override
+  String get gamesHubEndlessSection => 'Play anytime';
+
+  @override
+  String get gamesHubStatusSignIn => 'Sign in to play';
+
+  @override
+  String get plotGameNewClue => 'New clue';
 }

@@ -2026,5 +2026,20 @@
         "type": "int"
       }
     }
-  }
+  },
+  "gamesCommonYourGuesses": "Your guesses",
+  "gamesCommonSkipped": "Skipped",
+  "gamesCommonVerdictCorrect": "Correct",
+  "gamesCommonVerdictWrong": "Not it",
+  "gamesCommonVerdictSkipped": "Skipped",
+  "titleWordleLegendCorrect": "Right spot",
+  "titleWordleLegendPresent": "Wrong spot",
+  "titleWordleLegendAbsent": "Not in title",
+  "framesGameFrameOf": "Frame {number} of {total}",
+  "gamesHubToday": "Today · {date}",
+  "gamesHubResetNote": "New daily puzzles every day at midnight ET",
+  "gamesHubDailySection": "Daily puzzles",
+  "gamesHubEndlessSection": "Play anytime",
+  "gamesHubStatusSignIn": "Sign in to play",
+  "plotGameNewClue": "New clue"
 }

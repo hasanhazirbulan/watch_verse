@@ -77,6 +77,7 @@ class _FramesBoardState extends State<_FramesBoard> {
   Timer? _debounce;
 
   late final int _puzzleNumber;
+  late final DateTime _date;
   late final String _docId;
   late final int _answerId;
 
@@ -96,6 +97,7 @@ class _FramesBoardState extends State<_FramesBoard> {
     super.initState();
     final now = DateTime.now().toUtc();
     _puzzleNumber = gamePuzzleNumber(now);
+    _date = gameEstDate(now);
     _docId = gamePlayDocId('frames', widget.mode, gameDateKey(now));
     _answerId = dailyPoolEntry(
       widget.mode == MediaType.movie ? framesMoviePool : framesTvPool,
@@ -257,49 +259,40 @@ class _FramesBoardState extends State<_FramesBoard> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) return const GameLoading();
     final puzzle = _puzzle;
     final state = _state;
     if (_failed || puzzle == null || state == null) {
       return GameLoadError(onRetry: _load);
     }
     final l10n = AppLocalizations.of(context)!;
-    final colors = context.colors;
     final isMovie = widget.mode == MediaType.movie;
+    final pips = [for (final g in state.guesses) _pip(state, g)];
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       children: [
-        // Wrap, not Row: long translations / large text wrap to a second
-        // line instead of overflowing on an iPhone SE.
-        Wrap(
-          alignment: WrapAlignment.spaceBetween,
-          spacing: 12,
-          runSpacing: 2,
-          children: [
-            Text(
-              l10n.gamesCommonPuzzleNumber('$_puzzleNumber'),
-              style: const TextStyle(fontWeight: FontWeight.w800),
-            ),
-            if (!state.finished)
-              Text(
-                l10n.gamesCommonGuessesLeft(
+        GameHeader(
+          title: l10n.gamesCommonPuzzleNumber('$_puzzleNumber'),
+          subtitle: gameDateLabel(context, _date),
+          pips: pips,
+          total: framesMaxStills,
+          finished: state.finished,
+          status: state.finished
+              ? null
+              : l10n.gamesCommonGuessesLeft(
                   '${framesMaxStills - state.guesses.length}',
                 ),
-                style: TextStyle(color: colors.textSecondary, fontSize: 13),
-              ),
-          ],
         ),
         if (state.guesses.isEmpty) ...[
-          const SizedBox(height: 4),
-          Text(
+          const SizedBox(height: 10),
+          GameIntro(
             isMovie ? l10n.framesGameIntroMovie : l10n.framesGameIntroTv,
-            style: TextStyle(color: colors.textSecondary, fontSize: 13),
           ),
         ],
-        const SizedBox(height: 10),
-        _still(context, puzzle),
+        const SizedBox(height: 12),
+        _still(context, puzzle, state),
         const SizedBox(height: 10),
         _frameSelector(context, state),
         const SizedBox(height: 14),
@@ -318,8 +311,14 @@ class _FramesBoardState extends State<_FramesBoard> {
             onDetails: () => openMedia(context, puzzle.item),
           ),
         if (state.guesses.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          for (final g in state.guesses) _guessTile(context, l10n, state, g),
+          const SizedBox(height: 14),
+          GameGuessList(
+            guesses: [
+              for (final g in state.guesses)
+                GameGuessEntry(g.title, _pip(state, g)),
+            ],
+            skippedLabel: l10n.framesGameSkipped,
+          ),
         ],
         if (!_store.isSignedIn) ...[
           const SizedBox(height: 16),
@@ -329,18 +328,50 @@ class _FramesBoardState extends State<_FramesBoard> {
     );
   }
 
-  Widget _still(BuildContext context, FramesPuzzle puzzle) {
+  static GamePip _pip(FramesState state, FramesGuess g) => g.isSkip
+      ? GamePip.skipped
+      : g.id == state.answerId
+      ? GamePip.correct
+      : GamePip.wrong;
+
+  Widget _still(BuildContext context, FramesPuzzle puzzle, FramesState state) {
     final index = _viewIndex.clamp(0, puzzle.stills.length - 1);
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
       child: AspectRatio(
         aspectRatio: 16 / 9,
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          child: TmdbImage(
-            key: ValueKey(puzzle.stills[index]),
-            url: Tmdb.backdrop(puzzle.stills[index]),
-          ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: TmdbImage(
+                key: ValueKey(puzzle.stills[index]),
+                url: Tmdb.backdrop(puzzle.stills[index]),
+              ),
+            ),
+            Positioned(
+              left: 8,
+              bottom: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  AppLocalizations.of(
+                    context,
+                  )!.framesGameFrameOf('${index + 1}', '$framesMaxStills'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -363,11 +394,11 @@ class _FramesBoardState extends State<_FramesBoard> {
                     : null;
                 final Color fill = guess == null
                     ? colors.surfaceAlt
-                    : guess.isSkip
-                    ? colors.textMuted
-                    : guess.id == state.answerId
-                    ? colors.success
-                    : colors.primaryDark;
+                    : switch (_pip(state, guess)) {
+                        GamePip.correct => colors.gameCorrect,
+                        GamePip.wrong => colors.gameWrong,
+                        GamePip.skipped => colors.gameSkipped,
+                      };
                 return Semantics(
                   button: unlocked,
                   label: l10n.framesGameFrameLabel('${i + 1}'),
@@ -397,13 +428,9 @@ class _FramesBoardState extends State<_FramesBoard> {
                                 '${i + 1}',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w800,
-                                  // Dark theme's green is light: white
-                                  // on it was barely readable.
                                   color: guess == null
                                       ? colors.textPrimary
-                                      : fill.computeLuminance() > 0.4
-                                      ? Colors.black87
-                                      : Colors.white,
+                                      : gameOnFill(fill),
                                 ),
                               )
                             : Icon(
@@ -428,35 +455,20 @@ class _FramesBoardState extends State<_FramesBoard> {
       key: _searchFieldKey,
       children: [
         Expanded(
-          child: TextField(
+          child: GameSearchField(
             controller: _searchController,
             focusNode: _searchFocus,
             onChanged: _onSearchChanged,
-            textInputAction: TextInputAction.search,
-            autocorrect: false,
-            decoration: InputDecoration(
-              isDense: true,
-              hintText: isMovie
-                  ? l10n.framesGameSearchHintMovie
-                  : l10n.framesGameSearchHintTv,
-              prefixIcon: const Icon(Icons.search_rounded),
-              suffixIcon: _searching
-                  ? const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    )
-                  : null,
-            ),
+            busy: _searching,
+            hint: isMovie
+                ? l10n.framesGameSearchHintMovie
+                : l10n.framesGameSearchHintTv,
           ),
         ),
         const SizedBox(width: 8),
-        OutlinedButton(
+        GameSkipButton(
+          label: l10n.framesGameSkip,
           onPressed: () => _submit(const FramesGuess.skip()),
-          child: Text(l10n.framesGameSkip),
         ),
       ],
     );
@@ -545,48 +557,6 @@ class _FramesBoardState extends State<_FramesBoard> {
               ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _guessTile(
-    BuildContext context,
-    AppLocalizations l10n,
-    FramesState state,
-    FramesGuess g,
-  ) {
-    final colors = context.colors;
-    final correct = g.id == state.answerId;
-    final IconData icon;
-    final Color color;
-    if (g.isSkip) {
-      icon = Icons.skip_next_rounded;
-      color = colors.textMuted;
-    } else if (correct) {
-      icon = Icons.check_circle_rounded;
-      color = colors.success;
-    } else {
-      icon = Icons.cancel_rounded;
-      color = colors.primaryDark;
-    }
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: color),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              g.isSkip ? l10n.framesGameSkipped : g.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: g.isSkip ? colors.textMuted : colors.textPrimary,
-                fontWeight: correct ? FontWeight.w700 : FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
+import 'package:watch_verse/screens/games/game_common_widgets.dart';
+import 'package:watch_verse/services/games/game_day.dart';
 import 'package:watch_verse/services/games/plot_guess_logic.dart';
 import 'package:watch_verse/services/games/plot_guess_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
@@ -18,8 +20,11 @@ import 'package:watch_verse/widgets/media_widgets.dart';
 /// [plotGameMaxAttempts] attempts. See [PlotGuessService] for where puzzles
 /// come from and how progress is stored.
 class PlotGuessScreen extends StatefulWidget {
-  const PlotGuessScreen(
-      {super.key, this.initialMode = PlotGameMode.movie, this.service});
+  const PlotGuessScreen({
+    super.key,
+    this.initialMode = PlotGameMode.movie,
+    this.service,
+  });
 
   final PlotGameMode initialMode;
 
@@ -132,7 +137,9 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
   // ------------------------------------------------------------ attempts ---
 
   List<PlotAttempt> _effectiveAttempts(
-      PlotGameMode mode, List<PlotAttempt> remote) {
+    PlotGameMode mode,
+    List<PlotAttempt> remote,
+  ) {
     final local = _localAttempts[mode];
     return local != null && local.length >= remote.length ? local : remote;
   }
@@ -155,12 +162,13 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
     _service
         .saveAttempts(mode: mode, now: _now, attempts: next, progress: progress)
         .catchError((Object e) {
-      debugPrint('PlotGame: saving attempt failed: $e');
-      if (!mounted) return;
-      setState(() => _localAttempts[mode] = current);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(AppLocalizations.of(context)!.errorGeneric)));
-    });
+          debugPrint('PlotGame: saving attempt failed: $e');
+          if (!mounted) return;
+          setState(() => _localAttempts[mode] = current);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context)!.errorGeneric)),
+          );
+        });
   }
 
   // --------------------------------------------------------------- build ---
@@ -175,15 +183,11 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
       appBar: AppBar(title: Text(l10n.plotGameTitle)),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: SegmentedTabs(
-              labels: [
-                for (final m in PlotGameMode.values) _modeLabel(l10n, m),
-              ],
-              selected: _mode.index,
-              onChanged: _selectMode,
-            ),
+          GameModeTabs(
+            labels: [for (final m in PlotGameMode.values) _modeLabel(l10n, m)],
+            icons: const [Icons.movie_outlined, Icons.tv_rounded],
+            selected: _mode.index,
+            onChanged: _selectMode,
           ),
           Expanded(
             child: _isGuest
@@ -195,14 +199,10 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
     );
   }
 
-  Widget _message(BuildContext context, String text) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(text,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: context.colors.textSecondary)),
-        ),
-      );
+  Widget _message(BuildContext context, String text) => GameMessage(
+    icon: _isGuest ? Icons.lock_outline_rounded : Icons.hourglass_empty_rounded,
+    text: text,
+  );
 
   Widget _modeBody(BuildContext context, AppLocalizations l10n) {
     final mode = _mode;
@@ -211,7 +211,7 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
       future: _puzzle(mode),
       builder: (context, snap) {
         if (snap.connectionState != ConnectionState.done) {
-          return asyncLoadingIndicator();
+          return const GameLoading();
         }
         if (snap.hasError) {
           return Column(
@@ -246,10 +246,12 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
               );
             }
             if (!attemptsSnap.hasData && _localAttempts[mode] == null) {
-              return asyncLoadingIndicator();
+              return const GameLoading();
             }
-            final attempts =
-                _effectiveAttempts(mode, attemptsSnap.data ?? const []);
+            final attempts = _effectiveAttempts(
+              mode,
+              attemptsSnap.data ?? const [],
+            );
             return _game(context, l10n, puzzle, attempts);
           },
         );
@@ -257,17 +259,32 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
     );
   }
 
-  Widget _game(BuildContext context, AppLocalizations l10n, PlotPuzzle puzzle,
-      List<PlotAttempt> attempts) {
+  Widget _game(
+    BuildContext context,
+    AppLocalizations l10n,
+    PlotPuzzle puzzle,
+    List<PlotAttempt> attempts,
+  ) {
     final colors = context.colors;
     final progress = plotGameProgress(attempts, puzzle.id);
     final order = plotClueOrder(puzzle);
-    final revealed =
-        plotRevealedClues(puzzle, progress.missed, finished: progress.finished);
+    final revealed = plotRevealedClues(
+      puzzle,
+      progress.missed,
+      finished: progress.finished,
+    );
     final locked = order.skip(revealed.length).toList();
     final split = plotOpeningSplit(puzzle.redactedOverview);
     final showRest =
         revealed.contains(PlotClueKind.plotRest) && split.rest.isNotEmpty;
+    final pips = [
+      for (var i = 0; i < progress.attempts.length; i++) _pip(progress, i),
+    ];
+    // The clue the last miss unlocked gets a "New clue" tag.
+    final newest =
+        !progress.finished && progress.missed > 0 && revealed.isNotEmpty
+        ? revealed.last
+        : null;
 
     return Column(
       children: [
@@ -276,6 +293,19 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             children: [
+              GameHeader(
+                title: l10n.gamesCommonPuzzleNumber(
+                  '${gamePuzzleNumber(_now.toUtc())}',
+                ),
+                subtitle: gameDateLabel(context, gameEstDate(_now.toUtc())),
+                pips: pips,
+                total: plotGameMaxAttempts,
+                finished: progress.finished,
+                status: progress.finished
+                    ? null
+                    : l10n.plotGameAttemptsLeft(progress.attemptsLeft),
+              ),
+              const SizedBox(height: 12),
               // Finished: the answer goes first — no scrolling past the
               // clues to find out what it was.
               if (progress.finished) ...[
@@ -284,57 +314,57 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
               ],
               if (progress.attempts.isEmpty)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Text(l10n.plotGameIntro,
-                      style:
-                          TextStyle(color: colors.textSecondary, fontSize: 13)),
-                ),
-              if (!progress.finished)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(l10n.plotGameAttemptsLeft(progress.attemptsLeft),
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w800, fontSize: 15)),
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: GameIntro(l10n.plotGameIntro),
                 ),
               _card(
                 context,
                 label: l10n.plotGameCluePlot,
                 icon: Icons.menu_book_rounded,
+                isNew: newest == PlotClueKind.plotRest,
                 child: Text.rich(
-                  TextSpan(children: [
-                    TextSpan(text: split.opening),
-                    if (showRest) TextSpan(text: ' ${split.rest}'),
-                  ]),
+                  TextSpan(
+                    children: [
+                      TextSpan(text: split.opening),
+                      if (showRest) TextSpan(text: ' ${split.rest}'),
+                    ],
+                  ),
                   style: TextStyle(
-                      color: colors.textPrimary, fontSize: 15, height: 1.4),
+                    color: colors.textPrimary,
+                    fontSize: 15,
+                    height: 1.4,
+                  ),
                 ),
               ),
               for (final kind in revealed)
                 if (kind != PlotClueKind.plotRest)
-                  _card(context,
-                      label: _clueLabel(l10n, kind),
-                      icon: _clueIcon(kind),
-                      child: Text(_clueValue(puzzle, kind),
-                          style: TextStyle(
-                              color: colors.textPrimary,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              fontStyle: kind == PlotClueKind.tagline
-                                  ? FontStyle.italic
-                                  : FontStyle.normal))),
+                  _card(
+                    context,
+                    label: _clueLabel(l10n, kind),
+                    icon: _clueIcon(kind),
+                    isNew: newest == kind,
+                    child: Text(
+                      _clueValue(puzzle, kind),
+                      style: TextStyle(
+                        color: colors.textPrimary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        fontStyle: kind == PlotClueKind.tagline
+                            ? FontStyle.italic
+                            : FontStyle.normal,
+                      ),
+                    ),
+                  ),
               for (var i = 0; i < locked.length; i++)
                 _lockedTile(context, l10n, locked[i], first: i == 0),
               if (progress.attempts.isNotEmpty) ...[
-                const SizedBox(height: 6),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
+                const SizedBox(height: 8),
+                GameGuessList(
+                  guesses: [
                     for (var i = 0; i < progress.attempts.length; i++)
-                      _attemptChip(context, l10n, progress.attempts[i],
-                          correct: progress.won &&
-                              i == progress.attempts.length - 1),
+                      GameGuessEntry(progress.attempts[i].title, pips[i]),
                   ],
+                  skippedLabel: l10n.plotGameSkipped,
                 ),
               ],
             ],
@@ -346,35 +376,47 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
     );
   }
 
+  static GamePip _pip(PlotGameProgress progress, int i) {
+    if (progress.won && i == progress.attempts.length - 1) {
+      return GamePip.correct;
+    }
+    return progress.attempts[i].isSkip ? GamePip.skipped : GamePip.wrong;
+  }
+
   String _clueLabel(AppLocalizations l10n, PlotClueKind k) => switch (k) {
-        PlotClueKind.plotRest => l10n.plotGameClueMorePlot,
-        PlotClueKind.year => l10n.plotGameClueYear,
-        PlotClueKind.genres => l10n.plotGameClueGenres,
-        PlotClueKind.actor => l10n.plotGameClueActor,
-        PlotClueKind.tagline => l10n.plotGameClueTagline,
-        PlotClueKind.secondActor => l10n.plotGameClueSecondActor,
-      };
+    PlotClueKind.plotRest => l10n.plotGameClueMorePlot,
+    PlotClueKind.year => l10n.plotGameClueYear,
+    PlotClueKind.genres => l10n.plotGameClueGenres,
+    PlotClueKind.actor => l10n.plotGameClueActor,
+    PlotClueKind.tagline => l10n.plotGameClueTagline,
+    PlotClueKind.secondActor => l10n.plotGameClueSecondActor,
+  };
 
   IconData _clueIcon(PlotClueKind k) => switch (k) {
-        PlotClueKind.plotRest => Icons.notes_rounded,
-        PlotClueKind.year => Icons.event_rounded,
-        PlotClueKind.genres => Icons.theater_comedy_rounded,
-        PlotClueKind.actor => Icons.person_rounded,
-        PlotClueKind.tagline => Icons.format_quote_rounded,
-        PlotClueKind.secondActor => Icons.people_alt_rounded,
-      };
+    PlotClueKind.plotRest => Icons.notes_rounded,
+    PlotClueKind.year => Icons.event_rounded,
+    PlotClueKind.genres => Icons.theater_comedy_rounded,
+    PlotClueKind.actor => Icons.person_rounded,
+    PlotClueKind.tagline => Icons.format_quote_rounded,
+    PlotClueKind.secondActor => Icons.people_alt_rounded,
+  };
 
   String _clueValue(PlotPuzzle p, PlotClueKind k) => switch (k) {
-        PlotClueKind.plotRest => plotOpeningSplit(p.redactedOverview).rest,
-        PlotClueKind.year => '${p.year}',
-        PlotClueKind.genres => p.genres.join(', '),
-        PlotClueKind.actor => p.cast.isNotEmpty ? p.cast.first : '',
-        PlotClueKind.tagline => '“${p.tagline}”',
-        PlotClueKind.secondActor => p.cast.length > 1 ? p.cast[1] : '',
-      };
+    PlotClueKind.plotRest => plotOpeningSplit(p.redactedOverview).rest,
+    PlotClueKind.year => '${p.year}',
+    PlotClueKind.genres => p.genres.join(', '),
+    PlotClueKind.actor => p.cast.isNotEmpty ? p.cast.first : '',
+    PlotClueKind.tagline => '“${p.tagline}”',
+    PlotClueKind.secondActor => p.cast.length > 1 ? p.cast[1] : '',
+  };
 
-  Widget _card(BuildContext context,
-      {required String label, required IconData icon, required Widget child}) {
+  Widget _card(
+    BuildContext context, {
+    required String label,
+    required IconData icon,
+    required Widget child,
+    bool isNew = false,
+  }) {
     final colors = context.colors;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -382,20 +424,38 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isNew
+              ? colors.accent.withValues(alpha: 0.6)
+              : colors.surfaceAlt,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 16, color: colors.accent),
-              const SizedBox(width: 6),
-              Text(label.toUpperCase(),
-                  style: TextStyle(
-                      color: colors.textMuted,
-                      fontSize: 11,
-                      letterSpacing: 0.6,
-                      fontWeight: FontWeight.w800)),
+              Expanded(child: GameSectionLabel(label, icon: icon)),
+              if (isNew)
+                Container(
+                  margin: const EdgeInsets.only(left: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.accent,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context)!.plotGameNewClue,
+                    style: TextStyle(
+                      color: gameOnFill(colors.accent),
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 6),
@@ -405,9 +465,12 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
     );
   }
 
-  Widget _lockedTile(BuildContext context, AppLocalizations l10n,
-      PlotClueKind kind,
-      {required bool first}) {
+  Widget _lockedTile(
+    BuildContext context,
+    AppLocalizations l10n,
+    PlotClueKind kind, {
+    required bool first,
+  }) {
     final colors = context.colors;
     return Container(
       margin: const EdgeInsets.only(bottom: 6),
@@ -421,68 +484,41 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
           Icon(Icons.lock_rounded, size: 16, color: colors.textMuted),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(_clueLabel(l10n, kind),
-                style: TextStyle(
-                    color: colors.textSecondary, fontWeight: FontWeight.w700)),
+            child: Text(
+              _clueLabel(l10n, kind),
+              style: TextStyle(
+                color: colors.textSecondary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
           if (first)
             Flexible(
-              child: Text(l10n.plotGameNextClueLocked,
-                  textAlign: TextAlign.end,
-                  style: TextStyle(color: colors.textMuted, fontSize: 11)),
+              child: Text(
+                l10n.plotGameNextClueLocked,
+                textAlign: TextAlign.end,
+                style: TextStyle(color: colors.textMuted, fontSize: 11),
+              ),
             ),
         ],
       ),
     );
   }
 
-  Widget _attemptChip(
-      BuildContext context, AppLocalizations l10n, PlotAttempt a,
-      {required bool correct}) {
-    final colors = context.colors;
-    final error = Theme.of(context).colorScheme.error;
-    final color =
-        correct ? colors.success : (a.isSkip ? colors.textMuted : error);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.5)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-              correct
-                  ? Icons.check_rounded
-                  : (a.isSkip ? Icons.redo_rounded : Icons.close_rounded),
-              size: 14,
-              color: color),
-          const SizedBox(width: 4),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 220),
-            child: Text(a.isSkip ? l10n.plotGameSkipped : a.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    color: colors.textPrimary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _guessBar(BuildContext context, AppLocalizations l10n,
-      PlotPuzzle puzzle, List<PlotAttempt> attempts) {
+  Widget _guessBar(
+    BuildContext context,
+    AppLocalizations l10n,
+    PlotPuzzle puzzle,
+    List<PlotAttempt> attempts,
+  ) {
     final colors = context.colors;
     final query = _searchController.text.trim();
     // Room for results above the field without pushing it off-screen when
     // the keyboard is up on a small phone.
-    final maxResultsHeight =
-        math.min(240.0, MediaQuery.sizeOf(context).height * 0.28);
+    final maxResultsHeight = math.min(
+      240.0,
+      MediaQuery.sizeOf(context).height * 0.28,
+    );
     return Material(
       color: colors.surface,
       child: SafeArea(
@@ -501,8 +537,9 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Text(
-                      _searchFailed ? l10n.errorGeneric : l10n.plotGameNoResults,
-                      style: TextStyle(color: colors.textMuted, fontSize: 12)),
+                    _searchFailed ? l10n.errorGeneric : l10n.plotGameNoResults,
+                    style: TextStyle(color: colors.textMuted, fontSize: 12),
+                  ),
                 ),
               if (_results.isNotEmpty)
                 ConstrainedBox(
@@ -517,30 +554,42 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
                       final already = attempts.any((a) => a.id == item.id);
                       return ListTile(
                         dense: true,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 4),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                        ),
                         leading: ClipRRect(
                           borderRadius: BorderRadius.circular(6),
                           child: SizedBox(
                             width: 32,
                             height: 46,
                             child: TmdbImage(
-                                url: Tmdb.poster(item.posterPath, size: 'w92')),
+                              url: Tmdb.poster(item.posterPath, size: 'w92'),
+                            ),
                           ),
                         ),
-                        title: Text(item.title,
-                            maxLines: 1, overflow: TextOverflow.ellipsis),
+                        title: Text(
+                          item.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         subtitle: item.year.isEmpty ? null : Text(item.year),
                         trailing: already
-                            ? Text(l10n.plotGameAlreadyGuessed,
+                            ? Text(
+                                l10n.plotGameAlreadyGuessed,
                                 style: TextStyle(
-                                    color: colors.textMuted, fontSize: 12))
+                                  color: colors.textMuted,
+                                  fontSize: 12,
+                                ),
+                              )
                             : null,
                         enabled: !already,
                         onTap: already
                             ? null
-                            : () => _submit(puzzle, attempts,
-                                PlotAttempt(id: item.id, title: item.title)),
+                            : () => _submit(
+                                puzzle,
+                                attempts,
+                                PlotAttempt(id: item.id, title: item.title),
+                              ),
                       );
                     },
                   ),
@@ -548,36 +597,22 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
+                    child: GameSearchField(
                       controller: _searchController,
                       focusNode: _searchFocus,
                       onChanged: _onQueryChanged,
-                      textInputAction: TextInputAction.search,
                       onSubmitted: _search,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        hintText: _mode == PlotGameMode.movie
-                            ? l10n.plotGameSearchMovieHint
-                            : l10n.plotGameSearchTvHint,
-                        prefixIcon: const Icon(Icons.search_rounded),
-                        suffixIcon: _searching
-                            ? const Padding(
-                                padding: EdgeInsets.all(12),
-                                child: SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                        strokeWidth: 2)),
-                              )
-                            : null,
-                      ),
+                      busy: _searching,
+                      hint: _mode == PlotGameMode.movie
+                          ? l10n.plotGameSearchMovieHint
+                          : l10n.plotGameSearchTvHint,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  TextButton(
+                  GameSkipButton(
+                    label: l10n.plotGameSkip,
                     onPressed: () =>
                         _submit(puzzle, attempts, const PlotAttempt.skip()),
-                    child: Text(l10n.plotGameSkip),
                   ),
                 ],
               ),
@@ -588,9 +623,12 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
     );
   }
 
-  Widget _resultPanel(BuildContext context, AppLocalizations l10n,
-      PlotPuzzle puzzle, PlotGameProgress progress) {
-    final colors = context.colors;
+  Widget _resultPanel(
+    BuildContext context,
+    AppLocalizations l10n,
+    PlotPuzzle puzzle,
+    PlotGameProgress progress,
+  ) {
     final item = MediaItem(
       id: puzzle.id,
       title: puzzle.title,
@@ -606,81 +644,21 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
       dateKey: plotGameDateKey(_now),
       progress: progress,
     );
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.surfaceAlt),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(progress.won ? l10n.plotGameWinTitle : l10n.plotGameLoseTitle,
-              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
-          if (progress.won)
-            Text(
-                l10n.plotGameSolvedIn(
-                    progress.attempts.length, plotGameMaxAttempts),
-                style: TextStyle(color: colors.textSecondary)),
-          const SizedBox(height: 12),
-          InkWell(
-            borderRadius: BorderRadius.circular(10),
-            onTap: () => openMedia(context, item),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: SizedBox(
-                    width: 60,
-                    height: 90,
-                    child: TmdbImage(
-                        url: Tmdb.poster(puzzle.posterPath, size: 'w185')),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(puzzle.title,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w800, fontSize: 16)),
-                      if (puzzle.year > 0)
-                        Text('${puzzle.year}',
-                            style: TextStyle(color: colors.textSecondary)),
-                      const SizedBox(height: 4),
-                      Text(l10n.plotGameViewDetails,
-                          style: TextStyle(
-                              color: colors.primary,
-                              fontWeight: FontWeight.w700)),
-                    ],
-                  ),
-                ),
-                Icon(Icons.chevron_right_rounded, color: colors.textMuted),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              style: FilledButton.styleFrom(
-                  backgroundColor: colors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12)),
-              onPressed: () =>
-                  SharePlus.instance.share(ShareParams(text: share)),
-              icon: const Icon(Icons.ios_share_rounded, size: 18),
-              label: Text(l10n.plotGameShare,
-                  style: const TextStyle(fontWeight: FontWeight.w800)),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(l10n.plotGameComeBack,
-              style: TextStyle(color: colors.textMuted, fontSize: 12)),
-        ],
-      ),
+    return GameResultPanel(
+      won: progress.won,
+      guessCount: progress.attempts.length,
+      maxGuesses: plotGameMaxAttempts,
+      title: puzzle.title,
+      year: puzzle.year > 0 ? '${puzzle.year}' : '',
+      posterPath: puzzle.posterPath,
+      headline: progress.won ? l10n.plotGameWinTitle : l10n.plotGameLoseTitle,
+      summary: progress.won
+          ? l10n.plotGameSolvedIn(progress.attempts.length, plotGameMaxAttempts)
+          : null,
+      detailsLabel: l10n.plotGameViewDetails,
+      comeBackText: l10n.plotGameComeBack,
+      onShare: () => SharePlus.instance.share(ShareParams(text: share)),
+      onDetails: () => openMedia(context, item),
     );
   }
 }

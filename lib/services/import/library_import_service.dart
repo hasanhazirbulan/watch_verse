@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/models/model.dart';
 import 'package:watch_verse/services/import/import_models.dart';
@@ -47,15 +48,29 @@ class LibraryImportService {
     this.concurrency = 4,
     this.flushEvery = 100,
     Duration retryDelay = const Duration(seconds: 1),
+    Future<void> Function()? backfillDetails,
   })  : _db = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance,
         _api = api ?? TmdbImportLookupApi(),
-        _retryDelay = retryDelay;
+        _retryDelay = retryDelay,
+        _backfillDetails = backfillDetails ?? _defaultBackfill;
 
   final FirebaseFirestore _db;
   final FirebaseAuth _auth;
   final ImportLookupApi _api;
   final Duration _retryDelay;
+  final Future<void> Function() _backfillDetails;
+
+  /// Same pair the profile screen's one-time time-stats backfill runs.
+  static Future<void> _defaultBackfill() => Future.wait([
+        MovieService.instance.backfillDetails(),
+        TvTrackingService.instance.backfillAllShowDetails(),
+      ]);
+
+  /// The runtime/genre backfill started by the last [run] that marked films
+  /// watched (null if none). Runs in the background — the import summary
+  /// doesn't wait for it — and never throws. Exposed for tests.
+  Future<void>? detailsBackfill;
 
   /// Parallel TMDB lookups — small, to stay far below TMDB's rate limit.
   final int concurrency;
@@ -121,14 +136,30 @@ class LibraryImportService {
 
     if (summary.moviesWatched > 0) {
       // Imported films come from search results, which carry no runtime or
-      // genres. Clearing the profile screen's one-time backfill flag makes
-      // it fetch those (MovieService.backfillDetails) the next time the
-      // profile opens, so time-spent/genre stats include the import — the
-      // same mechanism that fixed up pre-runtime watches.
+      // genres, so Year in Review / Watch Stats would show them as 0 hours.
+      // Fetch those now, in the background: the profile screen's own
+      // backfill only runs when it's first built, which already happened
+      // before the user reached Settings → Import, so without this the
+      // stats stayed empty until the next app launch. The flag is cleared
+      // first so an interrupted backfill is retried by the profile screen
+      // on the next launch, and set again once this one finishes.
       await userRef.set(
           {'timeStatsBackfilledV2': false}, SetOptions(merge: true));
+      detailsBackfill = _backfillInBackground(userRef);
     }
     return summary;
+  }
+
+  Future<void> _backfillInBackground(
+      DocumentReference<Map<String, dynamic>> userRef) async {
+    try {
+      await _backfillDetails();
+      await userRef.set(
+          {'timeStatsBackfilledV2': true}, SetOptions(merge: true));
+    } catch (e) {
+      // Not fatal: the flag stays false, so the profile screen retries.
+      debugPrint('Import: details backfill failed: $e');
+    }
   }
 
   Future<void> _matchOne(TitleMatcher matcher, ImportedTitle t,

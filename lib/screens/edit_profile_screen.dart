@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/services/pro_service.dart';
+import 'package:watch_verse/services/profile_photo_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/theme/avatar_backgrounds.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
@@ -101,7 +102,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     try {
       // Small square JPEG stored inline on the profile doc — the project is
       // on the Spark plan, which has no Cloud Storage bucket (see
-      // utils/avatar_image.dart). 192px at q70 is ~10 KB.
+      // utils/avatar_image.dart). 192px at q70 is ~10 KB; iOS returns PNGs
+      // uncompressed, which ProfilePhotoService shrinks to fit.
       final picked = await ImagePicker().pickImage(
         source: ImageSource.gallery,
         maxWidth: 192,
@@ -110,13 +112,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       );
       if (picked == null || !mounted) return;
       setState(() => _uploadingPhoto = true);
-      final url = avatarDataUri(await picked.readAsBytes());
-      if (url == null) {
-        throw StateError('photo is too large after compression');
-      }
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'photoURL': url,
-      }, SetOptions(merge: true));
+      final url =
+          await ProfilePhotoService.instance.setPhoto(await picked.readAsBytes());
       if (!mounted) return;
       setState(() {
         _photoURL = url;

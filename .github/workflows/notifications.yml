@@ -11,7 +11,9 @@ name: WatchVerse Notifications
 #   06:10 UTC = 09:10 Istanbul -> movie-release
 #   16:00 UTC = 19:00 Istanbul -> digest-flush
 #   17:00 UTC = 20:00 Istanbul -> episode-today
-#   every 30 minutes           -> activity-poll (shared-watch / digest queue)
+#   hourly at :20              -> activity-poll (shared-watch / digest queue)
+#     (hourly, not every 30 min, to stay well inside the free Actions minutes;
+#      the job resumes from a cursor, so nothing is skipped)
 
 on:
   schedule:
@@ -19,7 +21,7 @@ on:
     - cron: "10 6 * * *"
     - cron: "0 16 * * *"
     - cron: "0 17 * * *"
-    - cron: "*/30 * * * *"
+    - cron: "20 * * * *"
   workflow_dispatch:
     inputs:
       mode:
@@ -58,7 +60,7 @@ jobs:
               "10 6 * * *") echo "value=movie-release" >> "$GITHUB_OUTPUT" ;;
               "0 16 * * *") echo "value=digest-flush" >> "$GITHUB_OUTPUT" ;;
               "0 17 * * *") echo "value=episode-today" >> "$GITHUB_OUTPUT" ;;
-              "*/30 * * * *") echo "value=activity-poll" >> "$GITHUB_OUTPUT" ;;
+              "20 * * * *") echo "value=activity-poll" >> "$GITHUB_OUTPUT" ;;
               *) echo "Unrecognized schedule: ${{ github.event.schedule }}" && exit 1 ;;
             esac
           fi

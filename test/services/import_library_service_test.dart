@@ -85,15 +85,24 @@ void main() {
   late FakeFirebaseFirestore db;
   late FakeApi api;
   late LibraryImportService service;
+  late int backfills;
+  Object? backfillError;
 
   setUp(() {
     db = FakeFirebaseFirestore();
     api = FakeApi();
+    backfills = 0;
+    backfillError = null;
     service = LibraryImportService(
       firestore: db,
       auth: MockFirebaseAuth(mockUser: MockUser(uid: uid), signedIn: true),
       api: api,
       retryDelay: Duration.zero,
+      backfillDetails: () async {
+        backfills++;
+        final e = backfillError;
+        if (e != null) throw e;
+      },
     );
   });
 
@@ -225,9 +234,33 @@ void main() {
       final diary = await userRef().collection('diary').get();
       expect(diary.docs.map((d) => d.data()['rating']).toSet(), {4.0, 4.5});
 
+      // Imported films have no runtime/genres yet: the importer fetches
+      // them itself (the profile screen's backfill already ran before the
+      // user got to Settings → Import), then marks the backfill done.
+      expect(service.detailsBackfill, isNotNull);
+      await service.detailsBackfill;
+      expect(backfills, 1);
       final user = await userRef().get();
-      expect(user.data()!['timeStatsBackfilledV2'], isFalse,
-          reason: 'triggers the runtime/genre backfill for imported films');
+      expect(user.data()!['timeStatsBackfilledV2'], isTrue);
+    });
+
+    test('a failed details backfill leaves the flag for the profile to retry',
+        () async {
+      seedLetterboxd();
+      backfillError = Exception('offline');
+      final s = await service.run(parse(lbFiles()));
+      expect(s.moviesWatched, 1, reason: 'the import itself still succeeds');
+      await service.detailsBackfill; // never throws
+      expect(backfills, 1);
+      expect((await userRef().get()).data()!['timeStatsBackfilledV2'], isFalse);
+    });
+
+    test('no details backfill when no film was newly watched', () async {
+      seedLetterboxd();
+      await service.run(parse([csv('watchlist.csv', lbWatchlist)]));
+      expect(service.detailsBackfill, isNull);
+      expect(backfills, 0);
+      expect((await userRef().get()).exists, isFalse);
     });
 
     test('re-importing the same files is a no-op (idempotent)', () async {

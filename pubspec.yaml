@@ -65,6 +65,7 @@ dependencies:
   share_plus: ^13.3.1
   file_picker: ^13.1.0
   archive: ^4.5.2
+  intl: any
 
 flutter_launcher_icons:
   android:  "launcher_icon"

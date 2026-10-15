@@ -131,7 +131,7 @@ class _GifPickerScreenState extends State<GifPickerScreen> {
                 fit: BoxFit.cover,
                 loadingBuilder: (context, child, progress) =>
                     progress == null ? child : const SizedBox.shrink(),
-                errorBuilder: (context, __, ___) =>
+                errorBuilder: (context, _, _) =>
                     Icon(Icons.broken_image_rounded,
                         color: context.colors.textMuted),
               ),

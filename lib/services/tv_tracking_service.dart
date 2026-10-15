@@ -182,8 +182,8 @@ class TvTrackingService {
     final ref = _noteRef(showId, key);
     if (ref == null) return;
     await ref.set({
-      if (note != null) 'note': note,
-      if (rating != null) 'rating': rating,
+      'note': ?note,
+      'rating': ?rating,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }

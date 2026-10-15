@@ -25,7 +25,7 @@ class BlockedUsersScreen extends StatelessWidget {
           builder: (context, users) => ListView.separated(
             padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: users.length,
-            separatorBuilder: (_, __) => const Divider(height: 1, indent: 72),
+            separatorBuilder: (_, _) => const Divider(height: 1, indent: 72),
             itemBuilder: (context, i) {
               final u = users[i];
               final name = (u['name'] ?? l10n.blockedDefaultUserName) as String;

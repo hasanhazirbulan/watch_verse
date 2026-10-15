@@ -31,7 +31,7 @@ class ExportService {
       _diaryFile(),
       _listsFile(),
     ]);
-    await Share.shareXFiles(files);
+    await SharePlus.instance.share(ShareParams(files: files));
   }
 
   Future<XFile> _moviesFile() async {

@@ -253,7 +253,7 @@ class MovieService {
     await _upsert(m, {
       'status': 'watched',
       'watchedAt': Timestamp.fromDate(when),
-      if (rating != null) 'rating': rating,
+      'rating': ?rating,
       // The note stays in the private diary entry above only — see
       // [saveDiary] for why it must not sit on the movie doc.
       'note': FieldValue.delete(),

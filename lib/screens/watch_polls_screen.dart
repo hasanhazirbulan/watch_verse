@@ -32,7 +32,7 @@ class WatchPollsScreen extends StatelessWidget {
         builder: (context, polls) => ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           itemCount: polls.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (context, i) => _card(context, l10n, polls[i]),
         ),
       ),

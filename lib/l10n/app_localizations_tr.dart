@@ -1670,9 +1670,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get proFeatureProfile => 'Özel profil temaları';
 
   @override
-  String get proFeatureGame => 'Günlük film tahmin oyunu';
-
-  @override
   String get proTierPro => 'Pro';
 
   @override
@@ -1683,9 +1680,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get proFeatureBadge => 'Profilinde Patron rozeti';
-
-  @override
-  String get proFeatureEarlyAccess => 'Yeni özelliklere erken erişim';
 
   @override
   String get proMonthly => 'Aylık';

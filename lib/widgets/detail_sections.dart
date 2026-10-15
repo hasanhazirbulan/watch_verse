@@ -31,7 +31,7 @@ class CastStrip extends StatelessWidget {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: cast.length.clamp(0, 20),
-            separatorBuilder: (_, __) => const SizedBox(width: 14),
+            separatorBuilder: (_, _) => const SizedBox(width: 14),
             itemBuilder: (context, i) => _castTile(context, cast[i]),
           ),
         ),
@@ -107,7 +107,7 @@ class MediaRail extends StatelessWidget {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
             itemBuilder: (context, i) =>
                 PosterCard(item: items[i], width: 120),
           ),

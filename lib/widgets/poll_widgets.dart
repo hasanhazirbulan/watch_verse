@@ -416,7 +416,7 @@ class _PollGroup extends StatelessWidget {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: options.length,
-                      separatorBuilder: (_, __) =>
+                      separatorBuilder: (_, _) =>
                           const SizedBox(width: _spacing),
                       itemBuilder: (context, i) {
                         final opt = options[i];

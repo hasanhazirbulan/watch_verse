@@ -1667,9 +1667,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proFeatureProfile => 'Exclusive profile themes';
 
   @override
-  String get proFeatureGame => 'Daily movie guessing game';
-
-  @override
   String get proTierPro => 'Pro';
 
   @override
@@ -1680,9 +1677,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get proFeatureBadge => 'Patron badge on your profile';
-
-  @override
-  String get proFeatureEarlyAccess => 'Early access to new features';
 
   @override
   String get proMonthly => 'Monthly';

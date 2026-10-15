@@ -274,7 +274,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                 height: 64,
                 child: Image.network(_pendingUrl!,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    errorBuilder: (_, _, _) => Container(
                         color: context.colors.surfaceAlt,
                         child: const Icon(Icons.broken_image_rounded))),
               ),

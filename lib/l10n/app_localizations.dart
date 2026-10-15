@@ -3018,12 +3018,6 @@ abstract class AppLocalizations {
   /// **'Exclusive profile themes'**
   String get proFeatureProfile;
 
-  /// No description provided for @proFeatureGame.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily movie guessing game'**
-  String get proFeatureGame;
-
   /// No description provided for @proTierPro.
   ///
   /// In en, this message translates to:
@@ -3047,12 +3041,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Patron badge on your profile'**
   String get proFeatureBadge;
-
-  /// No description provided for @proFeatureEarlyAccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Early access to new features'**
-  String get proFeatureEarlyAccess;
 
   /// No description provided for @proMonthly.
   ///

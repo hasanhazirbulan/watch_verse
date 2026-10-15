@@ -188,7 +188,7 @@ class _SearchScreenState extends State<SearchScreen> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: _Filter.values.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
           final f = _Filter.values[i];
           final active = f == _filter;
@@ -260,7 +260,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       itemCount: titles.length,
-      separatorBuilder: (_, __) => const Divider(height: 1, indent: 84),
+      separatorBuilder: (_, _) => const Divider(height: 1, indent: 84),
       itemBuilder: (context, index) => _resultTile(context, titles[index]),
     );
   }

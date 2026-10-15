@@ -96,7 +96,7 @@ class _ListsScreenState extends State<ListsScreen> {
       builder: (context, lists) => ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         itemCount: lists.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, i) => _card(context, lists[i]),
       ),
     );
@@ -110,7 +110,7 @@ class _ListsScreenState extends State<ListsScreen> {
       builder: (context, followed) => ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         itemCount: followed.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, i) => _followedCard(context, followed[i]),
       ),
     );

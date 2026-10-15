@@ -55,7 +55,7 @@ class TmdbImage extends StatelessWidget {
           ),
         ),
       ),
-      errorWidget: (_, __, ___) => _placeholder(context),
+      errorWidget: (_, _, _) => _placeholder(context),
     );
   }
 
@@ -212,7 +212,7 @@ class SectionHeader extends StatelessWidget {
               ),
             ),
           ),
-          if (trailing != null) trailing!,
+          ?trailing,
         ],
       ),
     );
@@ -332,7 +332,7 @@ class _ProviderBadge extends StatelessWidget {
             child: CachedNetworkImage(
               imageUrl: Tmdb.logo(providers.first.logoPath) ?? '',
               fit: BoxFit.cover,
-              errorWidget: (_, __, ___) => const SizedBox.shrink(),
+              errorWidget: (_, _, _) => const SizedBox.shrink(),
             ),
           ),
         );
@@ -527,8 +527,8 @@ class RailSkeleton extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: count,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (context, __) => SizedBox(
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        itemBuilder: (context, _) => SizedBox(
           width: itemWidth,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

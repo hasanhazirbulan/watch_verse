@@ -1,5 +1,5 @@
 name: watch_verse
-description: "A new Flutter project."
+description: "WatchVerse — track movies and TV shows, keep a diary, play movie games and follow friends. iOS app built with Flutter, TMDB and Firebase."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

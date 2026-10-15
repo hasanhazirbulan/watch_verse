@@ -2,7 +2,7 @@
 
 ## Getting set up
 
-Follow the [Getting Started](README.md#getting-started) section in the README — install Flutter, run `flutter pub get`, and set up `secrets.json` (TMDB + Giphy API keys) before running the app.
+Follow the [Getting Started](README.md#getting-started) section in the README — install Flutter, run `flutter pub get`, and set up `secrets.json` (TMDB + Giphy API keys) before running the app. Always pass `--dart-define-from-file=secrets.json` to `flutter run` / `flutter build`.
 
 ## Workflow
 
@@ -22,8 +22,9 @@ Follow the [Getting Started](README.md#getting-started) section in the README �
 - Match the patterns already in the codebase rather than introducing a new one for a single feature:
   - Services are singletons exposed via `Service.instance` (see `lib/services/`), with Firestore/Auth constructor-injectable for testing (see `ListService`, `MovieService`).
   - Screens read colors via `context.colors.*` (see `lib/theme/app_theme.dart`), never hardcoded `Color(...)` values, so light/dark theming keeps working.
-  - User-facing strings go through `AppLocalizations` (`l10n.someKey`), not string literals — see `lib/l10n/app_en.arb` / `app_tr.arb`. Add both an English and a Turkish entry for any new string.
+  - User-facing strings go through `AppLocalizations` (`l10n.someKey`), not string literals — add new strings to `lib/l10n/app_en.arb` and run `flutter gen-l10n`. The app is English-only (`main.dart` forces `Locale('en')`), so don't add Turkish entries; `app_tr.arb` is unused.
   - Loading/error/empty states for `Stream`/`Future`-backed lists use `StreamListView` / `FutureListView` / `FutureValueView` (`lib/widgets/async_state_view.dart`) instead of hand-rolled `StreamBuilder`/`FutureBuilder` branching.
+- Product constraints: the Firebase project is on the free Spark plan (no Cloud Storage, no Cloud Functions — anything server-side runs from `scripts/` on GitHub Actions), the app ships on iOS only, and there are no streak / habit-loop mechanics by design.
 - Comments should be in English and explain *why* something non-obvious is done, not restate the code.
 
 ## Tests

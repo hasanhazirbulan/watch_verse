@@ -152,10 +152,10 @@ class _GameCardState extends State<_GameCard> {
           children: [
             // Faint oversized icon as card art.
             Positioned(
-              right: -18,
-              bottom: -22,
+              right: 26,
+              bottom: -26,
               child: Icon(entry.icon,
-                  size: 110, color: entry.art.first.withValues(alpha: 0.07)),
+                  size: 100, color: entry.art.first.withValues(alpha: 0.06)),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),

@@ -5,8 +5,8 @@ import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 
 // Shared building blocks for the Games hub's daily games (Frames, Title
-// Wordle, Plot, Who's the Actor?) and Higher or Lower, so every game has the
-// same header, guess feedback, result card and empty/error states.
+// Wordle, Plot, Who's the Actor?), so they share one header, guess
+// feedback, result card and empty/error states.
 
 // ---------------------------------------------------------------- colors ---
 
@@ -228,8 +228,8 @@ class GameAttemptPips extends StatelessWidget {
 }
 
 /// Top strip of a daily game: puzzle name + date on the left, attempt pips
-/// and "N guesses left" on the right. Wraps under the title on a narrow
-/// screen or with large text.
+/// and "N guesses left" on the right. On a short screen (iPhone SE) it
+/// drops the subtitle and shrinks, so the board keeps its room.
 class GameHeader extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -247,55 +247,73 @@ class GameHeader extends StatelessWidget {
     this.status,
   });
 
+  /// Screens shorter than this get the compact header.
+  static const compactHeight = 640.0;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final left = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
-        ),
-        if (subtitle != null)
-          Text(
-            subtitle!,
-            style: TextStyle(color: colors.textSecondary, fontSize: 12),
-          ),
-      ],
-    );
-    final right = Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GameAttemptPips(used: pips, total: total, finished: finished),
-        if (status != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            status!,
-            style: TextStyle(
-              color: colors.textSecondary,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ],
-    );
+    final compact = MediaQuery.sizeOf(context).height < compactHeight;
+    final sub = compact ? null : subtitle;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 14, vertical: compact ? 6 : 10),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: colors.surfaceAlt),
       ),
-      child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 12,
-        runSpacing: 8,
-        children: [left, right],
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                  ),
+                ),
+                if (sub != null)
+                  Text(
+                    sub,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: colors.textSecondary, fontSize: 12),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GameAttemptPips(
+                used: pips,
+                total: total,
+                finished: finished,
+                size: compact ? 12 : 14,
+              ),
+              if (status != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  status!,
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: colors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -318,15 +336,21 @@ class GameIntro extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 1),
-          child: Icon(Icons.lightbulb_outline_rounded,
-              size: 16, color: colors.accent),
+          child: Icon(
+            Icons.lightbulb_outline_rounded,
+            size: 16,
+            color: colors.accent,
+          ),
         ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             text,
             style: TextStyle(
-                color: colors.textSecondary, fontSize: 13, height: 1.35),
+              color: colors.textSecondary,
+              fontSize: 13,
+              height: 1.35,
+            ),
           ),
         ),
       ],
@@ -394,23 +418,26 @@ class _GuessRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final colors = context.colors;
-    final (Color color, IconData icon, String verdict) = switch (
-        entry.outcome) {
+    final (
+      Color color,
+      IconData icon,
+      String verdict,
+    ) = switch (entry.outcome) {
       GamePip.correct => (
-          colors.gameCorrect,
-          Icons.check_rounded,
-          l10n.gamesCommonVerdictCorrect,
-        ),
+        colors.gameCorrect,
+        Icons.check_rounded,
+        l10n.gamesCommonVerdictCorrect,
+      ),
       GamePip.wrong => (
-          colors.gameWrong,
-          Icons.close_rounded,
-          l10n.gamesCommonVerdictWrong,
-        ),
+        colors.gameWrong,
+        Icons.close_rounded,
+        l10n.gamesCommonVerdictWrong,
+      ),
       GamePip.skipped => (
-          colors.gameSkipped,
-          Icons.redo_rounded,
-          l10n.gamesCommonVerdictSkipped,
-        ),
+        colors.gameSkipped,
+        Icons.redo_rounded,
+        l10n.gamesCommonVerdictSkipped,
+      ),
     };
     final skipped = entry.outcome == GamePip.skipped;
     return TweenAnimationBuilder<double>(
@@ -594,8 +621,7 @@ class GameSkipButton extends StatelessWidget {
         foregroundColor: colors.textPrimary,
         side: BorderSide(color: colors.surfaceAlt, width: 1.5),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
       icon: const Icon(Icons.redo_rounded, size: 18),
       label: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
@@ -796,8 +822,10 @@ class GameResultPanel extends StatelessWidget {
                   Container(
                     width: 40,
                     height: 40,
-                    decoration:
-                        BoxDecoration(color: tone, shape: BoxShape.circle),
+                    decoration: BoxDecoration(
+                      color: tone,
+                      shape: BoxShape.circle,
+                    ),
                     child: Icon(
                       won
                           ? Icons.emoji_events_rounded
@@ -813,7 +841,9 @@ class GameResultPanel extends StatelessWidget {
                       children: [
                         Text(
                           headline ??
-                              (won ? l10n.gamesCommonWin : l10n.gamesCommonLose),
+                              (won
+                                  ? l10n.gamesCommonWin
+                                  : l10n.gamesCommonLose),
                           style: const TextStyle(
                             fontWeight: FontWeight.w900,
                             fontSize: 18,
@@ -867,7 +897,8 @@ class GameResultPanel extends StatelessWidget {
                         child: SizedBox(
                           width: 64,
                           height: 96,
-                          child: image ??
+                          child:
+                              image ??
                               TmdbImage(
                                 url: Tmdb.poster(posterPath, size: 'w185'),
                               ),
@@ -908,8 +939,10 @@ class GameResultPanel extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Icon(Icons.chevron_right_rounded,
-                          color: colors.textMuted),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: colors.textMuted,
+                      ),
                     ],
                   ),
                 ),
@@ -929,15 +962,20 @@ class GameResultPanel extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.schedule_rounded,
-                          size: 14, color: colors.textMuted),
+                      Icon(
+                        Icons.schedule_rounded,
+                        size: 14,
+                        color: colors.textMuted,
+                      ),
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
                           comeBackText ?? l10n.gamesCommonComeBackTomorrow,
                           textAlign: TextAlign.center,
-                          style:
-                              TextStyle(color: colors.textMuted, fontSize: 12),
+                          style: TextStyle(
+                            color: colors.textMuted,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                     ],

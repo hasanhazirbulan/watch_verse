@@ -79,6 +79,7 @@ class _WordleBoardState extends State<_WordleBoard> {
   final _focus = FocusNode();
 
   late final int _puzzleNumber;
+  late final DateTime _date;
   late final String _docId;
   late final WordlePoolEntry _entry;
 
@@ -92,6 +93,7 @@ class _WordleBoardState extends State<_WordleBoard> {
     super.initState();
     final now = DateTime.now().toUtc();
     _puzzleNumber = gamePuzzleNumber(now);
+    _date = gameEstDate(now);
     _docId = gamePlayDocId('titleWordle', widget.mode, gameDateKey(now));
     _entry = dailyPoolEntry(
       widget.mode == MediaType.movie ? titleWordleMoviePool : titleWordleTvPool,
@@ -244,94 +246,139 @@ class _WordleBoardState extends State<_WordleBoard> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) return const GameLoading();
     final state = _state;
     if (_failed || state == null) return GameLoadError(onRetry: _load);
     final l10n = AppLocalizations.of(context)!;
-    final colors = context.colors;
     final isMovie = widget.mode == MediaType.movie;
+    final pips = [
+      for (final g in state.guesses)
+        g == _entry.letters ? GamePip.correct : GamePip.wrong,
+    ];
+
+    final header = Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+      child: GameHeader(
+        title: l10n.gamesCommonPuzzleNumber('$_puzzleNumber'),
+        subtitle:
+            '${gameDateLabel(context, _date)} · '
+            '${l10n.titleWordleLetterCount('${_entry.letters.length}')}',
+        pips: pips,
+        total: titleWordleMaxGuesses,
+        finished: state.finished,
+        status: state.finished
+            ? null
+            : l10n.gamesCommonGuessesLeft(
+                '${titleWordleMaxGuesses - state.guesses.length}',
+              ),
+      ),
+    );
 
     return Focus(
       focusNode: _focus,
       autofocus: widget.active,
       onKeyEvent: _onKey,
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-            // Wrap, not Row: long translations / large text wrap to a second
-            // line instead of overflowing on an iPhone SE.
-            child: Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 12,
-              runSpacing: 2,
+      child: state.finished
+          // Finished: board + result card scroll together, so the taller
+          // result card fits on an iPhone SE.
+          ? ListView(
+              padding: const EdgeInsets.only(bottom: 16),
               children: [
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: l10n.gamesCommonPuzzleNumber('$_puzzleNumber'),
-                        style: const TextStyle(fontWeight: FontWeight.w800),
-                      ),
-                      TextSpan(
-                        text:
-                            '  ${l10n.titleWordleLetterCount('${_entry.letters.length}')}',
-                        style: TextStyle(
-                          color: colors.textSecondary,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
+                header,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                  child: _board(context, state),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: GameResultPanel(
+                    won: state.won,
+                    guessCount: state.guesses.length,
+                    maxGuesses: titleWordleMaxGuesses,
+                    title: _entry.title,
+                    year: _entry.year,
+                    posterPath: _entry.posterPath,
+                    onShare: _share,
+                    onDetails: _openDetails,
                   ),
                 ),
-                if (!state.finished)
-                  Text(
-                    l10n.gamesCommonGuessesLeft(
-                      '${titleWordleMaxGuesses - state.guesses.length}',
+                if (!_store.isSignedIn)
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: GameGuestNote(),
+                  ),
+              ],
+            )
+          : Column(
+              children: [
+                header,
+                if (state.guesses.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: GameIntro(
+                      isMovie
+                          ? l10n.titleWordleIntroMovie
+                          : l10n.titleWordleIntroTv,
                     ),
-                    style: TextStyle(color: colors.textSecondary, fontSize: 13),
+                  )
+                // The color key costs a row the board can't spare on an
+                // iPhone SE.
+                else if (MediaQuery.sizeOf(context).height >=
+                    GameHeader.compactHeight)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: _legend(context, l10n),
+                  ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: _board(context, state),
+                  ),
+                ),
+                _keyboard(context, l10n, state),
+                if (!_store.isSignedIn)
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: GameGuestNote(),
                   ),
               ],
             ),
+    );
+  }
+
+  /// Color key for the tiles, shown once the first guess is scored.
+  Widget _legend(BuildContext context, AppLocalizations l10n) {
+    final colors = context.colors;
+    Widget item(LetterResult r, String label) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: _fill(r),
+            borderRadius: BorderRadius.circular(3),
           ),
-          if (state.guesses.isEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-              child: Text(
-                isMovie ? l10n.titleWordleIntroMovie : l10n.titleWordleIntroTv,
-                style: TextStyle(color: colors.textSecondary, fontSize: 12),
-              ),
-            ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: _board(context, state),
-            ),
-          ),
-          if (state.finished)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: GameResultPanel(
-                won: state.won,
-                guessCount: state.guesses.length,
-                maxGuesses: titleWordleMaxGuesses,
-                title: _entry.title,
-                year: _entry.year,
-                posterPath: _entry.posterPath,
-                onShare: _share,
-                onDetails: _openDetails,
-              ),
-            )
-          else
-            _keyboard(context, l10n, state),
-          if (!_store.isSignedIn)
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: GameGuestNote(),
-            ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 5),
+        Text(
+          label,
+          style: TextStyle(color: colors.textSecondary, fontSize: 12),
+        ),
+      ],
+    );
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 14,
+      runSpacing: 4,
+      children: [
+        item(LetterResult.correct, l10n.titleWordleLegendCorrect),
+        item(LetterResult.present, l10n.titleWordleLegendPresent),
+        item(LetterResult.absent, l10n.titleWordleLegendAbsent),
+      ],
     );
   }
 
@@ -342,12 +389,6 @@ class _WordleBoardState extends State<_WordleBoard> {
     LetterResult.present => context.colors.accent,
     LetterResult.absent => context.colors.textMuted,
   };
-
-  /// Text on a [_fill] color. The dark theme's green and gold are light
-  /// colors, and white letters on them were barely readable (same rule as
-  /// the daily game's `ClueTile`).
-  static Color _onFill(Color fill) =>
-      fill.computeLuminance() > 0.4 ? Colors.black87 : Colors.white;
 
   Widget _board(BuildContext context, TitleWordleState state) {
     final words = _entry.wordLengths;
@@ -429,7 +470,7 @@ class _WordleBoardState extends State<_WordleBoard> {
               style: TextStyle(
                 fontSize: tile * 0.5,
                 fontWeight: FontWeight.w800,
-                color: submitted ? _onFill(fill) : colors.textPrimary,
+                color: submitted ? gameOnFill(fill) : colors.textPrimary,
               ),
             ),
           ),
@@ -486,7 +527,7 @@ class _WordleBoardState extends State<_WordleBoard> {
                             fontSize: 15,
                             color: s == null
                                 ? context.colors.textPrimary
-                                : _onFill(bg),
+                                : gameOnFill(bg),
                           ),
                         ),
                   ),

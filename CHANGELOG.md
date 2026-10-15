@@ -4,8 +4,24 @@ All notable changes to this project are documented here. Format loosely follows 
 
 ## [Unreleased]
 
+### Added (2026-10-15)
+- **Fits tonight** (Watchlist → timer icon): pick a time budget (30 min–4 h) and see To Watch movies that fit plus runs of the next unwatched episodes of your shows ("3 episodes · 2h 10m"), closest fit first, optionally only what's on your services. Missing movie runtimes are fetched once and cached on the device; no Firestore writes.
+- **Common ground** (on another user's profile): titles on both your watchlists (your services first), how often your film ratings agree ("You agree on 7 of 9", within 1 star) with the closest matches and biggest splits, and one tap to start a watch poll pre-filled with up to 6 shared titles. Reads are capped; hidden for guests, your own profile and blocked users.
+- **Where you left off** (Up Next): shows untouched for 30+ days get a "Recap" chip that opens the last 1–2 episodes you watched (still, synopsis, when you watched it) and the cast credited on your latest watched episode. Never shows anything from an unwatched episode.
+- **Remove photo** in Edit Profile.
+- On-device smoke tests for Letterboxd/IMDb import (incl. Year in Review over imported data) and profile photos.
+
 ### Changed (2026-10-15)
+- **Games hub redesign**: today's puzzle banner, "Daily puzzles" / "Play anytime" sections, per-game status chips (Not played / In progress / Solved / Played today, per Movie/TV mode; best score for Higher or Lower). Frames, Title Wordle, Plot and Who's the Actor? share one header, guess list, search field and result card; layouts fit small iPhones.
+- Notifications cron: activity poll runs hourly instead of every 30 minutes (stays well inside the free GitHub Actions minutes; it resumes from a cursor, so nothing is skipped).
+- README, CONTRIBUTING, privacy policy, terms and plan.md brought in line with the code (no Storage, English-only, iOS-only, what's actually stored on `users/{uid}`).
 - **Splash shows a different poster every launch**: one of this week's trending TMDB movies/shows, pre-downloaded on an earlier launch (list refreshed at most every 12h, 4 posters fetched per launch in the background) so the splash never waits on the network. Never repeats the previous launch's poster; falls back to one of four bundled posters on first launch or offline (`lib/services/splash_backdrop_service.dart`).
+
+### Fixed (2026-10-15)
+- **Pro/Patron are now taken away when a subscription expires, is refunded or upgraded away** (StoreKit 2 transaction history checked at launch, on restore and on purchase updates; never downgrades while the App Store is unreachable or the history is empty). Losing Patron clears the public `patron` flag. Refunded/expired renewals on the purchase stream no longer grant a tier.
+- Imported films show their hours and genres in Year in Review / Watch Stats right away instead of after the next launch.
+- PNG profile photos no longer fail with "too large" (iOS ignores JPEG quality for PNGs); oversized images are shrunk to fit, and stored photos carry their real image type.
+- Comments by users without a profile name show "WatchVerse user" instead of their email prefix.
 
 ### Added (2026-10-14)
 - **My streaming services** (Settings, signed-in users): pick a region (defaults to the device's) and the services you subscribe to, from TMDB's JustWatch provider list. Stored on `users/{uid}` as `streamingRegion` / `streamingProviderIds`. The Watchlist and Up Next → My Shows get an **"On my services"** filter (flat-rate, free or with-ads streaming in your region; never rent/buy, never another region's data) with a logo badge on matching posters. Availability is checked 4 titles at a time with "Checking 12/80…" progress and a retry for failures, and cached per title in memory and on disk for 24h. Movie/TV "Where to Watch" now uses your chosen region, lists your services first ("On your Netflix") and credits JustWatch.

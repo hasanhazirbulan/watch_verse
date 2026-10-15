@@ -14,7 +14,10 @@ import 'package:watch_verse/widgets/social_widgets.dart';
 /// Pick 2-6 candidate titles and (optionally) which friends to invite, then
 /// creates a [WatchPollService] poll everyone invited can vote on.
 class CreateWatchPollScreen extends StatefulWidget {
-  const CreateWatchPollScreen({super.key});
+  /// Titles to start with already picked (e.g. from Common Ground); only the
+  /// first 6 are used.
+  final List<MediaItem> initialOptions;
+  const CreateWatchPollScreen({super.key, this.initialOptions = const []});
 
   @override
   State<CreateWatchPollScreen> createState() => _CreateWatchPollScreenState();
@@ -29,7 +32,8 @@ class _CreateWatchPollScreenState extends State<CreateWatchPollScreen> {
   Timer? _debounce;
 
   List<MediaItem> _searchResults = [];
-  final List<MediaItem> _selectedOptions = [];
+  late final List<MediaItem> _selectedOptions =
+      widget.initialOptions.take(_maxOptions).toList();
   final Set<String> _selectedMemberUids = {};
   bool _creating = false;
   // Cached so tapping a chip or getting search results (both setState) don't

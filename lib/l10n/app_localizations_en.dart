@@ -2754,4 +2754,65 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsNotifyMovieRelease => 'Watchlist movies released today';
+
+  @override
+  String get commonGroundAction => 'Common ground';
+
+  @override
+  String commonGroundTitle(String name) {
+    return 'You & $name';
+  }
+
+  @override
+  String get commonGroundSharedHeader => 'On both your watchlists';
+
+  @override
+  String get commonGroundSharedEmpty =>
+      'Nothing is on both your watchlists yet. Add a few picks from their profile and check back.';
+
+  @override
+  String get commonGroundServicesFirst =>
+      'Titles on your streaming services come first.';
+
+  @override
+  String get commonGroundStartPoll => 'Start a poll';
+
+  @override
+  String get commonGroundTasteHeader => 'Taste match';
+
+  @override
+  String commonGroundAgreeSummary(int agreed, int total) {
+    return 'You agree on $agreed of $total';
+  }
+
+  @override
+  String commonGroundAgreeDefinition(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Based on the $count films you\'ve both rated. Ratings within 1 star count as agreeing.',
+      one:
+          'Based on the film you\'ve both rated. Ratings within 1 star count as agreeing.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get commonGroundTasteEmpty =>
+      'You haven\'t rated any of the same films yet.';
+
+  @override
+  String get commonGroundMostInSync => 'Most in sync';
+
+  @override
+  String get commonGroundBiggestSplits => 'Biggest splits';
+
+  @override
+  String commonGroundRatingsLine(String mine, String name, String theirs) {
+    return 'You $mine · $name $theirs';
+  }
+
+  @override
+  String get commonGroundThem => 'Them';
 }

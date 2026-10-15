@@ -6,12 +6,21 @@ yeniden düzenlenmesi, (2) yeni bir bildirim sistemi (yeni bölüm hatırlatmala
 teknik implementasyon (veri modeli + tetikleyici mantığı) olarak anlatılıyor.
 Referans verilen dosya/satırlar mevcut koddan alınmıştır, tahmini değildir.
 
-> **Durum (2026-10-13):** Bölüm 2'nin istemci tarafı (FCM token kaydı,
-> Ayarlar'daki bildirim anahtarları, bildirime dokununca yönlendirme) uygulamada
-> mevcut. Bildirimleri gerçekten **gönderen** Cloud Functions
-> (`functions/src/index.ts`) ise **deploy edilmedi** — proje ücretsiz Spark
-> planında ve Cloud Functions çalıştıramıyor. Yani şu an hiçbir anlık bildirim
-> gönderilmiyor. Ayrıntı: `plan.md` → "Notifications".
+> **Durum (2026-10-15):** Bölüm 2 canlıda. İstemci tarafı (FCM token kaydı,
+> Ayarlar'daki bildirim anahtarları, bildirime dokununca yönlendirme)
+> uygulamada. Bildirimleri **gönderen** taraf Cloud Functions değil:
+> `functions/src/index.ts` hâlâ **deploy edilmedi** (proje ücretsiz Spark
+> planında), onun yerine aynı mantık `scripts/notify/run.js` içinde GitHub
+> Actions zamanlanmış görevi olarak çalışıyor
+> (`.github/workflows/notifications.yml`, `FIREBASE_SERVICE_ACCOUNT` repo
+> secret'ı ile). Takvim (UTC): 06:00 yarın yayınlanacak bölümler, 06:10 bugün
+> vizyona giren izleme listesi filmleri, 16:00 arkadaş aktivitesi özeti
+> (digest), 17:00 bugün yayınlanan bölümler, her saat :20'de aktivite taraması
+> (ortak izleme eşleşmeleri + özet kuyruğu). Bu dokümandaki Cloud Functions /
+> tetikleyici anlatımı tasarım olarak geçerli, ama gerçek gönderim yolu bu
+> cron görevidir — ikisini birden deploy etmeyin, yoksa her bildirim iki kez
+> gider. Ayrıntı: `README.md` → "Push Notifications", `plan.md` → "1.0 status
+> + maintenance".
 
 ---
 
@@ -481,9 +490,11 @@ sunucu tarafı bu dokümandaki gibi `functions/src/index.ts` üzerinden değil,
 **tamamen ücretsiz bir GitHub Actions cron job** olarak canlıya alındı:
 
 - `scripts/notify/run.js` — aynı mantık (bölüm hatırlatmaları, ortak izleme,
-  günlük özet), bağımsız bir Node script olarak.
-- `.github/workflows/notifications.yml` — günde 3 sabit saat + 30 dakikada
-  bir aktivite taraması.
+  günlük özet; sonradan eklenen izleme listesi film çıkışları), bağımsız bir
+  Node script olarak.
+- `.github/workflows/notifications.yml` — günde 4 sabit saat + saatte bir
+  (her saat :20) aktivite taraması (2026-10-15'e kadar 30 dakikada birdi;
+  ücretsiz Actions dakikaları için seyreltildi).
 - Kimlik doğrulama: Firebase servis hesabı anahtarı, GitHub'da şifreli
   `FIREBASE_SERVICE_ACCOUNT` secret'i olarak saklanıyor.
 - Tek davranış farkı: `onNewActivity`'nin anlık tetiklenmesi yerine, ortak

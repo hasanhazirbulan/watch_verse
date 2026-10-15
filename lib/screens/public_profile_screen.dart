@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:watch_verse/widgets/patron_badge.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
+import 'package:watch_verse/screens/common_ground_screen.dart';
 import 'package:watch_verse/screens/follow_list_screen.dart';
 import 'package:watch_verse/screens/list_detail_screen.dart';
+import 'package:watch_verse/services/common_ground.dart';
 import 'package:watch_verse/services/list_service.dart';
 import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/social_service.dart';
@@ -35,6 +37,9 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
   late final Future<List<MediaItem>> _shows = _social
       .userShows(widget.userId)
       .then((list) => list.map(_showItem).toList());
+  // Created once: the header's StreamBuilder rebuilds on every user-doc
+  // change and a fresh stream each time would resubscribe (and re-read).
+  late final Stream<List<String>> _myBlocked = _social.blockedStream();
   late final Future<List<Map<String, dynamic>>> _publicLists =
       ListService.instance.publicListsFor(widget.userId);
 
@@ -159,8 +164,57 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
               ),
             ),
             const SizedBox(height: 18),
-            Center(child: FollowButton(targetUid: widget.userId)),
+            Center(
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: [
+                  FollowButton(targetUid: widget.userId),
+                  if (data != null) _commonGroundButton(data),
+                ],
+              ),
+            ),
           ],
+        );
+      },
+    );
+  }
+
+  // Hidden for guests, on your own profile, and when either of you has
+  // blocked the other (`blocked` arrays on both user docs).
+  Widget _commonGroundButton(Map<String, dynamic> theirData) {
+    return StreamBuilder<List<String>>(
+      stream: _myBlocked,
+      builder: (context, snap) {
+        final show = snap.hasData &&
+            canShowCommonGround(
+              myUid: _social.uid,
+              targetUid: widget.userId,
+              myBlocked: snap.data!,
+              theirBlocked:
+                  (theirData['blocked'] as List?)?.cast<String>() ?? const [],
+            );
+        if (!show) return const SizedBox.shrink();
+        final name = (theirData['name'] ?? widget.name) as String;
+        return OutlinedButton.icon(
+          key: const ValueKey('common-ground-button'),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  CommonGroundScreen(userId: widget.userId, name: name),
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            visualDensity: VisualDensity.compact,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20)),
+          ),
+          icon: const Icon(Icons.join_inner_rounded, size: 18),
+          label: Text(AppLocalizations.of(context)!.commonGroundAction,
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
         );
       },
     );

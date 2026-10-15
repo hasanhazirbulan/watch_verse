@@ -1869,5 +1869,56 @@
   },
   "recapNoOverview": "No synopsis available for this episode.",
   "recapEmpty": "No watched episodes to recap yet.",
-  "recapLoadFailed": "Couldn't load your watch history. Check your connection and try again."
+  "recapLoadFailed": "Couldn't load your watch history. Check your connection and try again.",
+  "commonGroundAction": "Common ground",
+  "commonGroundTitle": "You & {name}",
+  "@commonGroundTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "commonGroundSharedHeader": "On both your watchlists",
+  "commonGroundSharedEmpty": "Nothing is on both your watchlists yet. Add a few picks from their profile and check back.",
+  "commonGroundServicesFirst": "Titles on your streaming services come first.",
+  "commonGroundStartPoll": "Start a poll",
+  "commonGroundTasteHeader": "Taste match",
+  "commonGroundAgreeSummary": "You agree on {agreed} of {total}",
+  "@commonGroundAgreeSummary": {
+    "placeholders": {
+      "agreed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "commonGroundAgreeDefinition": "{count, plural, =1{Based on the film you've both rated. Ratings within 1 star count as agreeing.} other{Based on the {count} films you've both rated. Ratings within 1 star count as agreeing.}}",
+  "@commonGroundAgreeDefinition": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "commonGroundTasteEmpty": "You haven't rated any of the same films yet.",
+  "commonGroundMostInSync": "Most in sync",
+  "commonGroundBiggestSplits": "Biggest splits",
+  "commonGroundRatingsLine": "You {mine} · {name} {theirs}",
+  "@commonGroundRatingsLine": {
+    "placeholders": {
+      "mine": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "theirs": {
+        "type": "String"
+      }
+    }
+  },
+  "commonGroundThem": "Them"
 }

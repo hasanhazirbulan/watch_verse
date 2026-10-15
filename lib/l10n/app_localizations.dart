@@ -4805,6 +4805,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t load your watch history. Check your connection and try again.'**
   String get recapLoadFailed;
+
+  /// No description provided for @commonGroundAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Common ground'**
+  String get commonGroundAction;
+
+  /// No description provided for @commonGroundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You & {name}'**
+  String commonGroundTitle(String name);
+
+  /// No description provided for @commonGroundSharedHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'On both your watchlists'**
+  String get commonGroundSharedHeader;
+
+  /// No description provided for @commonGroundSharedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is on both your watchlists yet. Add a few picks from their profile and check back.'**
+  String get commonGroundSharedEmpty;
+
+  /// No description provided for @commonGroundServicesFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Titles on your streaming services come first.'**
+  String get commonGroundServicesFirst;
+
+  /// No description provided for @commonGroundStartPoll.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a poll'**
+  String get commonGroundStartPoll;
+
+  /// No description provided for @commonGroundTasteHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Taste match'**
+  String get commonGroundTasteHeader;
+
+  /// No description provided for @commonGroundAgreeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'You agree on {agreed} of {total}'**
+  String commonGroundAgreeSummary(int agreed, int total);
+
+  /// No description provided for @commonGroundAgreeDefinition.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Based on the film you\'ve both rated. Ratings within 1 star count as agreeing.} other{Based on the {count} films you\'ve both rated. Ratings within 1 star count as agreeing.}}'**
+  String commonGroundAgreeDefinition(int count);
+
+  /// No description provided for @commonGroundTasteEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t rated any of the same films yet.'**
+  String get commonGroundTasteEmpty;
+
+  /// No description provided for @commonGroundMostInSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Most in sync'**
+  String get commonGroundMostInSync;
+
+  /// No description provided for @commonGroundBiggestSplits.
+  ///
+  /// In en, this message translates to:
+  /// **'Biggest splits'**
+  String get commonGroundBiggestSplits;
+
+  /// No description provided for @commonGroundRatingsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'You {mine} · {name} {theirs}'**
+  String commonGroundRatingsLine(String mine, String name, String theirs);
+
+  /// No description provided for @commonGroundThem.
+  ///
+  /// In en, this message translates to:
+  /// **'Them'**
+  String get commonGroundThem;
 }
 
 class _AppLocalizationsDelegate

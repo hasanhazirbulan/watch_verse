@@ -4889,6 +4889,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Them'**
   String get commonGroundThem;
+
+  /// No description provided for @fitsTonightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fits tonight'**
+  String get fitsTonightTitle;
+
+  /// No description provided for @fitsTonightTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'What fits tonight?'**
+  String get fitsTonightTooltip;
+
+  /// No description provided for @fitsTonightBudgetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time you have'**
+  String get fitsTonightBudgetLabel;
+
+  /// No description provided for @fitsTonightHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h {minutes}m'**
+  String fitsTonightHoursMinutes(int hours, int minutes);
+
+  /// No description provided for @fitsTonightHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h'**
+  String fitsTonightHours(int hours);
+
+  /// No description provided for @fitsTonightMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String fitsTonightMinutes(int minutes);
+
+  /// No description provided for @fitsTonightEpisodesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Episodes'**
+  String get fitsTonightEpisodesSection;
+
+  /// No description provided for @fitsTonightMoviesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Movies'**
+  String get fitsTonightMoviesSection;
+
+  /// No description provided for @fitsTonightUnknownSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Runtime unknown'**
+  String get fitsTonightUnknownSection;
+
+  /// No description provided for @fitsTonightEpisodeRun.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 episode} other{{count} episodes}} · {duration}'**
+  String fitsTonightEpisodeRun(int count, String duration);
+
+  /// No description provided for @fitsTonightApprox.
+  ///
+  /// In en, this message translates to:
+  /// **'about {duration}'**
+  String fitsTonightApprox(String duration);
+
+  /// No description provided for @fitsTonightSpare.
+  ///
+  /// In en, this message translates to:
+  /// **'{duration} to spare'**
+  String fitsTonightSpare(String duration);
+
+  /// No description provided for @fitsTonightExactFit.
+  ///
+  /// In en, this message translates to:
+  /// **'Just fits'**
+  String get fitsTonightExactFit;
+
+  /// No description provided for @fitsTonightUnknownMovie.
+  ///
+  /// In en, this message translates to:
+  /// **'TMDB has no runtime for this movie'**
+  String get fitsTonightUnknownMovie;
+
+  /// No description provided for @fitsTonightUnknownShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Next up: {episode} · length unknown'**
+  String fitsTonightUnknownShow(String episode);
+
+  /// No description provided for @fitsTonightNothingFitsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing fits in {duration}'**
+  String fitsTonightNothingFitsTitle(String duration);
+
+  /// No description provided for @fitsTonightNothingFitsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The shortest thing on your lists is {duration}.'**
+  String fitsTonightNothingFitsBody(String duration);
+
+  /// No description provided for @fitsTonightNothingFitsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Make it {duration}'**
+  String fitsTonightNothingFitsAction(String duration);
+
+  /// No description provided for @fitsTonightEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to pick from yet'**
+  String get fitsTonightEmptyTitle;
+
+  /// No description provided for @fitsTonightEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add movies to your watchlist or track a show, and this will show what fits the time you have.'**
+  String get fitsTonightEmptyBody;
+
+  /// No description provided for @fitsTonightGuestBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to see what fits tonight from your watchlist and your shows.'**
+  String get fitsTonightGuestBody;
+
+  /// No description provided for @fitsTonightLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking runtimes…'**
+  String get fitsTonightLoading;
+
+  /// No description provided for @fitsTonightShowsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Couldn\'t load 1 show} other{Couldn\'t load {count} shows}}'**
+  String fitsTonightShowsFailed(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/models/model.dart';
+import 'package:watch_verse/screens/fits_tonight_screen.dart';
 import 'package:watch_verse/screens/movie_detail_screen.dart';
 import 'package:watch_verse/screens/streaming_services_screen.dart';
 import 'package:watch_verse/services/movie_service.dart';
@@ -101,7 +102,22 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
       l10n.watchlistCategoryFavorites,
     ];
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.watchlistTitle)),
+      appBar: AppBar(
+        title: Text(l10n.watchlistTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.timer_outlined),
+            tooltip: l10n.fitsTonightTooltip,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    FitsTonightScreen(streamingDeps: widget.streamingDeps),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(

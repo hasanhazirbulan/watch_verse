@@ -4,6 +4,9 @@ All notable changes to this project are documented here. Format loosely follows 
 
 ## [Unreleased]
 
+### Changed (2026-10-15)
+- **Splash shows a different poster every launch**: one of this week's trending TMDB movies/shows, pre-downloaded on an earlier launch (list refreshed at most every 12h, 4 posters fetched per launch in the background) so the splash never waits on the network. Never repeats the previous launch's poster; falls back to one of four bundled posters on first launch or offline (`lib/services/splash_backdrop_service.dart`).
+
 ### Added (2026-10-14)
 - **My streaming services** (Settings, signed-in users): pick a region (defaults to the device's) and the services you subscribe to, from TMDB's JustWatch provider list. Stored on `users/{uid}` as `streamingRegion` / `streamingProviderIds`. The Watchlist and Up Next → My Shows get an **"On my services"** filter (flat-rate, free or with-ads streaming in your region; never rent/buy, never another region's data) with a logo badge on matching posters. Availability is checked 4 titles at a time with "Checking 12/80…" progress and a retry for failures, and cached per title in memory and on disk for 24h. Movie/TV "Where to Watch" now uses your chosen region, lists your services first ("On your Netflix") and credits JustWatch.
 - **Games hub** (side menu → Games) with six free games, no streaks: the reworked Daily Movie game, **Frames** (guess from stills), **Title Wordle**, **Plot** (redacted synopsis), **Who's the Actor?** (daily, movie + TV modes where relevant) and **Higher or Lower** (endless rating/box-office rounds). Daily pools are bundled with the app (generators in `tool/`); progress syncs to `users/{uid}/gamePlays` under the existing rules.

@@ -57,6 +57,7 @@ dependencies:
   firebase_crashlytics: ^5.4.0
   firebase_analytics: ^12.6.0
   cached_network_image: ^4.0.4
+  flutter_cache_manager: ^3.4.5
   in_app_purchase: ^3.2.0
   csv: ^8.0.0
   share_plus: ^13.3.1

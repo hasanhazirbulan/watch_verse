@@ -4763,6 +4763,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Watchlist movies released today'**
   String get settingsNotifyMovieRelease;
+
+  /// No description provided for @recapChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Recap'**
+  String get recapChip;
+
+  /// No description provided for @recapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where you left off'**
+  String get recapTitle;
+
+  /// No description provided for @recapSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A quick refresher on {show}, only from episodes you\'ve watched.'**
+  String recapSubtitle(String show);
+
+  /// No description provided for @recapWatchedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched {date}'**
+  String recapWatchedOn(DateTime date);
+
+  /// No description provided for @recapNoOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'No synopsis available for this episode.'**
+  String get recapNoOverview;
+
+  /// No description provided for @recapEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No watched episodes to recap yet.'**
+  String get recapEmpty;
+
+  /// No description provided for @recapLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your watch history. Check your connection and try again.'**
+  String get recapLoadFailed;
 }
 
 class _AppLocalizationsDelegate

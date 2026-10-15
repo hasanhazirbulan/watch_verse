@@ -1847,5 +1847,27 @@
       }
     }
   },
-  "settingsNotifyMovieRelease": "Watchlist movies released today"
+  "settingsNotifyMovieRelease": "Watchlist movies released today",
+  "recapChip": "Recap",
+  "recapTitle": "Where you left off",
+  "recapSubtitle": "A quick refresher on {show}, only from episodes you've watched.",
+  "@recapSubtitle": {
+    "placeholders": {
+      "show": {
+        "type": "String"
+      }
+    }
+  },
+  "recapWatchedOn": "Watched {date}",
+  "@recapWatchedOn": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      }
+    }
+  },
+  "recapNoOverview": "No synopsis available for this episode.",
+  "recapEmpty": "No watched episodes to recap yet.",
+  "recapLoadFailed": "Couldn't load your watch history. Check your connection and try again."
 }

@@ -9,12 +9,14 @@ import 'package:watch_verse/screens/episode_detail_screen.dart';
 import 'package:watch_verse/screens/streaming_services_screen.dart';
 import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/movie_service.dart';
+import 'package:watch_verse/services/recap_logic.dart';
 import 'package:watch_verse/services/streaming/streaming_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/widgets/recap_sheet.dart';
 import 'package:watch_verse/widgets/streaming_widgets.dart';
 
 /// A tracked show with its full ordered episode list, plus watch-progress
@@ -919,13 +921,19 @@ class _NextUpCard extends StatelessWidget {
         // nothing to show here (the detail screen still surfaces a "more
         // episodes coming" note once TMDB announces a date).
         if (next == null) return const SizedBox.shrink();
-        return _nextUp(context, show, next, watchedAired, aired.length);
+        // `lastWatchedAt` is from load time: once the user marks something
+        // here (watched count changes), the show is no longer stale.
+        final showRecap = snap.hasData &&
+            watchedAired == bundle.watchedAiredCount &&
+            recapQualifies(bundle.lastWatchedAt, DateTime.now());
+        return _nextUp(context, show, next, watchedAired, aired.length,
+            showRecap: showRecap);
       },
     );
   }
 
   Widget _nextUp(BuildContext context, TvShow show, Episode ep,
-      int watchedAired, int airedTotal) {
+      int watchedAired, int airedTotal, {bool showRecap = false}) {
     final l10n = AppLocalizations.of(context)!;
     final isPremiere = ep.seasonNumber == 1 && ep.episodeNumber == 1;
     final backlog = airedTotal - watchedAired - 1;
@@ -1032,6 +1040,17 @@ class _NextUpCard extends StatelessWidget {
                               l10n.upNextPremiereTag,
                               context.colors.primary.withValues(alpha: 0.16),
                               context.colors.primary),
+                        if (showRecap)
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () =>
+                                showRecapSheet(context, show, bundle.flat),
+                            child: _tag(
+                                context,
+                                l10n.recapChip,
+                                context.colors.accent.withValues(alpha: 0.18),
+                                context.colors.accent),
+                          ),
                       ],
                     ),
                     const SizedBox(height: 6),

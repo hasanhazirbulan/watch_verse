@@ -125,6 +125,15 @@ void main() {
     expect((await showDoc().collection('watched').get()).docs, isEmpty);
   });
 
+  test('watchedAtByKey maps exactly the watched episodes to dates', () async {
+    await service.setEpisodeWatched(show, ep(1), true);
+    await service.setEpisodeWatched(show, ep(3), true);
+
+    final map = await service.watchedAtByKey(show.id);
+    expect(map.keys.toSet(), {'s1e1', 's1e3'});
+    expect(map.values.every((d) => d != null), isTrue);
+  });
+
   test('watch then unwatch leaves no history entry behind', () async {
     await service.setEpisodeWatched(show, ep(1), true);
     await service.setEpisodeWatched(show, ep(1), false);

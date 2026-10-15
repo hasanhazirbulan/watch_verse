@@ -208,6 +208,20 @@ class APIservices {
         .toList();
   }
 
+  /// Cast credited on one episode (series regulars who appear in it; guest
+  /// stars excluded). Used by the Up Next recap instead of the show-level
+  /// credits, which reflect the latest season and could spoil it.
+  Future<List<CastMember>> getEpisodeCast(
+      int showId, int seasonNumber, int episodeNumber) async {
+    final data = await _getJson(_uri(
+        '/tv/$showId/season/$seasonNumber/episode/$episodeNumber/credits'));
+    final cast = (data['cast'] as List<dynamic>? ?? []);
+    return cast
+        .map((c) => CastMember.fromMap(c as Map<String, dynamic>))
+        .where((c) => c.id != 0)
+        .toList();
+  }
+
   /// "Because you watched this" recommendations (same media type).
   Future<List<MediaItem>> getRecommendations(MediaType type, int id) {
     final mapper =

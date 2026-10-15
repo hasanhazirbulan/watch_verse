@@ -2754,4 +2754,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsNotifyMovieRelease => 'Watchlist movies released today';
+
+  @override
+  String get recapChip => 'Recap';
+
+  @override
+  String get recapTitle => 'Where you left off';
+
+  @override
+  String recapSubtitle(String show) {
+    return 'A quick refresher on $show, only from episodes you\'ve watched.';
+  }
+
+  @override
+  String recapWatchedOn(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Watched $dateString';
+  }
+
+  @override
+  String get recapNoOverview => 'No synopsis available for this episode.';
+
+  @override
+  String get recapEmpty => 'No watched episodes to recap yet.';
+
+  @override
+  String get recapLoadFailed =>
+      'Couldn\'t load your watch history. Check your connection and try again.';
 }

@@ -134,6 +134,24 @@ class TvTrackingService {
     return ts is Timestamp ? ts.toDate() : null;
   }
 
+  /// When each watched episode of this show was marked watched, keyed by
+  /// episode key (`s2e5`) — the keys are exactly the watched set. Null when
+  /// a doc has no usable timestamp. Feeds the Up Next recap sheet; served
+  /// from Firestore's local cache when offline.
+  Future<Map<String, DateTime?>> watchedAtByKey(int showId) async {
+    final ref = _showRef(showId);
+    if (ref == null) return {};
+    final snap = await ref.collection('watched').get(const GetOptions(
+        serverTimestampBehavior: ServerTimestampBehavior.estimate));
+    return {
+      for (final d in snap.docs)
+        d.id: switch (d.data()['watchedAt']) {
+          final Timestamp ts => ts.toDate(),
+          _ => null,
+        },
+    };
+  }
+
   Future<bool> isTracked(int showId) async {
     final ref = _showRef(showId);
     if (ref == null) return false;

@@ -1847,5 +1847,111 @@
       }
     }
   },
-  "settingsNotifyMovieRelease": "Watchlist movies released today"
+  "settingsNotifyMovieRelease": "Watchlist movies released today",
+  "fitsTonightTitle": "Fits tonight",
+  "fitsTonightTooltip": "What fits tonight?",
+  "fitsTonightBudgetLabel": "Time you have",
+  "fitsTonightHoursMinutes": "{hours}h {minutes}m",
+  "@fitsTonightHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "fitsTonightHours": "{hours}h",
+  "@fitsTonightHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "fitsTonightMinutes": "{minutes}m",
+  "@fitsTonightMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "fitsTonightEpisodesSection": "Episodes",
+  "fitsTonightMoviesSection": "Movies",
+  "fitsTonightUnknownSection": "Runtime unknown",
+  "fitsTonightEpisodeRun": "{count, plural, =1{1 episode} other{{count} episodes}} · {duration}",
+  "@fitsTonightEpisodeRun": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "fitsTonightApprox": "about {duration}",
+  "@fitsTonightApprox": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "fitsTonightSpare": "{duration} to spare",
+  "@fitsTonightSpare": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "fitsTonightExactFit": "Just fits",
+  "fitsTonightUnknownMovie": "TMDB has no runtime for this movie",
+  "fitsTonightUnknownShow": "Next up: {episode} · length unknown",
+  "@fitsTonightUnknownShow": {
+    "placeholders": {
+      "episode": {
+        "type": "String"
+      }
+    }
+  },
+  "fitsTonightNothingFitsTitle": "Nothing fits in {duration}",
+  "@fitsTonightNothingFitsTitle": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "fitsTonightNothingFitsBody": "The shortest thing on your lists is {duration}.",
+  "@fitsTonightNothingFitsBody": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "fitsTonightNothingFitsAction": "Make it {duration}",
+  "@fitsTonightNothingFitsAction": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "fitsTonightEmptyTitle": "Nothing to pick from yet",
+  "fitsTonightEmptyBody": "Add movies to your watchlist or track a show, and this will show what fits the time you have.",
+  "fitsTonightGuestBody": "Sign in to see what fits tonight from your watchlist and your shows.",
+  "fitsTonightLoading": "Checking runtimes…",
+  "fitsTonightShowsFailed": "{count, plural, =1{Couldn't load 1 show} other{Couldn't load {count} shows}}",
+  "@fitsTonightShowsFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

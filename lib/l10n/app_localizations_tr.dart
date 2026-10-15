@@ -2763,4 +2763,109 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get settingsNotifyMovieRelease => 'Watchlist movies released today';
+
+  @override
+  String get fitsTonightTitle => 'Fits tonight';
+
+  @override
+  String get fitsTonightTooltip => 'What fits tonight?';
+
+  @override
+  String get fitsTonightBudgetLabel => 'Time you have';
+
+  @override
+  String fitsTonightHoursMinutes(int hours, int minutes) {
+    return '${hours}h ${minutes}m';
+  }
+
+  @override
+  String fitsTonightHours(int hours) {
+    return '${hours}h';
+  }
+
+  @override
+  String fitsTonightMinutes(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
+  String get fitsTonightEpisodesSection => 'Episodes';
+
+  @override
+  String get fitsTonightMoviesSection => 'Movies';
+
+  @override
+  String get fitsTonightUnknownSection => 'Runtime unknown';
+
+  @override
+  String fitsTonightEpisodeRun(int count, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count episodes',
+      one: '1 episode',
+    );
+    return '$_temp0 · $duration';
+  }
+
+  @override
+  String fitsTonightApprox(String duration) {
+    return 'about $duration';
+  }
+
+  @override
+  String fitsTonightSpare(String duration) {
+    return '$duration to spare';
+  }
+
+  @override
+  String get fitsTonightExactFit => 'Just fits';
+
+  @override
+  String get fitsTonightUnknownMovie => 'TMDB has no runtime for this movie';
+
+  @override
+  String fitsTonightUnknownShow(String episode) {
+    return 'Next up: $episode · length unknown';
+  }
+
+  @override
+  String fitsTonightNothingFitsTitle(String duration) {
+    return 'Nothing fits in $duration';
+  }
+
+  @override
+  String fitsTonightNothingFitsBody(String duration) {
+    return 'The shortest thing on your lists is $duration.';
+  }
+
+  @override
+  String fitsTonightNothingFitsAction(String duration) {
+    return 'Make it $duration';
+  }
+
+  @override
+  String get fitsTonightEmptyTitle => 'Nothing to pick from yet';
+
+  @override
+  String get fitsTonightEmptyBody =>
+      'Add movies to your watchlist or track a show, and this will show what fits the time you have.';
+
+  @override
+  String get fitsTonightGuestBody =>
+      'Sign in to see what fits tonight from your watchlist and your shows.';
+
+  @override
+  String get fitsTonightLoading => 'Checking runtimes…';
+
+  @override
+  String fitsTonightShowsFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Couldn\'t load $count shows',
+      one: 'Couldn\'t load 1 show',
+    );
+    return '$_temp0';
+  }
 }

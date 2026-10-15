@@ -59,6 +59,8 @@ dependencies:
   cached_network_image: ^4.0.4
   flutter_cache_manager: ^3.4.5
   in_app_purchase: ^3.2.0
+  # Direct dep for the StoreKit 2 transaction-history API (lapse detection).
+  in_app_purchase_storekit: ^0.4.13+2
   csv: ^8.0.0
   share_plus: ^13.3.1
   file_picker: ^13.1.0

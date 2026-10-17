@@ -1,9 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/services/poll_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Poll categories (`pollId/category`) with a vote still in flight.
 /// [PollService.vote] is read-then-write (reads the previous pick, then
@@ -18,7 +18,7 @@ Future<void> _castVote(
   final l10n = AppLocalizations.of(context)!;
   // Guests: PollService.vote is a silent no-op without a user, so the tap
   // used to do nothing at all.
-  if (FirebaseAuth.instance.currentUser == null) {
+  if (AppFirebase.auth.currentUser == null) {
     messenger?.showSnackBar(SnackBar(content: Text(l10n.pollSignInToVote)));
     return;
   }

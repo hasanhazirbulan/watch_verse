@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/services/api_service.dart' show apiKey;
 import 'package:watch_verse/services/games/plot_guess_logic.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Daily "Plot" game: picks today's puzzle from the shipped pool
 /// (`assets/games/plot_pool_{movie,tv}.json`, redacted ahead of time by
@@ -44,8 +45,8 @@ class PlotGuessService {
   // Firebase (keeps widget tests that only render the screen simple).
   final FirebaseFirestore? _dbOverride;
   final FirebaseAuth? _authOverride;
-  FirebaseFirestore get _db => _dbOverride ?? FirebaseFirestore.instance;
-  FirebaseAuth get _auth => _authOverride ?? FirebaseAuth.instance;
+  FirebaseFirestore get _db => _dbOverride ?? AppFirebase.firestore;
+  FirebaseAuth get _auth => _authOverride ?? AppFirebase.auth;
   final AssetBundle _bundle;
   final http.Client? _client;
 

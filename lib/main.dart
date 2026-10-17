@@ -16,6 +16,7 @@ import 'package:watch_verse/screens/profile_screen.dart';
 import 'package:watch_verse/services/notification_service.dart';
 import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'firebase_options.dart'; // Firebase configuration import
 
 /// Lets [NotificationService] push a route when a notification is tapped,
@@ -81,6 +82,10 @@ class MyApp extends StatelessWidget {
       // around it read as a half-translated app. app_tr.arb is kept so this
       // is a one-line switch if Turkish ever comes back.
       locale: const Locale('en'),
+      // Insets every screen from side safe areas (landscape notch, the side
+      // status bar on the iPhone Duo's inner display) in one place.
+      builder: (context, child) =>
+          SideSafeArea(color: AppColors.dark.background, child: child!),
       home: const SplashWrapper(),
       routes: {
         '/login': (context) => const LoginScreen(),

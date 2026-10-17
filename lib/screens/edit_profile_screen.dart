@@ -1,15 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/services/profile_photo_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/theme/avatar_backgrounds.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/paywall_sheet.dart';
 import 'package:watch_verse/utils/avatar_image.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Dedicated profile-photo/name editor, reached from Settings and kept off
 /// the main profile view so that screen stays a read-only summary. Fetches
@@ -30,7 +31,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   int _avatarBg = 0;
   // Guests (reachable via Settings) have nothing to load — starting at true
   // with no user left them on an endless spinner.
-  bool _loading = FirebaseAuth.instance.currentUser != null;
+  bool _loading = AppFirebase.auth.currentUser != null;
   // Set when the initial profile read fails. The form is NOT shown then:
   // its empty fields would overwrite the real name/quote on Save.
   Object? _loadError;
@@ -44,7 +45,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _fetchUserData() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = AppFirebase.auth.currentUser;
     if (user == null) return;
     if (_loadError != null) {
       setState(() {
@@ -53,7 +54,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       });
     }
     try {
-      final doc = await FirebaseFirestore.instance
+      final doc = await AppFirebase.firestore
           .collection('users')
           .doc(user.uid)
           .get();
@@ -84,20 +85,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _setAvatarBg(int index) async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = AppFirebase.auth.currentUser;
     if (user == null) return;
     if (isProBackground(index) && !ProService.instance.isPatron) {
       showPaywallSheet(context);
       return;
     }
     setState(() => _avatarBg = index);
-    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+    await AppFirebase.firestore.collection('users').doc(user.uid).set({
       'avatarBg': index,
     }, SetOptions(merge: true));
   }
 
   Future<void> _changePhoto() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = AppFirebase.auth.currentUser;
     if (user == null) return;
     try {
       // Small square JPEG stored inline on the profile doc — the project is
@@ -149,12 +150,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _save() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = AppFirebase.auth.currentUser;
     if (user == null) return;
     final l10n = AppLocalizations.of(context)!;
     setState(() => _saving = true);
     try {
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      await AppFirebase.firestore.collection('users').doc(user.uid).set({
         'name': _nameController.text.trim(),
         'characterQuote': _characterQuoteController.text.trim(),
       }, SetOptions(merge: true));
@@ -172,7 +173,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final user = FirebaseAuth.instance.currentUser;
+    final user = AppFirebase.auth.currentUser;
     return Scaffold(
       backgroundColor: context.colors.background,
       appBar: AppBar(
@@ -207,7 +208,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
               ],
             )
-          : SingleChildScrollView(
+          : ReadableScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [

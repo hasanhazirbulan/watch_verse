@@ -8,6 +8,7 @@ import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/services/watch_poll_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/social_widgets.dart';
 
@@ -114,7 +115,7 @@ class _CreateWatchPollScreenState extends State<CreateWatchPollScreen> {
     final canCreate = _selectedOptions.length >= 2 && !_creating;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.createWatchPollTitle)),
-      body: ListView(
+      body: ReadableListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
           TextField(

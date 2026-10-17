@@ -4,6 +4,7 @@ import 'package:watch_verse/screens/create_watch_poll_screen.dart';
 import 'package:watch_verse/screens/watch_poll_detail_screen.dart';
 import 'package:watch_verse/services/watch_poll_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 
@@ -29,7 +30,7 @@ class WatchPollsScreen extends StatelessWidget {
       body: StreamListView<Map<String, dynamic>>(
         stream: WatchPollService.instance.myPollsStream(),
         emptyBuilder: (context) => _empty(context, l10n),
-        builder: (context, polls) => ListView.separated(
+        builder: (context, polls) => ReadableListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           itemCount: polls.length,
           separatorBuilder: (_, _) => const SizedBox(height: 12),

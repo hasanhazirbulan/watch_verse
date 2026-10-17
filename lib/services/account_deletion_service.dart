@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Erases everything the app stores about one user, so "Delete account" in
 /// Settings matches what the privacy policy promises (docs/privacy-policy.html).
@@ -29,8 +30,8 @@ class AccountDeletionService {
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
     DateTime Function()? now,
-  })  : _db = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance,
+  })  : _db = firestore ?? AppFirebase.firestore,
+        _auth = auth ?? AppFirebase.auth,
         _now = now ?? DateTime.now;
 
   static final AccountDeletionService instance = AccountDeletionService._();

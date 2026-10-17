@@ -1,5 +1,4 @@
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
@@ -7,6 +6,8 @@ import 'package:watch_verse/services/import/import_models.dart';
 import 'package:watch_verse/services/import/import_parser.dart';
 import 'package:watch_verse/services/import/library_import_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Import history from Letterboxd / IMDb — the counterpart to the free
 /// export in Settings. Explains where to get each export, lets the user
@@ -94,7 +95,7 @@ class _ImportScreenState extends State<ImportScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final signedIn = FirebaseAuth.instance.currentUser != null;
+    final signedIn = AppFirebase.auth.currentUser != null;
     return Scaffold(
       backgroundColor: context.colors.background,
       appBar: AppBar(title: Text(l10n.importTitle)),
@@ -120,7 +121,7 @@ class _ImportScreenState extends State<ImportScreen> {
 
   Widget _intro(AppLocalizations l10n) {
     final muted = TextStyle(color: context.colors.textSecondary, height: 1.4);
-    return ListView(
+    return ReadableListView(
       padding: const EdgeInsets.all(16),
       children: [
         Text(l10n.importIntro, style: muted),
@@ -237,7 +238,7 @@ class _ImportScreenState extends State<ImportScreen> {
       (l10n.importSummarySkipped, s.skipped),
       (l10n.importSummaryUnmatched, s.unmatched.length),
     ];
-    return ListView(
+    return ReadableListView(
       padding: const EdgeInsets.all(16),
       children: [
         Text(l10n.importDoneTitle,

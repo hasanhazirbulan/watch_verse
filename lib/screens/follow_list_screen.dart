@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/social_widgets.dart';
 
@@ -29,7 +30,7 @@ class _FollowListScreenState extends State<FollowListScreen> {
           : FutureListView<Map<String, dynamic>>(
               future: _future,
               emptyBuilder: (_) => _empty(context),
-              builder: (context, users) => ListView.builder(
+              builder: (context, users) => ReadableListView.builder(
                 itemCount: users.length,
                 itemBuilder: (context, i) => UserTile(user: users[i]),
               ),

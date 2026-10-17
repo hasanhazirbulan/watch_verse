@@ -3,6 +3,7 @@ import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/quick_add_sheet.dart';
@@ -146,8 +147,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         SliverPadding(
           padding: EdgeInsets.fromLTRB(16, 16, 16, failedMore ? 0 : 90),
           sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
+            // 3 columns on phones, more on wide windows.
+            gridDelegate: const SliverGridDelegateWithAdaptiveCount(
+              compactCount: 3,
               mainAxisSpacing: 18,
               crossAxisSpacing: 12,
               childAspectRatio: 0.52,

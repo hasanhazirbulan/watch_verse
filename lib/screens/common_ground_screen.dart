@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
@@ -9,10 +8,12 @@ import 'package:watch_verse/services/common_ground.dart';
 import 'package:watch_verse/services/common_ground_source.dart';
 import 'package:watch_verse/services/streaming/streaming_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/streaming_widgets.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// What the viewer and another user have in common: titles on both their
 /// watchlists (streamable-on-my-services first, when services are set up),
@@ -69,7 +70,7 @@ class _CommonGroundScreenState extends State<CommonGroundScreen> {
   }
 
   Future<_Result> _load() async {
-    final me = widget.myUid ?? FirebaseAuth.instance.currentUser?.uid;
+    final me = widget.myUid ?? AppFirebase.auth.currentUser?.uid;
     if (me == null) throw StateError('Not signed in');
     final source = widget.source ?? FirestoreCommonGroundSource();
     final data = await source.load(myUid: me, theirUid: widget.userId);
@@ -134,7 +135,7 @@ class _CommonGroundScreenState extends State<CommonGroundScreen> {
               ? result.shared
               : rankByAvailability(
                   result.shared, (m) => _myProvidersFor(m).isNotEmpty);
-          return ListView(
+          return ReadableListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
             children: [
               _sharedSection(context, l10n, ranked),

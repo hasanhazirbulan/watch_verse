@@ -1,6 +1,5 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
@@ -18,12 +17,14 @@ import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/friend_poster_card.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/paywall_sheet.dart';
 import 'package:watch_verse/widgets/quick_add_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -254,12 +255,12 @@ class _HomeScreenState extends State<HomeScreen> {
               _scaffoldKey.currentState?.closeDrawer();
               final rootNav = Navigator.of(context, rootNavigator: true);
               final messenger = ScaffoldMessenger.of(context);
-              final uid = FirebaseAuth.instance.currentUser?.uid;
+              final uid = AppFirebase.auth.currentUser?.uid;
               try {
                 if (uid != null) {
                   await NotificationService.instance.clearToken(uid);
                 }
-                await FirebaseAuth.instance.signOut();
+                await AppFirebase.auth.signOut();
                 rootNav.pushNamedAndRemoveUntil('/login', (r) => false);
               } catch (e) {
                 messenger.showSnackBar(
@@ -302,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
             slivers: [
               SliverToBoxAdapter(child: _header()),
               SliverToBoxAdapter(
-                child: Padding(
+                child: ReadablePadding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                   child: SegmentedTabs(
                     labels: [l10n.homeTabMovies, l10n.homeTabTvShows],
@@ -726,36 +727,55 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // A full-width hero carousel driven by [future].
+  // A full-width hero carousel driven by [future]. Phones show one 200 pt
+  // card at 88% width; wider windows (iPhone Duo unfolded, landscape) show
+  // narrower cards with neighbours peeking, sized to the backdrop's 16:9
+  // instead of one card stretched into a thin banner.
   Widget _spotlight(Future<List<MediaItem>> future) {
     return SliverToBoxAdapter(
-      child: FutureBuilder<List<MediaItem>>(
-        future: future,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Padding(
-              padding: EdgeInsets.fromLTRB(8, 8, 8, 0),
-              child: SkeletonBox(height: 200, radius: 20),
-            );
-          }
-          final items = snapshot.data!.take(8).toList();
-          if (items.isEmpty) return const SizedBox.shrink();
-          return Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: CarouselSlider.builder(
-              itemCount: items.length,
-              itemBuilder: (context, index, _) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: BackdropCard(item: items[index]),
-              ),
-              options: CarouselOptions(
-                height: 200,
-                autoPlay: true,
-                enlargeCenterPage: true,
-                viewportFraction: 0.88,
-                autoPlayInterval: const Duration(seconds: 6),
-              ),
-            ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final fraction = switch (Breakpoints.of(width)) {
+            WindowSize.compact => 0.88,
+            WindowSize.medium => 0.66,
+            WindowSize.expanded => 0.5,
+          };
+          // ...but never more than ~a third of a short (landscape) window.
+          final maxHeight =
+              (MediaQuery.sizeOf(context).height * 0.35).clamp(200.0, 300.0);
+          final height = width < Breakpoints.medium
+              ? 200.0
+              : (width * fraction * 9 / 16).clamp(200.0, maxHeight);
+          return FutureBuilder<List<MediaItem>>(
+            future: future,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                  child: SkeletonBox(height: height, radius: 20),
+                );
+              }
+              final items = snapshot.data!.take(8).toList();
+              if (items.isEmpty) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: CarouselSlider.builder(
+                  itemCount: items.length,
+                  itemBuilder: (context, index, _) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: BackdropCard(item: items[index]),
+                  ),
+                  options: CarouselOptions(
+                    height: height,
+                    autoPlay: true,
+                    enlargeCenterPage: true,
+                    viewportFraction: fraction,
+                    autoPlayInterval: const Duration(seconds: 6),
+                  ),
+                ),
+              );
+            },
           );
         },
       ),

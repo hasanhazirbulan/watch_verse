@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
@@ -13,11 +12,13 @@ import 'package:watch_verse/services/recap_logic.dart';
 import 'package:watch_verse/services/streaming/streaming_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/recap_sheet.dart';
 import 'package:watch_verse/widgets/streaming_widgets.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// A tracked show with its full ordered episode list, plus watch-progress
 /// bookkeeping used to order the feed: how many aired episodes are watched,
@@ -133,7 +134,7 @@ class _UpNextScreenState extends State<UpNextScreen> {
 
   ({Stream<List<Map<String, dynamic>>> stream,
       List<Map<String, dynamic>>? initial}) _trackedShows() {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final uid = AppFirebase.auth.currentUser?.uid;
     if (uid == null) {
       // Guests: the service returns a single-subscription Stream.value([]),
       // which can't be cached and re-listened to — hand out a fresh one each
@@ -265,7 +266,7 @@ class _UpNextScreenState extends State<UpNextScreen> {
       appBar: AppBar(title: Text(l10n.upNextTitle)),
       body: Column(
         children: [
-          Padding(
+          ReadablePadding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
             child: SegmentedTabs(
               labels: [
@@ -371,16 +372,17 @@ class _UpNextScreenState extends State<UpNextScreen> {
               AppLocalizations.of(context)!.upNextAllCaughtUpEmptySubtitle,
             );
           }
-          return ListView(
+          // One column on phones; side-by-side cards on wide windows
+          // (iPhone Duo unfolded, landscape) rather than one card stretched
+          // edge to edge.
+          return AdaptiveListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-            children: [
-              for (final b in bundles)
-                _NextUpCard(
-                  bundle: b,
-                  onStoppedWatching: () =>
-                      setState(() => _hiddenShowIds.add(b.show.id)),
-                ),
-            ],
+            itemCount: bundles.length,
+            itemBuilder: (context, i) => _NextUpCard(
+              bundle: bundles[i],
+              onStoppedWatching: () =>
+                  setState(() => _hiddenShowIds.add(bundles[i].show.id)),
+            ),
           );
         },
       ),
@@ -422,9 +424,12 @@ class _UpNextScreenState extends State<UpNextScreen> {
                     l10n.upNextUpcomingEmptySubtitle,
                   );
                 }
-                return ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
-                  children: _upcomingChildren(items),
+                return LayoutBuilder(
+                  builder: (context, constraints) => ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
+                    children: _upcomingChildren(
+                        items, listColumns(constraints.maxWidth)),
+                  ),
                 );
               },
             );
@@ -487,17 +492,23 @@ class _UpNextScreenState extends State<UpNextScreen> {
     return items;
   }
 
-  List<Widget> _upcomingChildren(List<_UpcomingItem> items) {
+  /// Day headers, each followed by that day's rows — laid out [columns] per
+  /// row on wide windows.
+  List<Widget> _upcomingChildren(List<_UpcomingItem> items, int columns) {
     final children = <Widget>[];
+    var day = <Widget>[];
     DateTime? lastHeader;
     for (final item in items) {
-      final day = DateTime(item.date.year, item.date.month, item.date.day);
-      if (lastHeader != day) {
-        children.add(_upcomingDateHeader(day));
-        lastHeader = day;
+      final date = DateTime(item.date.year, item.date.month, item.date.day);
+      if (lastHeader != date) {
+        children.addAll(rowsOf(day, columns));
+        day = [];
+        children.add(_upcomingDateHeader(date));
+        lastHeader = date;
       }
-      children.add(_upcomingRow(item));
+      day.add(_upcomingRow(item));
     }
+    children.addAll(rowsOf(day, columns));
     return children;
   }
 
@@ -641,7 +652,7 @@ class _UpNextScreenState extends State<UpNextScreen> {
                           MaterialPageRoute(
                               builder: (_) => const StreamingServicesScreen())),
                       builder: (context, visible, matchesOf) =>
-                          ListView.separated(
+                          AdaptiveListView(
                         padding: const EdgeInsets.fromLTRB(12, 4, 12, 100),
                         itemCount: visible.length,
                         separatorBuilder: (_, _) => const SizedBox(height: 10),
@@ -850,7 +861,7 @@ class _UpNextScreenState extends State<UpNextScreen> {
       );
 
   Widget _empty(IconData icon, String title, String subtitle) {
-    return Center(
+    return ScrollableCenter(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(

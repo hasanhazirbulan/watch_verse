@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,11 +15,13 @@ import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/clue_tile.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/services/app_firebase.dart';
+import 'package:watch_verse/utils/responsive.dart';
 
 /// Today's status line for the Games hub card — one Firestore doc listener;
 /// nothing for guests (they can't play).
 Stream<String?> dailyGameTodayStatus(AppLocalizations l10n) {
-  if (FirebaseAuth.instance.currentUser == null) return Stream.value(null);
+  if (AppFirebase.auth.currentUser == null) return Stream.value(null);
   final svc = DailyGameService.instance;
   return svc.progressStream(svc.todayIndex).map((play) {
     if (play.finished) {
@@ -70,7 +71,7 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
   // (gameConfig) and progress (gamePlays) are sign-in-only in
   // firestore.rules — loading would just fail with permission-denied.
   late final bool _isGuest =
-      !(widget.signedIn ?? FirebaseAuth.instance.currentUser != null);
+      !(widget.signedIn ?? AppFirebase.auth.currentUser != null);
 
   /// Absolute puzzle index being played (see `DailyGameService.todayIndex`)
   /// — pinned when chosen, so leaving the screen open past midnight can't
@@ -391,7 +392,9 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
             ),
         ],
       ),
-      body: _isGuest
+      // Games keep a phone-width column on wide windows (iPhone Duo
+      // unfolded, landscape) rather than stretching edge to edge.
+      body: ReadableWidth(child: _isGuest
           ? _message(context, l10n.dailyGameSignInPrompt)
           : _loadingMystery
               ? asyncLoadingIndicator()
@@ -399,7 +402,7 @@ class _DailyGameScreenState extends State<DailyGameScreen> {
                   ? _loadError(context, l10n, _loadMystery)
                   : _mystery == null
                       ? _message(context, l10n.dailyGameNoPool)
-                      : _game(context, l10n, _mystery!),
+                      : _game(context, l10n, _mystery!)),
     );
   }
 

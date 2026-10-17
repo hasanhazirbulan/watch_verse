@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:watch_verse/services/social_service.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Raw library docs the Common Ground screen compares. "Their" lists are
 /// capped samples of the other user's library; "my" maps hold only the
@@ -49,7 +50,7 @@ class FirestoreCommonGroundSource implements CommonGroundSource {
 
   final FirebaseFirestore? _dbOverride;
   final SocialService? _socialOverride;
-  FirebaseFirestore get _db => _dbOverride ?? FirebaseFirestore.instance;
+  FirebaseFirestore get _db => _dbOverride ?? AppFirebase.firestore;
   SocialService get _social => _socialOverride ?? SocialService.instance;
 
   CollectionReference<Map<String, dynamic>> _col(String uid, String name) =>

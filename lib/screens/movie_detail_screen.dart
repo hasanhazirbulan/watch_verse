@@ -9,6 +9,7 @@ import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/poll_service.dart';
 import 'package:watch_verse/services/streaming/streaming_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/add_to_list_sheet.dart';
 import 'package:watch_verse/widgets/comment_widgets.dart';
 import 'package:watch_verse/widgets/detail_sections.dart';
@@ -153,7 +154,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 300,
+            expandedHeight: detailHeroHeight(MediaQuery.sizeOf(context)),
             pinned: true,
             backgroundColor: context.colors.background,
             leading: Padding(
@@ -182,66 +183,19 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  TmdbImage(
-                      url: Tmdb.backdrop(movie.backDropPath, size: 'w1280')),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.transparent, context.colors.background],
-                        begin: Alignment.center,
-                        end: Alignment.bottomCenter,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 16,
-                    bottom: 16,
-                    right: 16,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: SizedBox(
-                            width: 92,
-                            height: 138,
-                            child:
-                                TmdbImage(url: Tmdb.poster(movie.posterPath)),
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(movie.title,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w800,
-                                    shadows: [
-                                      Shadow(color: Colors.black, blurRadius: 8)
-                                    ],
-                                  )),
-                              const SizedBox(height: 6),
-                              RatingBadge(rating: movie.voteAverage),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              background: DetailHeroBackground(
+                backdropPath: movie.backDropPath,
+                posterPath: movie.posterPath,
+                title: movie.title,
+                rating: movie.voteAverage,
               ),
             ),
           ),
           SliverToBoxAdapter(
-            child: Padding(
+            // A readable column on wide windows (iPhone Duo unfolded,
+            // landscape) instead of stretching edge to edge.
+            child: ReadablePadding(
+              maxWidth: Breakpoints.content,
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

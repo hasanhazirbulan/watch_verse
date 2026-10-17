@@ -20,8 +20,14 @@ class APIservices {
   static const String _base = 'https://api.themoviedb.org/3';
   static const String _lang = 'en-US';
 
+  /// Lets widget tests (which can't pass `--dart-define`) talk to a fake
+  /// TMDB through `http.runWithClient`. Always null in the app.
+  @visibleForTesting
+  static String? keyOverride;
+
   Uri _uri(String path, [Map<String, String>? params]) {
-    if (apiKey.isEmpty) {
+    final key = keyOverride ?? apiKey;
+    if (key.isEmpty) {
       throw StateError(
 
         'TMDB_API_KEY is not set. Run with '
@@ -29,7 +35,7 @@ class APIservices {
       );
     }
     final query = {
-      'api_key': apiKey,
+      'api_key': key,
       'language': _lang,
       ...?params,
     };

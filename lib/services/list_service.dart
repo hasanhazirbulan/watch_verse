@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/services/pro_service.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Thrown by [ListService.createList] when a free account is already at the
 /// [ListService.freeListLimit] and tries to create another list. Callers
@@ -20,8 +21,8 @@ class ListLimitReachedException implements Exception {
 /// subcollection or composite index. Covered by the existing owner-write rule.
 class ListService {
   ListService._({FirebaseFirestore? firestore, FirebaseAuth? auth})
-      : _db = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+      : _db = firestore ?? AppFirebase.firestore,
+        _auth = auth ?? AppFirebase.auth;
   static final ListService instance = ListService._();
 
   /// Test-only factory: inject a fake Firestore/Auth instead of touching

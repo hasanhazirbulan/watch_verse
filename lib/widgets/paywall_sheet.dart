@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/services/legal_links.dart';
 import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// WatchVerse Pro upsell sheet — shown at every gate (list limit, advanced
 /// stats; Patron profile themes) and from the Home
@@ -118,7 +118,7 @@ class _PaywallSheetState extends State<_PaywallSheet> {
   // themes) is itself account-gated
   // elsewhere in the app, so a guest's purchase would unlock nothing they
   // could actually use until they signed in anyway.
-  bool get _signedIn => FirebaseAuth.instance.currentUser != null;
+  bool get _signedIn => AppFirebase.auth.currentUser != null;
 
   void _promptSignIn(AppLocalizations l10n) {
     // Capture these before popping the sheet — `context` becomes unusable

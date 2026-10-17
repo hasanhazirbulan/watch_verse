@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:watch_verse/models/media.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// A single public comment on a movie or show. Comments can carry text and an
 /// optional image/GIF, and other users can like them.
@@ -60,8 +60,8 @@ class CommentService {
   CommentService._();
   static final CommentService instance = CommentService._();
 
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-  String? get uid => FirebaseAuth.instance.currentUser?.uid;
+  final FirebaseFirestore _db = AppFirebase.firestore;
+  String? get uid => AppFirebase.auth.currentUser?.uid;
 
   CollectionReference<Map<String, dynamic>> get _col =>
       _db.collection('comments');
@@ -91,7 +91,7 @@ class CommentService {
     required String text,
     String? imageUrl,
   }) async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = AppFirebase.auth.currentUser;
     if (user == null) return;
     if (text.trim().isEmpty && (imageUrl == null || imageUrl.isEmpty)) return;
 

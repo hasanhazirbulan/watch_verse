@@ -8,11 +8,13 @@ import 'package:watch_verse/services/database_service.dart';
 import 'package:watch_verse/services/notification_service.dart';
 import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/utils/validators.dart';
 import 'package:watch_verse/widgets/auth_backdrop.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 class RegisterScreen extends StatefulWidget {
-  /// Test-only override — defaults to [FirebaseAuth.instance] so production
+  /// Test-only override — defaults to [AppFirebase.auth] so production
   /// call sites (`RegisterScreen()`) don't need to change.
   final FirebaseAuth? auth;
   const RegisterScreen({super.key, this.auth});
@@ -27,7 +29,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // State construction — form-validation-only widget tests never reach it.
   late final DatabaseService _databaseService = DatabaseService.instance;
   final _formKey = GlobalKey<FormState>();
-  late final FirebaseAuth _auth = widget.auth ?? FirebaseAuth.instance;
+  late final FirebaseAuth _auth = widget.auth ?? AppFirebase.auth;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -116,7 +118,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: SafeArea(child: BackButton(color: Colors.white)),
           ),
           SafeArea(
-            child: SingleChildScrollView(
+            child: ReadableScrollView(
+              maxWidth: authFormMaxWidth,
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -191,8 +194,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     onPressed: _register,
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  // Wraps instead of overflowing when the prompt is long for
+                  // the width (large text, narrow form column).
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(l10n.alreadyHaveAccountPrompt,
                           style: TextStyle(color: context.colors.textMuted)),

@@ -9,6 +9,7 @@ import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/screens/friends_activity_screen.dart';
 import 'package:watch_verse/screens/public_profile_screen.dart';
 import 'package:watch_verse/utils/navigation.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Must be a top-level (or static) function: the OS calls this in a separate
 /// isolate when a push arrives while the app is backgrounded/terminated.
@@ -133,7 +134,7 @@ class NotificationService {
       // surface as an uncaught async error.
       final token = await _messaging.getToken();
       if (token == null) return;
-      await FirebaseFirestore.instance
+      await AppFirebase.firestore
           .collection('users')
           .doc(uid)
           .update({
@@ -219,7 +220,7 @@ class NotificationService {
   Future<void> clearToken(String uid) async {
     _uid = null;
     try {
-      await FirebaseFirestore.instance
+      await AppFirebase.firestore
           .collection('users')
           .doc(uid)
           .update({'fcmToken': FieldValue.delete()});

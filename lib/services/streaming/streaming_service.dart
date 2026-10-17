@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/streaming/streaming_logic.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 export 'package:watch_verse/services/streaming/streaming_logic.dart';
 
@@ -31,8 +32,8 @@ class FirestoreStreamingPrefsStore implements StreamingPrefsStore {
 
   final FirebaseFirestore? _dbOverride;
   final FirebaseAuth? _authOverride;
-  FirebaseFirestore get _db => _dbOverride ?? FirebaseFirestore.instance;
-  FirebaseAuth get _auth => _authOverride ?? FirebaseAuth.instance;
+  FirebaseFirestore get _db => _dbOverride ?? AppFirebase.firestore;
+  FirebaseAuth get _auth => _authOverride ?? AppFirebase.auth;
 
   DocumentReference<Map<String, dynamic>>? get _ref {
     final uid = _auth.currentUser?.uid;

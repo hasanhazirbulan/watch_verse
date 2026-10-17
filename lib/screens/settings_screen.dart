@@ -11,6 +11,8 @@ import 'package:watch_verse/services/account_deletion_service.dart';
 import 'package:watch_verse/services/export_service.dart';
 import 'package:watch_verse/services/legal_links.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// App-level preferences plus account management (edit profile, delete
 /// account) — the drawer is the only other entry point into account actions,
@@ -69,7 +71,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _deleteAccount() async {
     final l10n = AppLocalizations.of(context)!;
-    final user = FirebaseAuth.instance.currentUser;
+    final user = AppFirebase.auth.currentUser;
     if (user == null) return;
     setState(() => _deleting = true);
     final messenger = ScaffoldMessenger.of(context);
@@ -82,7 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       // Don't leave the user in a half-emptied account — sign out; the
       // `deletionPending` marker makes the next sign-in finish the job.
       try {
-        await FirebaseAuth.instance.signOut();
+        await AppFirebase.auth.signOut();
       } catch (_) {}
       nav.pushNamedAndRemoveUntil('/login', (r) => false);
       messenger.showSnackBar(
@@ -119,7 +121,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       backgroundColor: context.colors.background,
       appBar: AppBar(title: Text(l10n.settingsTitle)),
-      body: ListView(
+      body: ReadableListView(
         padding: const EdgeInsets.all(16),
         children: [
           Text(l10n.settingsAccountSection,
@@ -141,7 +143,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           // Stored on the profile doc, so signed-in users only (a guest's
           // watchlist is empty anyway).
-          if (FirebaseAuth.instance.currentUser != null) ...[
+          if (AppFirebase.auth.currentUser != null) ...[
             const SizedBox(height: 12),
             _tile(
               icon: Icons.live_tv_rounded,
@@ -215,9 +217,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // Functions side (functions/src/index.ts) reads the same fields before
   // sending, so a toggle takes effect on the next scheduled run/event.
   Widget _notificationsSection(AppLocalizations l10n) {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final uid = AppFirebase.auth.currentUser?.uid;
     if (uid == null) return const SizedBox.shrink();
-    final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
+    final userRef = AppFirebase.firestore.collection('users').doc(uid);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

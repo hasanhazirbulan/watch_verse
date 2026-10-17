@@ -8,6 +8,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:watch_verse/services/actor_guess_logic.dart';
 import 'package:watch_verse/services/api_service.dart' show apiKey;
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// A person result from the guess search.
 class ActorGuessCandidate {
@@ -78,8 +79,8 @@ class ActorGuessService {
 
   final FirebaseFirestore? _dbOverride;
   final FirebaseAuth? _authOverride;
-  FirebaseFirestore get _db => _dbOverride ?? FirebaseFirestore.instance;
-  FirebaseAuth get _auth => _authOverride ?? FirebaseAuth.instance;
+  FirebaseFirestore get _db => _dbOverride ?? AppFirebase.firestore;
+  FirebaseAuth get _auth => _authOverride ?? AppFirebase.auth;
 
   static const poolAsset = 'assets/games/actor_guess_pool.json';
 

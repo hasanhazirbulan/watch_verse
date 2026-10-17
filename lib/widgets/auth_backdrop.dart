@@ -4,7 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+
+/// Widest the auth forms get (fields + their 24 pt side padding).
+const double authFormMaxWidth = 488;
+
+/// Gap above the login form, over the backdrop. 250 pt on phones; on wide
+/// windows it shrinks with the height so a landscape window (e.g. the
+/// iPhone Duo's 951x669 inner display) still shows the form above the fold.
+double authTopGap(Size window) => window.width < Breakpoints.medium
+    ? 250
+    : (window.height * 0.25).clamp(120.0, 250.0);
 
 /// Atmospheric auth header: an auto-scrolling, blurred carousel of backdrops
 /// from currently-playing movies, fading into the page background.

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:watch_verse/models/model.dart';
 import 'package:watch_verse/services/api_service.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Per-user movie library + ratings, mirroring [TvTrackingService] for shows.
 ///
@@ -16,8 +17,8 @@ import 'package:watch_verse/services/api_service.dart';
 /// the movie is never added to a list — fixing "my ratings disappear".
 class MovieService {
   MovieService._({FirebaseFirestore? firestore, FirebaseAuth? auth})
-      : _db = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+      : _db = firestore ?? AppFirebase.firestore,
+        _auth = auth ?? AppFirebase.auth;
   static final MovieService instance = MovieService._();
 
   /// Test-only factory: inject a fake Firestore/Auth instead of touching

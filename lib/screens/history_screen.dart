@@ -7,6 +7,7 @@ import 'package:watch_verse/screens/movie_detail_screen.dart';
 import 'package:watch_verse/screens/tv_detail_screen.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 
@@ -23,7 +24,7 @@ class HistoryScreen extends StatelessWidget {
       body: StreamListView<Map<String, dynamic>>(
         stream: TvTrackingService.instance.activityStream(),
         emptyBuilder: (context) => _empty(context),
-        builder: (context, items) => ListView.separated(
+        builder: (context, items) => ReadableListView.separated(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
           itemCount: items.length,
           separatorBuilder: (_, _) => const SizedBox(height: 8),

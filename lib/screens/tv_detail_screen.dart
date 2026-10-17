@@ -8,6 +8,7 @@ import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/services/streaming/streaming_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/add_to_list_sheet.dart';
 import 'package:watch_verse/widgets/comment_widgets.dart';
 import 'package:watch_verse/widgets/detail_sections.dart';
@@ -206,7 +207,10 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
       slivers: [
         _heroAppBar(context, show),
         SliverToBoxAdapter(
-          child: Padding(
+          // A readable column on wide windows (iPhone Duo unfolded,
+          // landscape) instead of stretching edge to edge.
+          child: ReadablePadding(
+            maxWidth: Breakpoints.content,
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,7 +267,8 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
         ),
         _seasonList(data, watched),
         SliverToBoxAdapter(
-          child: Padding(
+          child: ReadablePadding(
+            maxWidth: Breakpoints.content,
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,7 +302,7 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
   Widget _heroAppBar(BuildContext context, TvShow show) {
     final l10n = AppLocalizations.of(context)!;
     return SliverAppBar(
-      expandedHeight: 300,
+      expandedHeight: detailHeroHeight(MediaQuery.sizeOf(context)),
       pinned: true,
       backgroundColor: context.colors.background,
       leading: Padding(
@@ -345,61 +350,11 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
                         fontSize: 16, fontWeight: FontWeight.w700),
                   )
                 : null,
-            background: Stack(
-              fit: StackFit.expand,
-              children: [
-                TmdbImage(url: Tmdb.backdrop(show.backdropPath, size: 'w1280')),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.transparent, context.colors.background],
-                      begin: Alignment.center,
-                      end: Alignment.bottomCenter,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 16,
-                  bottom: 16,
-                  right: 16,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: SizedBox(
-                          width: 92,
-                          height: 138,
-                          child: TmdbImage(url: Tmdb.poster(show.posterPath)),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              show.name,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w800,
-                                shadows: [
-                                  Shadow(color: Colors.black, blurRadius: 8)
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            RatingBadge(rating: show.voteAverage),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            background: DetailHeroBackground(
+              backdropPath: show.backdropPath,
+              posterPath: show.posterPath,
+              title: show.name,
+              rating: show.voteAverage,
             ),
           );
         },
@@ -916,7 +871,8 @@ class _TvDetailScreenState extends State<TvDetailScreen> {
           final showsMoreComing = isLastSeason &&
               allWatched &&
               _ongoingStatuses.contains(show.status);
-          return Padding(
+          return ReadablePadding(
+            maxWidth: Breakpoints.content,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: Theme(
               data: Theme.of(context).copyWith(dividerColor: Colors.transparent),

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
@@ -16,9 +15,11 @@ import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/streaming/streaming_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/streaming_widgets.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// A tracked show plus its aired, unwatched episodes in watch order — the
 /// screen-side payload behind a [FitsShowCandidate].
@@ -263,7 +264,7 @@ class _FitsTonightScreenState extends State<FitsTonightScreen> {
   StreamingPrefs? _prefs;
 
   late final bool _signedIn =
-      (widget.isSignedIn ?? () => FirebaseAuth.instance.currentUser != null)();
+      (widget.isSignedIn ?? () => AppFirebase.auth.currentUser != null)();
   Future<FitsTonightData>? _future;
 
   @override
@@ -321,9 +322,9 @@ class _FitsTonightScreenState extends State<FitsTonightScreen> {
             )
           : Column(
               children: [
-                _budgetPanel(),
+                ReadableWidth(child: _budgetPanel()),
                 if (_streaming.prefs.canSave)
-                  Padding(
+                  ReadablePadding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
                     child: Align(
                       alignment: Alignment.centerLeft,
@@ -543,7 +544,7 @@ class _FitsTonightScreenState extends State<FitsTonightScreen> {
         for (final m in result.unknownMovies) _unknownMovieTile(m),
       ],
     ];
-    return ListView(
+    return ReadableListView(
       padding: const EdgeInsets.only(bottom: 32),
       children: children,
     );

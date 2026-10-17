@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:ui' show ImageFilter;
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
@@ -14,6 +13,8 @@ import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/services/app_firebase.dart';
+import 'package:watch_verse/utils/responsive.dart';
 
 /// Daily "Who's the Actor?": name the mystery actor in up to
 /// [actorGuessMaxAttempts] guesses. One clue is shown up front and each wrong
@@ -44,7 +45,7 @@ class _ActorGuessScreenState extends State<ActorGuessScreen> {
   // Guests have no Firebase account to save progress under (gamePlays is
   // owner-only in firestore.rules), same as the daily movie game.
   late final bool _isGuest =
-      !(widget.signedIn ?? FirebaseAuth.instance.currentUser != null);
+      !(widget.signedIn ?? AppFirebase.auth.currentUser != null);
 
   // Captured once: a game started at 23:59 EST keeps its puzzle and progress
   // doc instead of flipping to tomorrow's mid-game.
@@ -220,7 +221,9 @@ class _ActorGuessScreenState extends State<ActorGuessScreen> {
     final puzzle = _puzzle;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.actorGuessTitle)),
-      body: SafeArea(
+      // Games keep a phone-width column on wide windows (iPhone Duo
+      // unfolded, landscape) rather than stretching edge to edge.
+      body: ReadableWidth(child: SafeArea(
         top: false,
         child: _isGuest
             ? _message(context, l10n.actorGuessSignInPrompt)
@@ -231,7 +234,7 @@ class _ActorGuessScreenState extends State<ActorGuessScreen> {
             : puzzle == null
             ? _message(context, l10n.actorGuessNoPool)
             : _gameStream(context, l10n, puzzle),
-      ),
+      )),
     );
   }
 

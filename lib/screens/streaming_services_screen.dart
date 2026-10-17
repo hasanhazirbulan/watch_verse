@@ -5,6 +5,7 @@ import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/services/streaming/streaming_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/streaming_widgets.dart';
 
@@ -135,12 +136,13 @@ class _StreamingServicesScreenState extends State<StreamingServicesScreen> {
         Expanded(
           child: CustomScrollView(
             slivers: [
-              SliverToBoxAdapter(child: _header(context)),
-              _providerList(context),
+              SliverReadableWidth(
+                  sliver: SliverToBoxAdapter(child: _header(context))),
+              SliverReadableWidth(sliver: _providerList(context)),
             ],
           ),
         ),
-        Padding(
+        ReadablePadding(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

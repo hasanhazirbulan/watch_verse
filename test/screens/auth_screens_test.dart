@@ -50,6 +50,9 @@ void main() {
         _wrap(RegisterScreen(auth: MockFirebaseAuth())),
       );
 
+      // The form scrolls; at the 800x600 test window it's a readable-width
+      // column, so the button can sit below the fold.
+      await tester.ensureVisible(find.text('Create Account'));
       await tester.tap(find.text('Create Account'));
       await tester.pump();
 
@@ -71,6 +74,7 @@ void main() {
           find.widgetWithText(TextFormField, 'Password'), '123');
       await tester.enterText(
           find.widgetWithText(TextFormField, 'Confirm password'), '123');
+      await tester.ensureVisible(find.text('Create Account'));
       await tester.tap(find.text('Create Account'));
       await tester.pump();
 
@@ -91,6 +95,7 @@ void main() {
       await tester.enterText(
           find.widgetWithText(TextFormField, 'Confirm password'),
           'password2');
+      await tester.ensureVisible(find.text('Create Account'));
       await tester.tap(find.text('Create Account'));
       await tester.pump();
 

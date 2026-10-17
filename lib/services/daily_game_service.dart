@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:watch_verse/models/game_clue_movie.dart';
 import 'package:watch_verse/services/api_service.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 export 'package:watch_verse/services/daily_game_clues.dart'
     show dailyGameMaxGuesses, dailyGameHintUnlockGuesses;
@@ -62,8 +63,8 @@ class DailyGameService {
       FirebaseAuth? auth,
       APIservices? api,
       DateTime Function()? clock})
-      : _db = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance,
+      : _db = firestore ?? AppFirebase.firestore,
+        _auth = auth ?? AppFirebase.auth,
         _api = api ?? APIservices(),
         _clock = clock ?? DateTime.now;
   static final DailyGameService instance = DailyGameService._();

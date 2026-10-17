@@ -28,11 +28,18 @@ class TmdbImage extends StatelessWidget {
   final BoxFit fit;
   final IconData placeholderIcon;
 
+  /// Which part of the image survives a [BoxFit.cover] crop. Full-bleed
+  /// heroes pass [Alignment.topCenter] so a wide window (e.g. the iPhone
+  /// Duo unfolded) trims the bottom — already under a fade — rather than
+  /// faces at the top.
+  final Alignment alignment;
+
   const TmdbImage({
     super.key,
     required this.url,
     this.fit = BoxFit.cover,
     this.placeholderIcon = Icons.movie_creation_outlined,
+    this.alignment = Alignment.center,
   });
 
   @override
@@ -45,6 +52,7 @@ class TmdbImage extends StatelessWidget {
     return CachedNetworkImage(
       imageUrl: url!,
       fit: fit,
+      alignment: alignment,
       placeholder: (context, _) => Container(
         color: context.colors.surfaceAlt,
         child: const Center(

@@ -1,14 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Social graph: follow/unfollow, user search, and reading other users' public
 /// library + activity. Follower/following are stored as arrays on the user doc
 /// (`followers` / `following`), matching the project's security rules.
 class SocialService {
   SocialService._({FirebaseFirestore? firestore, FirebaseAuth? auth})
-      : _db = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+      : _db = firestore ?? AppFirebase.firestore,
+        _auth = auth ?? AppFirebase.auth;
   static final SocialService instance = SocialService._();
 
   /// Test-only factory: inject a fake Firestore/Auth instead of touching

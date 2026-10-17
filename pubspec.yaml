@@ -93,6 +93,8 @@ dev_dependencies:
   mocktail: ^1.0.4
   fake_cloud_firestore: ^4.3.0
   firebase_auth_mocks: ^0.15.2
+  # Lets layout tests open the paywall without StoreKit.
+  in_app_purchase_platform_interface: ^1.4.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

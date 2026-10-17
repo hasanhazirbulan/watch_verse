@@ -8,6 +8,7 @@ import 'package:watch_verse/services/games/higher_lower_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/utils/responsive.dart';
 
 /// Endless "Higher or Lower": the top title shows its value, guess whether
 /// the bottom one's is higher or lower. A right call moves the bottom title
@@ -175,7 +176,9 @@ class _HigherLowerScreenState extends State<HigherLowerScreen> {
                 onPressed: _backToCategories,
               ),
       ),
-      body: FutureBuilder<Map<HigherLowerCategory, List<HigherLowerItem>>>(
+      // Games keep a phone-width column on wide windows (iPhone Duo
+      // unfolded, landscape) rather than stretching edge to edge.
+      body: ReadableWidth(child: FutureBuilder<Map<HigherLowerCategory, List<HigherLowerItem>>>(
         future: _poolFuture,
         builder: (context, snap) {
           if (snap.connectionState != ConnectionState.done) {
@@ -190,7 +193,7 @@ class _HigherLowerScreenState extends State<HigherLowerScreen> {
           }
           return _game(context, l10n, _category!, _left!, _right!);
         },
-      ),
+      )),
     );
   }
 

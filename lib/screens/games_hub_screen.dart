@@ -4,6 +4,7 @@ import 'package:watch_verse/screens/games/game_common_widgets.dart';
 import 'package:watch_verse/screens/games/game_registry.dart';
 import 'package:watch_verse/services/games/game_day.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 
 /// Lists the app's games (see [gameRegistry]): today's daily puzzles with
 /// their status, then the play-anytime games.
@@ -17,7 +18,7 @@ class GamesHubScreen extends StatelessWidget {
     final endless = [for (final g in gameRegistry) if (!g.daily) g];
     return Scaffold(
       appBar: AppBar(title: Text(l10n.gamesHubTitle)),
-      body: ListView(
+      body: ReadableListView(
         padding: EdgeInsets.fromLTRB(
             16, 8, 16, 24 + MediaQuery.paddingOf(context).bottom),
         children: [

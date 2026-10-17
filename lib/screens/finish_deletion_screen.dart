@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/services/account_deletion_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Shown instead of the app when the signed-in user's profile carries a
 /// `deletionPending` marker — i.e. an earlier "Delete account" was
@@ -56,7 +57,7 @@ class _FinishDeletionScreenState extends State<FinishDeletionScreen> {
 
   Future<void> _signOut(NavigatorState nav) async {
     try {
-      await FirebaseAuth.instance.signOut();
+      await AppFirebase.auth.signOut();
     } catch (_) {}
     nav.pushNamedAndRemoveUntil('/login', (r) => false);
   }

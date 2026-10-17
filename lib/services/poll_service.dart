@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Cross-user "how was it?" poll (platform watched on / emotion felt /
 /// favorite character), shown right after a movie or episode is marked
@@ -19,8 +20,8 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 /// memory to turn an id back into a label.
 class PollService {
   PollService._({FirebaseFirestore? firestore, FirebaseAuth? auth})
-      : _db = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+      : _db = firestore ?? AppFirebase.firestore,
+        _auth = auth ?? AppFirebase.auth;
   static final PollService instance = PollService._();
 
   /// Test-only factory: inject a fake Firestore/Auth instead of touching

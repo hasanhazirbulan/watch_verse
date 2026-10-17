@@ -12,12 +12,14 @@ import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/patron_badge.dart';
 import 'package:watch_verse/theme/avatar_backgrounds.dart';
 import 'package:watch_verse/utils/duration_format.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/utils/avatar_image.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -40,9 +42,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   /// visit. Bumped to V2 to re-run once for accounts that already completed
   /// the runtime-only V1 backfill, so genres get filled in too.
   Future<void> _backfillTimeStatsOnce() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final uid = AppFirebase.auth.currentUser?.uid;
     if (uid == null) return;
-    final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
+    final userRef = AppFirebase.firestore.collection('users').doc(uid);
     // Fire-and-forget from initState: without a catch, an offline launch or
     // a TMDB failure surfaced as an uncaught async error (recorded as a
     // *fatal* crash by main.dart's PlatformDispatcher.onError). The flag is
@@ -63,7 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final user = FirebaseAuth.instance.currentUser;
+    final user = AppFirebase.auth.currentUser;
     if (user == null) {
       return Scaffold(
         body: Center(child: Text(l10n.profileSignInPrompt)),
@@ -72,7 +74,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.profileTitle)),
-      body: SingleChildScrollView(
+      // A centered column on wide windows (iPhone Duo unfolded, landscape).
+      body: ReadableScrollView(
+        maxWidth: Breakpoints.content,
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
         child: Column(
           children: [
@@ -102,7 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _header(User user, AppLocalizations l10n) {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
+      stream: AppFirebase.firestore
           .collection('users')
           .doc(user.uid)
           .snapshots(),
@@ -401,7 +405,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             SectionHeader(
                 title: AppLocalizations.of(context)!.profileFavoritesTitle),
-            Padding(
+            // Three poster-sized slots, not three tablet-sized ones: on a
+            // wide window the row stops growing at ~150 pt per slot.
+            ReadablePadding(
+              maxWidth: 502,
+              alignStart: true,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: List.generate(bySlot.length, (i) {
@@ -673,21 +681,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     fontSize: 13)),
           ),
         ),
-        GridView.count(
-          crossAxisCount: _gridColumns,
-          shrinkWrap: true,
-          // The page already scrolls; let the grid size itself to its content.
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-          // Real poster art is 2:3 — the old 96x120 tile cropped every one.
-          childAspectRatio: 2 / 3,
-          children: [
-            for (final item in items.take(_gridColumns * _gridRows))
-              _recentPoster(item),
-          ],
-        ),
+        // More (not bigger) posters per row on wide windows.
+        LayoutBuilder(builder: (context, constraints) {
+          final columns = posterColumns(constraints.maxWidth - 32,
+              compact: _gridColumns, minTileWidth: 120);
+          return GridView.count(
+            crossAxisCount: columns,
+            shrinkWrap: true,
+            // The page already scrolls; let the grid size itself to its
+            // content.
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            // Real poster art is 2:3 — the old 96x120 tile cropped every one.
+            childAspectRatio: 2 / 3,
+            children: [
+              for (final item in items.take(columns * _gridRows))
+                _recentPoster(item),
+            ],
+          );
+        }),
         const SizedBox(height: 20),
       ],
     );

@@ -6,8 +6,112 @@ import 'package:watch_verse/screens/person_screen.dart';
 import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/streaming/streaming_logic.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/streaming_widgets.dart';
+
+/// Expanded height of the movie/TV detail hero for a window of [size].
+///
+/// Phones keep the original 300 pt. Wider windows (the iPhone Duo unfolded,
+/// landscape) follow the backdrop's 16:9 shape, capped so the hero never
+/// takes more than ~half of a short window and the page content starts
+/// above the fold.
+double detailHeroHeight(Size size) {
+  if (size.width < Breakpoints.medium) return 300;
+  final shaped = (size.width * 9 / 16).clamp(0.0, size.height * 0.45);
+  return shaped < 300 ? (size.height * 0.6).clamp(shaped, 300.0) : shaped;
+}
+
+/// Backdrop + fade + poster/title row shown behind a detail page's
+/// [SliverAppBar]. On wide windows the poster/title row lines up with the
+/// centered [Breakpoints.content] column the page body uses, and the poster
+/// grows with the hero instead of staying phone-sized.
+class DetailHeroBackground extends StatelessWidget {
+  const DetailHeroBackground({
+    super.key,
+    required this.backdropPath,
+    required this.posterPath,
+    required this.title,
+    required this.rating,
+  });
+
+  final String backdropPath;
+  final String posterPath;
+  final String title;
+  final double rating;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: _build);
+  }
+
+  Widget _build(BuildContext context, BoxConstraints constraints) {
+    final size = MediaQuery.sizeOf(context);
+    final compact = constraints.maxWidth < Breakpoints.medium;
+    final posterHeight = compact
+        ? 138.0
+        : (detailHeroHeight(size) - 120).clamp(110.0, 180.0);
+    final side =
+        16 + centeredInset(constraints.maxWidth, maxWidth: Breakpoints.content);
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        TmdbImage(
+          url: Tmdb.backdrop(backdropPath, size: 'w1280'),
+          alignment: Alignment.topCenter,
+        ),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.transparent, context.colors.background],
+              begin: Alignment.center,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
+        Positioned(
+          left: side,
+          bottom: 16,
+          right: side,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: SizedBox(
+                  width: posterHeight * 2 / 3,
+                  height: posterHeight,
+                  child: TmdbImage(url: Tmdb.poster(posterPath)),
+                ),
+              ),
+              SizedBox(width: compact ? 14 : 18),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: compact ? 22 : 26,
+                          fontWeight: FontWeight.w800,
+                          shadows: const [
+                            Shadow(color: Colors.black, blurRadius: 8)
+                          ],
+                        )),
+                    const SizedBox(height: 6),
+                    RatingBadge(rating: rating),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 /// Horizontal strip of top-billed cast; tapping a face opens their filmography.
 class CastStrip extends StatelessWidget {

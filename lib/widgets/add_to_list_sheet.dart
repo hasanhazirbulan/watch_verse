@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
@@ -6,6 +5,7 @@ import 'package:watch_verse/services/list_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/text_prompt.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Opens the "Add to list" picker for [item] — toggle membership across the
 /// user's custom lists or create a new one on the spot.
@@ -29,7 +29,7 @@ class _AddToListSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final signedIn = FirebaseAuth.instance.currentUser != null;
+    final signedIn = AppFirebase.auth.currentUser != null;
     final key = ListService.keyFor(item);
 
     return SafeArea(

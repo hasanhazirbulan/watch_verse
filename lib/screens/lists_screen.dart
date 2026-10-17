@@ -1,13 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/screens/list_detail_screen.dart';
 import 'package:watch_verse/services/list_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/paywall_sheet.dart';
 import 'package:watch_verse/widgets/text_prompt.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 enum _ListsTab { mine, following }
 
@@ -51,7 +52,7 @@ class _ListsScreenState extends State<ListsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final signedIn = FirebaseAuth.instance.currentUser != null;
+    final signedIn = AppFirebase.auth.currentUser != null;
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.listsTitle),
@@ -93,7 +94,7 @@ class _ListsScreenState extends State<ListsScreen> {
       stream: ListService.instance.listsStream(),
       emptyBuilder: (context) => _empty(context, Icons.playlist_add_rounded,
           l10n.listsEmptyTitle, l10n.listsEmptySubtitle),
-      builder: (context, lists) => ListView.separated(
+      builder: (context, lists) => ReadableListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         itemCount: lists.length,
         separatorBuilder: (_, _) => const SizedBox(height: 12),
@@ -107,7 +108,7 @@ class _ListsScreenState extends State<ListsScreen> {
       stream: ListService.instance.followedListsStream(),
       emptyBuilder: (context) => _empty(context, Icons.bookmark_add_outlined,
           l10n.listsFollowingEmptyTitle, l10n.listsFollowingEmptySubtitle),
-      builder: (context, followed) => ListView.separated(
+      builder: (context, followed) => ReadableListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         itemCount: followed.length,
         separatorBuilder: (_, _) => const SizedBox(height: 12),

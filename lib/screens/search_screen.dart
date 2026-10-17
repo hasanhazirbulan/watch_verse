@@ -5,6 +5,7 @@ import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/social_widgets.dart';
@@ -145,7 +146,7 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(title: Text(l10n.searchTitle)),
       body: Column(
         children: [
-          Padding(
+          ReadablePadding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
             child: TextField(
               controller: _controller,
@@ -245,7 +246,7 @@ class _SearchScreenState extends State<SearchScreen> {
             l10n.searchNoOneFoundTitle,
             l10n.searchNoUsersMatched(_query));
       }
-      return ListView.builder(
+      return AdaptiveListView(
         padding: const EdgeInsets.only(top: 4),
         itemCount: _people.length,
         itemBuilder: (context, i) => UserTile(user: _people[i]),
@@ -257,7 +258,8 @@ class _SearchScreenState extends State<SearchScreen> {
       return _emptyState(context, Icons.sentiment_dissatisfied_rounded,
           l10n.searchNoResultsTitle, l10n.searchNothingMatched(_query));
     }
-    return ListView.separated(
+    // Columns of rows on wide windows (iPhone Duo unfolded, landscape).
+    return AdaptiveListView(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       itemCount: titles.length,
       separatorBuilder: (_, _) => const Divider(height: 1, indent: 84),
@@ -303,7 +305,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _emptyState(
       BuildContext context, IconData icon, String title, String subtitle) {
-    return Center(
+    // Scrolls instead of overflowing in a short window (landscape phone).
+    return ScrollableCenter(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(

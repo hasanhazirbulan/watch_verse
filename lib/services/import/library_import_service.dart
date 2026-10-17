@@ -9,6 +9,7 @@ import 'package:watch_verse/services/import/import_models.dart';
 import 'package:watch_verse/services/import/title_matcher.dart';
 import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 typedef ImportProgressCallback = void Function(int done, int total);
 
@@ -49,8 +50,8 @@ class LibraryImportService {
     this.flushEvery = 100,
     Duration retryDelay = const Duration(seconds: 1),
     Future<void> Function()? backfillDetails,
-  })  : _db = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance,
+  })  : _db = firestore ?? AppFirebase.firestore,
+        _auth = auth ?? AppFirebase.auth,
         _api = api ?? TmdbImportLookupApi(),
         _retryDelay = retryDelay,
         _backfillDetails = backfillDetails ?? _defaultBackfill;

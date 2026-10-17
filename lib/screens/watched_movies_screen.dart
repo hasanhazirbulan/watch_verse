@@ -3,6 +3,7 @@ import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
 import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
@@ -73,8 +74,9 @@ class _WatchedMoviesScreenState extends State<WatchedMoviesScreen> {
           }
           return GridView.builder(
             padding: const EdgeInsets.all(14),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
+            // 3 columns on phones, more on wide windows.
+            gridDelegate: const SliverGridDelegateWithAdaptiveCount(
+              compactCount: 3,
               mainAxisSpacing: 16,
               crossAxisSpacing: 12,
               childAspectRatio: 0.52,

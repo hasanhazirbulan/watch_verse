@@ -6,6 +6,7 @@ import 'package:watch_verse/services/api_service.dart';
 import 'package:watch_verse/services/poll_service.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/poll_widgets.dart';
@@ -67,7 +68,8 @@ class _EpisodeDetailScreenState extends State<EpisodeDetailScreen> {
                   : openMedia(context, show.toMediaItem()),
             ),
           ]),
-      body: ListView(
+      body: ReadableListView(
+        maxWidth: Breakpoints.content,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
           ClipRRect(

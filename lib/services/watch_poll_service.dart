@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:watch_verse/models/media.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// "What should we watch?" group polls — a small friend group picks between
 /// a handful of movie/show candidates. Distinct from [PollService] (which
@@ -20,8 +20,8 @@ class WatchPollService {
   WatchPollService._();
   static final WatchPollService instance = WatchPollService._();
 
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-  String? get _uid => FirebaseAuth.instance.currentUser?.uid;
+  final FirebaseFirestore _db = AppFirebase.firestore;
+  String? get _uid => AppFirebase.auth.currentUser?.uid;
 
   CollectionReference<Map<String, dynamic>> get _col =>
       _db.collection('watchPolls');

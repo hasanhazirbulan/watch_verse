@@ -13,6 +13,7 @@ import 'package:watch_verse/services/games/pools/frames_pools.g.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/utils/responsive.dart';
 
 /// Daily "Frames" game (Framed-style): name today's movie or TV show from
 /// its stills. One still to start; every wrong guess or skip reveals the
@@ -39,7 +40,9 @@ class _FramesGameScreenState extends State<FramesGameScreen> {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.framesGameTitle)),
-      body: Column(
+      // Games keep a phone-width column on wide windows (iPhone Duo
+      // unfolded, landscape) rather than stretching edge to edge.
+      body: ReadableWidth(child: Column(
         children: [
           GameModeToggle(
             mode: _mode,
@@ -53,7 +56,7 @@ class _FramesGameScreenState extends State<FramesGameScreen> {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

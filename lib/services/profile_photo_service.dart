@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:watch_verse/utils/avatar_image.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Thrown when a picked photo can't be made small enough to store inline.
 class ProfilePhotoTooLargeException implements Exception {
@@ -16,8 +17,8 @@ class ProfilePhotoTooLargeException implements Exception {
 /// plan, which has no Cloud Storage bucket (see utils/avatar_image.dart).
 class ProfilePhotoService {
   ProfilePhotoService({FirebaseFirestore? firestore, FirebaseAuth? auth})
-      : _db = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+      : _db = firestore ?? AppFirebase.firestore,
+        _auth = auth ?? AppFirebase.auth;
 
   static final ProfilePhotoService instance = ProfilePhotoService();
 

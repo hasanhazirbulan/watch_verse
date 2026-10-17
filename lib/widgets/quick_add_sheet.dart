@@ -45,7 +45,9 @@ class _QuickAddSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Padding(
+      // Scrolls rather than overflowing in a short window (landscape phone,
+      // the iPhone Duo's outer display).
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -190,8 +192,14 @@ Widget _sheetRow(BuildContext context,
         children: [
           Icon(icon, size: 20, color: context.colors.textSecondary),
           const SizedBox(width: 14),
-          Text(label,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+          // "Go to <title>" can be longer than the sheet is wide.
+          Expanded(
+            child: Text(label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style:
+                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+          ),
         ],
       ),
     ),

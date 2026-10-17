@@ -4,11 +4,13 @@ import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/screens/main_screen.dart';
 import 'package:watch_verse/screens/register.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/utils/validators.dart';
 import 'package:watch_verse/widgets/auth_backdrop.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 class LoginScreen extends StatefulWidget {
-  /// Test-only override — defaults to [FirebaseAuth.instance] so production
+  /// Test-only override — defaults to [AppFirebase.auth] so production
   /// call sites (`LoginScreen()`) don't need to change.
   final FirebaseAuth? auth;
   const LoginScreen({super.key, this.auth});
@@ -19,7 +21,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  late final FirebaseAuth _auth = widget.auth ?? FirebaseAuth.instance;
+  late final FirebaseAuth _auth = widget.auth ?? AppFirebase.auth;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
@@ -89,12 +91,15 @@ class _LoginScreenState extends State<LoginScreen> {
             child: AuthBackdrop(height: 440),
           ),
           SafeArea(
-            child: SingleChildScrollView(
+            // A phone-width form on wide windows (iPhone Duo unfolded,
+            // landscape), not fields stretched across the screen.
+            child: ReadableScrollView(
+              maxWidth: authFormMaxWidth,
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 250),
+                  SizedBox(height: authTopGap(MediaQuery.sizeOf(context))),
                   AuthHeader(
                     title: l10n.appTitle,
                     subtitle: l10n.loginSubtitle,
@@ -150,8 +155,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(color: context.colors.textSecondary)),
                   ),
                   const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  // Wraps instead of overflowing when the prompt is long for
+                  // the width (large text, narrow form column).
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(l10n.noAccountPrompt,
                           style: TextStyle(color: context.colors.textMuted)),

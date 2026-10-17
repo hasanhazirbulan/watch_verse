@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
@@ -15,6 +14,7 @@ import 'package:watch_verse/services/actor_guess_logic.dart';
 import 'package:watch_verse/services/games/game_day.dart';
 import 'package:watch_verse/services/games/higher_lower_service.dart';
 import 'package:watch_verse/services/games/plot_guess_logic.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// How a hub status chip is tinted.
 enum GameStatusTone { neutral, progress, done, missed }
@@ -125,7 +125,7 @@ final List<GameEntry> gameRegistry = [
 // --------------------------------------------------------------- status ---
 
 Stream<List<GameStatusChip>> _dailyMovieStatus(AppLocalizations l10n) {
-  if (FirebaseAuth.instance.currentUser == null) {
+  if (AppFirebase.auth.currentUser == null) {
     return Stream.value([GameStatusChip(l10n.gamesHubStatusSignIn)]);
   }
   return dailyGameTodayStatus(l10n).map((s) {
@@ -149,12 +149,12 @@ Stream<List<GameStatusChip>> _perModeStatus(
   Map<MediaType?, String> docIds, {
   required bool guestCanPlay,
 }) {
-  final uid = FirebaseAuth.instance.currentUser?.uid;
+  final uid = AppFirebase.auth.currentUser?.uid;
   if (uid == null) {
     return Stream.value(
         guestCanPlay ? const [] : [GameStatusChip(l10n.gamesHubStatusSignIn)]);
   }
-  final plays = FirebaseFirestore.instance
+  final plays = AppFirebase.firestore
       .collection('users')
       .doc(uid)
       .collection('gamePlays');

@@ -12,6 +12,7 @@ import 'package:watch_verse/services/games/pools/title_wordle_pools.g.dart';
 import 'package:watch_verse/services/games/title_wordle_logic.dart';
 import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
+import 'package:watch_verse/utils/responsive.dart';
 
 /// Daily "Title Wordle": guess a well-known movie or TV show title letter by
 /// letter with Wordle feedback, in [titleWordleMaxGuesses] tries. Titles are
@@ -37,7 +38,9 @@ class _TitleWordleScreenState extends State<TitleWordleScreen> {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.titleWordleTitle)),
-      body: SafeArea(
+      // Games keep a phone-width column on wide windows (iPhone Duo
+      // unfolded, landscape) rather than stretching edge to edge.
+      body: ReadableWidth(child: SafeArea(
         top: false,
         child: Column(
           children: [
@@ -57,7 +60,7 @@ class _TitleWordleScreenState extends State<TitleWordleScreen> {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 }
@@ -309,43 +312,106 @@ class _WordleBoardState extends State<_WordleBoard> {
                   ),
               ],
             )
-          : Column(
-              children: [
-                header,
-                if (state.guesses.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                    child: GameIntro(
-                      isMovie
-                          ? l10n.titleWordleIntroMovie
-                          : l10n.titleWordleIntroTv,
-                    ),
-                  )
-                // The color key costs a row the board can't spare on an
-                // iPhone SE.
-                else if (MediaQuery.sizeOf(context).height >=
-                    GameHeader.compactHeight)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                    child: _legend(context, l10n),
+          // A short, wide window (a landscape phone) can't stack header,
+          // board and keyboard; put the keyboard beside the board instead.
+          : LayoutBuilder(
+              builder: (context, constraints) =>
+                  constraints.maxHeight < 440 && constraints.maxWidth >= 600
+                  ? _sideBySide(context, l10n, state, header)
+                  : Column(
+                    children: [
+                      header,
+                      if (state.guesses.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          child: GameIntro(
+                            isMovie
+                                ? l10n.titleWordleIntroMovie
+                                : l10n.titleWordleIntroTv,
+                          ),
+                        )
+                      // The color key costs a row the board can't spare on an
+                      // iPhone SE.
+                      else if (MediaQuery.sizeOf(context).height >=
+                          GameHeader.compactHeight)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          child: _legend(context, l10n),
+                        ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: _board(context, state),
+                        ),
+                      ),
+                      _keyboard(context, l10n, state),
+                      if (!_store.isSignedIn)
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+                          child: GameGuestNote(),
+                        ),
+                    ],
                   ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: _board(context, state),
-                  ),
-                ),
-                _keyboard(context, l10n, state),
-                if (!_store.isSignedIn)
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
-                    child: GameGuestNote(),
-                  ),
-              ],
             ),
+    );
+  }
+
+  /// In-progress layout for short, wide windows: header + board on the
+  /// left, intro/legend + keyboard on the right.
+  Widget _sideBySide(
+    BuildContext context,
+    AppLocalizations l10n,
+    TitleWordleState state,
+    Widget header,
+  ) {
+    final isMovie = widget.mode == MediaType.movie;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: Column(
+            children: [
+              header,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: _board(context, state),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Center(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: state.guesses.isEmpty
+                        ? GameIntro(
+                            isMovie
+                                ? l10n.titleWordleIntroMovie
+                                : l10n.titleWordleIntroTv,
+                          )
+                        : _legend(context, l10n),
+                  ),
+                  _keyboard(context, l10n, state),
+                  if (!_store.isSignedIn)
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      child: GameGuestNote(),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

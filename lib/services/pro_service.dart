@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart'
     show TargetPlatform, debugPrint, defaultTargetPlatform, kDebugMode;
@@ -10,6 +9,7 @@ import 'package:in_app_purchase_storekit/store_kit_2_wrappers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'pro_entitlement.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 export 'pro_entitlement.dart'
     show
@@ -122,7 +122,7 @@ class ProService {
     // Publish the Patron badge for whoever signs in on a Patron device (the
     // purchase may have happened before sign-in, or on a previous account
     // session).
-    _authSub = FirebaseAuth.instance.authStateChanges().listen((user) {
+    _authSub = AppFirebase.auth.authStateChanges().listen((user) {
       if (user == null) return;
       if (isPatron) {
         _publishPatronBadge(user.uid);
@@ -314,7 +314,7 @@ class ProService {
     _controller.add(value);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_proTierPrefsKey, value.index);
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final uid = AppFirebase.auth.currentUser?.uid;
     if (value == ProTier.patron) {
       if (_patronBadgeClearPending) {
         _patronBadgeClearPending = false;
@@ -343,7 +343,7 @@ class ProService {
   /// the doc exists, and every later launch's auth event does too.
   Future<void> _publishPatronBadge(String uid) async {
     try {
-      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+      await AppFirebase.firestore.collection('users').doc(uid).update({
         'patron': true,
       });
     } catch (e) {
@@ -355,7 +355,7 @@ class ProService {
   /// sign-in until it succeeds (see the pending flag in [initialize]).
   Future<void> _clearPatronBadge(String uid) async {
     try {
-      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+      await AppFirebase.firestore.collection('users').doc(uid).update({
         'patron': false,
       });
       _patronBadgeClearPending = false;

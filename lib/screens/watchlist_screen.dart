@@ -10,6 +10,7 @@ import 'package:watch_verse/screens/streaming_services_screen.dart';
 import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/streaming/streaming_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/streaming_widgets.dart';
@@ -120,7 +121,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
       ),
       body: Column(
         children: [
-          Padding(
+          ReadablePadding(
             padding: EdgeInsets.fromLTRB(
               16,
               16,
@@ -134,7 +135,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
             ),
           ),
           if (_streaming.prefs.canSave)
-            Padding(
+            ReadablePadding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
               child: Align(
                 alignment: Alignment.centerLeft,
@@ -179,7 +180,8 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
           builder: (_) => StreamingServicesScreen(deps: _streaming),
         ),
       ),
-      builder: (context, visible, matchesOf) => ListView.separated(
+      // Columns of rows on wide windows (iPhone Duo unfolded, landscape).
+      builder: (context, visible, matchesOf) => AdaptiveListView(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         itemCount: visible.length,
         separatorBuilder: (_, _) => const Divider(height: 1, indent: 84),
@@ -265,7 +267,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
   }
 
   Widget _empty(BuildContext context, IconData icon, String message) {
-    return Center(
+    return ScrollableCenter(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

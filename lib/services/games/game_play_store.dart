@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Per-day progress for the bundled-pool games, stored at
 /// `users/{uid}/gamePlays/{game}-{mode}-{yyyy-mm-dd}` so a finished puzzle
@@ -26,8 +27,8 @@ class GamePlayStore {
   // doesn't require an initialized Firebase app.
   final FirebaseFirestore? _dbOverride;
   final FirebaseAuth? _authOverride;
-  FirebaseFirestore get _db => _dbOverride ?? FirebaseFirestore.instance;
-  FirebaseAuth get _auth => _authOverride ?? FirebaseAuth.instance;
+  FirebaseFirestore get _db => _dbOverride ?? AppFirebase.firestore;
+  FirebaseAuth get _auth => _authOverride ?? AppFirebase.auth;
 
   bool get isSignedIn => _auth.currentUser != null;
 

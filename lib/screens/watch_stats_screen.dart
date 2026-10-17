@@ -9,6 +9,7 @@ import 'package:watch_verse/services/pro_service.dart';
 import 'package:watch_verse/screens/year_in_review_screen.dart';
 import 'package:watch_verse/services/tv_tracking_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/utils/duration_format.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/paywall_sheet.dart';
@@ -87,7 +88,8 @@ class _WatchStatsScreenState extends State<WatchStatsScreen> {
                     initialData: ProService.instance.isPro,
                     builder: (context, proSnap) {
                       final isPro = proSnap.data ?? false;
-                      return ListView(
+                      return ReadableListView(
+                        maxWidth: Breakpoints.content,
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
                         children: [
                           _typeSection(context, l10n, movieMinutes, showMinutes),

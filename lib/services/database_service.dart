@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show debugPrint, visibleForTesting;
+import 'package:watch_verse/services/app_firebase.dart';
 
 class DatabaseService {
   DatabaseService._privateConstructor({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+      : _firestore = firestore ?? AppFirebase.firestore;
 
   static final DatabaseService _instance =
   DatabaseService._privateConstructor();
@@ -59,7 +60,7 @@ class DatabaseService {
   Future<DocumentSnapshot<Map<String, dynamic>>> getUser(String uid) async {
     try {
       // Fetch user document from Firestore
-      final userSnapshot = await FirebaseFirestore.instance
+      final userSnapshot = await AppFirebase.firestore
           .collection('users')
           .doc(uid)
           .get();

@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/widgets/patron_badge.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
@@ -11,10 +10,12 @@ import 'package:watch_verse/services/list_service.dart';
 import 'package:watch_verse/services/movie_service.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/detail_sections.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/social_widgets.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 class PublicProfileScreen extends StatefulWidget {
   final String userId;
@@ -70,7 +71,8 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(title: Text(widget.name)),
-      body: SingleChildScrollView(
+      body: ReadableScrollView(
+        maxWidth: Breakpoints.content,
         padding: const EdgeInsets.only(bottom: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -453,7 +455,7 @@ class _AddablePosterState extends State<_AddablePoster> {
                   // Hidden for guests: MovieService.setStatus silently no-ops
                   // without a signed-in user, so a guest used to get the
                   // "added" check + snackbar for a write that never happened.
-                  if (FirebaseAuth.instance.currentUser != null)
+                  if (AppFirebase.auth.currentUser != null)
                     Positioned(
                       top: 6,
                       right: 6,

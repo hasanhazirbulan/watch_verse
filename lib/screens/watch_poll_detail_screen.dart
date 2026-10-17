@@ -1,9 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/services/watch_poll_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// One "what should we watch?" poll: options as vote bars (tap to vote),
 /// live as members vote. The creator can close it (locking in the current
@@ -12,7 +13,7 @@ class WatchPollDetailScreen extends StatelessWidget {
   final String pollId;
   const WatchPollDetailScreen({super.key, required this.pollId});
 
-  String? get _uid => FirebaseAuth.instance.currentUser?.uid;
+  String? get _uid => AppFirebase.auth.currentUser?.uid;
 
   Future<void> _closePoll(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
@@ -123,7 +124,7 @@ class WatchPollDetailScreen extends StatelessWidget {
                 ),
             ],
           ),
-          body: ListView(
+          body: ReadableListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
             children: [
               if (closed)

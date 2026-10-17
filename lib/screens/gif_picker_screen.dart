@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/services/giphy_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 
 /// Full-screen Giphy picker. Pops with the selected GIF URL (a String), or null
 /// if the user backs out. Shows trending GIFs first, then live search results.
@@ -111,8 +112,10 @@ class _GifPickerScreenState extends State<GifPickerScreen> {
     }
     return GridView.builder(
       padding: const EdgeInsets.all(12),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      // 2 columns on phones, more on wide windows.
+      gridDelegate: const SliverGridDelegateWithAdaptiveCount(
+        compactCount: 2,
+        minTileWidth: 200,
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
         childAspectRatio: 1.1,

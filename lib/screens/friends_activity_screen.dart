@@ -7,6 +7,7 @@ import 'package:watch_verse/screens/movie_detail_screen.dart';
 import 'package:watch_verse/screens/tv_detail_screen.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
 import 'package:watch_verse/widgets/social_widgets.dart';
@@ -57,7 +58,7 @@ class _FriendsActivityScreenState extends State<FriendsActivityScreen> {
             future: _futureFor(following),
             emptyBuilder: (context) => _empty(
                 context, l10n.friendsQuietTitle, l10n.friendsQuietSubtitle),
-            builder: (context, items) => ListView.separated(
+            builder: (context, items) => ReadableListView.separated(
               padding: const EdgeInsets.all(12),
               itemCount: items.length,
               separatorBuilder: (_, _) => const SizedBox(height: 8),

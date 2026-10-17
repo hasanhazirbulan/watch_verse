@@ -1,4 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/models/media.dart';
@@ -7,9 +8,11 @@ import 'package:watch_verse/services/comment_service.dart';
 import 'package:watch_verse/services/giphy_service.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/comment_widgets.dart';
 import 'package:watch_verse/widgets/text_prompt.dart';
+import 'package:watch_verse/services/app_firebase.dart';
 
 /// Public comments for one title. Users can post text + an image/GIF and like
 /// each other's comments. Kept on its own screen so spoilers stay off the
@@ -154,7 +157,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final signedIn = FirebaseAuth.instance.currentUser != null;
+    final signedIn = AppFirebase.auth.currentUser != null;
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.commentsTitle),
@@ -184,7 +187,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                     final comments =
                         all.where((c) => !blocked.contains(c.uid)).toList();
                     if (comments.isEmpty) return _empty();
-                    return ListView.builder(
+                    return ReadableListView.builder(
                       padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
                       itemCount: comments.length,
                       itemBuilder: (context, i) =>
@@ -208,53 +211,60 @@ class _CommentsScreenState extends State<CommentsScreen> {
         left: 12,
         right: 12,
         top: 8,
-        bottom: 8 + MediaQuery.of(context).viewInsets.bottom,
+        // The keyboard when it's up, else the home indicator (zero above
+        // the tab bar, which already clears it).
+        bottom: 8 +
+            math.max(MediaQuery.of(context).viewInsets.bottom,
+                MediaQuery.paddingOf(context).bottom),
       ),
       decoration: BoxDecoration(
         color: context.colors.surface,
         border: const Border(top: BorderSide(color: Colors.white10)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (_hasAttachment) _attachmentPreview(),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              IconButton(
-                icon: Icon(Icons.add_photo_alternate_rounded,
-                    color: context.colors.primary),
-                onPressed: _openAttachMenu,
-              ),
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  minLines: 1,
-                  maxLines: 4,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: InputDecoration(
-                    hintText: l10n.commentsAddCommentHint,
-                    isDense: true,
+      // The bar spans the window; its contents stay a readable width.
+      child: ReadableWidth(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_hasAttachment) _attachmentPreview(),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.add_photo_alternate_rounded,
+                      color: context.colors.primary),
+                  onPressed: _openAttachMenu,
+                ),
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    minLines: 1,
+                    maxLines: 4,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      hintText: l10n.commentsAddCommentHint,
+                      isDense: true,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              _sending
-                  ? const Padding(
-                      padding: EdgeInsets.all(10),
-                      child: SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2)),
-                    )
-                  : IconButton(
-                      icon: Icon(Icons.send_rounded,
-                          color: context.colors.primary),
-                      onPressed: _send,
-                    ),
-            ],
-          ),
-        ],
+                const SizedBox(width: 8),
+                _sending
+                    ? const Padding(
+                        padding: EdgeInsets.all(10),
+                        child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2)),
+                      )
+                    : IconButton(
+                        icon: Icon(Icons.send_rounded,
+                            color: context.colors.primary),
+                        onPressed: _send,
+                      ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

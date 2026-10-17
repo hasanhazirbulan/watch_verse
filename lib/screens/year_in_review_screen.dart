@@ -10,6 +10,7 @@ import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/services/year_in_review.dart';
 import 'package:watch_verse/services/year_in_review_source.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/utils/duration_format.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
@@ -238,7 +239,7 @@ class _YearInReviewScreenState extends State<YearInReviewScreen> {
           child: _funFacts(context, l10n, r),
         ),
     ];
-    return ListView.separated(
+    return ReadableListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       itemCount: cards.length,
       separatorBuilder: (_, _) => const SizedBox(height: 16),

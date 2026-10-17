@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:watch_verse/l10n/app_localizations.dart';
 import 'package:watch_verse/services/social_service.dart';
 import 'package:watch_verse/theme/app_theme.dart';
+import 'package:watch_verse/utils/responsive.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/social_widgets.dart';
 
@@ -22,7 +23,7 @@ class BlockedUsersScreen extends StatelessWidget {
         builder: (context, ids) => FutureListView<Map<String, dynamic>>(
           future: social.usersByIds(ids),
           emptyBuilder: (context) => _empty(context),
-          builder: (context, users) => ListView.separated(
+          builder: (context, users) => ReadableListView.separated(
             padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: users.length,
             separatorBuilder: (_, _) => const Divider(height: 1, indent: 72),

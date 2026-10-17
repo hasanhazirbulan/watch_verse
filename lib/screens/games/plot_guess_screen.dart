@@ -13,6 +13,7 @@ import 'package:watch_verse/theme/app_theme.dart';
 import 'package:watch_verse/utils/navigation.dart';
 import 'package:watch_verse/widgets/async_state_view.dart';
 import 'package:watch_verse/widgets/media_widgets.dart';
+import 'package:watch_verse/utils/responsive.dart';
 
 /// Daily "Plot" game: guess today's movie (or show) from its TMDB overview
 /// with names redacted. Every wrong guess or skip unlocks the next clue
@@ -181,7 +182,9 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.plotGameTitle)),
-      body: Column(
+      // Games keep a phone-width column on wide windows (iPhone Duo
+      // unfolded, landscape) rather than stretching edge to edge.
+      body: ReadableWidth(child: Column(
         children: [
           GameModeTabs(
             labels: [for (final m in PlotGameMode.values) _modeLabel(l10n, m)],
@@ -195,7 +198,7 @@ class _PlotGuessScreenState extends State<PlotGuessScreen> {
                 : _modeBody(context, l10n),
           ),
         ],
-      ),
+      )),
     );
   }
 

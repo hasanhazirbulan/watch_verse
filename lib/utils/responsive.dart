@@ -303,9 +303,59 @@ class SideSafeArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final padding = MediaQuery.paddingOf(context);
     return ColoredBox(
       color: color,
-      child: SafeArea(top: false, bottom: false, child: child),
+      child: _SideInsets(
+        left: padding.left,
+        right: padding.right,
+        child: SafeArea(top: false, bottom: false, child: child),
+      ),
+    );
+  }
+}
+
+/// The side insets [SideSafeArea] took away, for [FullBleed].
+class _SideInsets extends InheritedWidget {
+  const _SideInsets(
+      {required this.left, required this.right, required super.child});
+
+  final double left;
+  final double right;
+
+  @override
+  bool updateShouldNotify(_SideInsets old) =>
+      left != old.left || right != old.right;
+}
+
+/// Lets a purely decorative background (a backdrop image, its blur and
+/// gradients) extend back under the side insets [SideSafeArea] keeps content
+/// out of, so a side status bar sits over the image instead of a blank strip.
+/// Never put interactive content in it. A no-op when there are no side
+/// insets (portrait phones). Needs bounded constraints.
+class FullBleed extends StatelessWidget {
+  const FullBleed({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final insets = context.dependOnInheritedWidgetOfExactType<_SideInsets>();
+    if (insets == null || (insets.left == 0 && insets.right == 0)) {
+      return child;
+    }
+    return Stack(
+      clipBehavior: Clip.none,
+      fit: StackFit.expand,
+      children: [
+        Positioned(
+          left: -insets.left,
+          right: -insets.right,
+          top: 0,
+          bottom: 0,
+          child: child,
+        ),
+      ],
     );
   }
 }

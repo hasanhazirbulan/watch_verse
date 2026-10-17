@@ -51,52 +51,56 @@ class _AuthBackdropState extends State<AuthBackdrop> {
   Widget build(BuildContext context) {
     return SizedBox(
       height: widget.height,
-      child: ClipRect(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Base gradient — visible while images load and as a safety net.
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [const Color(0xFF241B2F), context.colors.background],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
+      child: FullBleed(child: _backdrop(context)),
+    );
+  }
+
+  Widget _backdrop(BuildContext context) {
+    return ClipRect(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Base gradient — visible while images load and as a safety net.
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [const Color(0xFF241B2F), context.colors.background],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
-            if (_items.isNotEmpty)
-              CarouselSlider.builder(
-                itemCount: _items.length,
-                itemBuilder: (context, index, _) => TmdbImage(
-                  url: Tmdb.backdrop(_items[index].backdropPath, size: 'w780'),
-                ),
-                options: CarouselOptions(
-                  height: widget.height,
-                  autoPlay: true,
-                  viewportFraction: 1.0,
-                  autoPlayInterval: const Duration(seconds: 5),
-                  autoPlayAnimationDuration: const Duration(milliseconds: 1200),
-                ),
+          ),
+          if (_items.isNotEmpty)
+            CarouselSlider.builder(
+              itemCount: _items.length,
+              itemBuilder: (context, index, _) => TmdbImage(
+                url: Tmdb.backdrop(_items[index].backdropPath, size: 'w780'),
               ),
-            // Blur + darken everything painted so far.
-            BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-              child: Container(color: Colors.black.withValues(alpha: 0.42)),
-            ),
-            // Melt into the page background at the bottom.
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.transparent, context.colors.background],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: const [0.45, 1.0],
-                ),
+              options: CarouselOptions(
+                height: widget.height,
+                autoPlay: true,
+                viewportFraction: 1.0,
+                autoPlayInterval: const Duration(seconds: 5),
+                autoPlayAnimationDuration: const Duration(milliseconds: 1200),
               ),
             ),
-          ],
-        ),
+          // Blur + darken everything painted so far.
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Container(color: Colors.black.withValues(alpha: 0.42)),
+          ),
+          // Melt into the page background at the bottom.
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.transparent, context.colors.background],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.45, 1.0],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

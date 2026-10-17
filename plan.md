@@ -24,7 +24,7 @@ This document lists the gaps and suggested improvements found while reviewing th
 
 **Still open** (details in the sections below): the unconfirmed "my data disappeared" report (§8), the unreproduced "app won't open" report (§10 — check Crashlytics), comment auto-hide on 3+ reports needs the undeployed `onCommentReported` function (no client sets `hidden`), and the `following`-array residue after account deletion (needs Admin SDK). Also:
 - **Sandbox-test the subscription-expiry fix before shipping 1.0.1** (`lib/services/pro_entitlement.dart`): buy Pro and let it expire → relaunch drops to none; refund Patron in Xcode's Transaction Manager → tier drops and `users/{uid}.patron` becomes false; Pro→Patron upgrade → Patron; airplane mode with an expired cached tier → no downgrade; purchase + Restore still work. Confirm the real `jsonRepresentation` keys (`revocationDate`, `isUpgraded`, `expiresDate`). Known gap: the App Store billing grace period isn't recognised.
-- **Leftover smoke-test account**: an interrupted run on 2026-10-15 left Firebase Auth user `ZBRpZr6ASHP5UBakT3H5xQiLnTw2` with `users/{uid}` (`deletionPending: true`), 1 show doc and 8 activity docs — delete them in the Firebase console.
+- ~~Leftover smoke-test account~~ — deleted 2026-10-17 (Auth user + `users/{uid}` tree).
 
 ## Pro/Patron tier split (2026-10-04) — done
 

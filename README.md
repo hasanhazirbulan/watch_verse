@@ -1,103 +1,144 @@
+<div align="center">
+
+<img src=".github/readme/icon.png" width="120" alt="WatchVerse app icon" />
+
 # WatchVerse
 
-A Flutter app for discovering and tracking movies and TV shows, with social features built in. Content data comes from the [TMDB](https://www.themoviedb.org/) API; user accounts, watch history, lists, and social interactions are backed by Firebase (Auth + Firestore). The project runs on Firebase's free Spark plan: there is no Cloud Storage bucket and no deployed Cloud Functions. WatchVerse ships on iOS only, and the UI is English-only.
+**A movie & TV tracker built around the questions you actually ask on the couch.**<br/>
+*What fits in the time we have? What do we both want to see? What happened last episode?*
 
-## Features
+[![CI](https://github.com/hasanhazirbulan/watch_verse/actions/workflows/ci.yml/badge.svg)](https://github.com/hasanhazirbulan/watch_verse/actions/workflows/ci.yml)
+![Platform](https://img.shields.io/badge/platform-iOS%20%C2%B7%20iPadOS%20%C2%B7%20iPhone%20Duo-black)
+![Flutter](https://img.shields.io/badge/Flutter-3.47.6-02569B?logo=flutter)
+![Firebase](https://img.shields.io/badge/Firebase-Spark%20plan-FFCA28?logo=firebase&logoColor=black)
 
-- **Discover / Home** — now playing, trending, upcoming, popular, and top-rated movies & TV shows
-- **Search** — search movies, TV shows, and people
-- **Watchlist** — keep track of what you want to watch
-- **Watch history & diary** — mark movies/shows as watched, rate them, favorite them, add notes
-- **Episode tracking** — mark episodes watched per season/show, with an "Up Next" screen showing what's next
-- **Custom lists** — create user-defined lists of movies/shows; make a list public and follow other users' public lists (free accounts: 3 lists)
-- **Watch statistics** — time spent, movies vs shows, genre/weekly/weekday charts (the advanced charts are Pro)
-- **Year in Review** — a yearly recap from your library and diary (Profile card + Watch Stats), shareable as PNG cards
-- **My streaming services** — pick your region and services in Settings (stored on `users/{uid}` as `streamingRegion` / `streamingProviderIds`); an "On my services" filter chip on Watchlist and My Shows. Provider data from TMDB/JustWatch
-- **Post-watch polls** — rate an episode/movie and answer "where did you watch / how did it feel / favorite character", with community percentages
-- **Watch polls** — "What should we watch?" group polls with invited friends
-- **Games hub** — six free games, no streaks: Daily Movie, Frames, Title Wordle, Plot, Who's the Actor? and Higher or Lower (`lib/screens/games/game_registry.dart`). Puzzle pools are bundled in the app; signed-in progress is saved under `users/{uid}/gamePlays`, Higher or Lower's best score stays on the device
-- **Comments** — text + GIF comments (Giphy search, or a pasted GIF link when no Giphy key is configured; no photo uploads), likes, reporting, and blocking
-- **Social features** — follow/unfollow users, block users, friends' activity feed, public profiles
-- **Authentication** — sign up/login via Firebase Auth, or browse as a guest
-- **Settings** — edit profile (the profile photo is a small inline JPEG stored on `users/{uid}`, not a Storage file), light/dark/system theme, notification preferences, My streaming services, and account deletion (resumes automatically on next sign-in if interrupted)
-- **Import & export** — import from Letterboxd (zip/CSVs) or IMDb (CSV exports) in Settings; free CSV export of your library (movies, shows, diary, lists) via the share sheet
-- **Splash screen** — shows a different trending poster on each launch (pre-cached on the previous run; falls back to bundled posters)
-- **WatchVerse Pro / Patron** — optional iOS subscriptions via StoreKit (`in_app_purchase`, no backend). Pro: unlimited lists + advanced stats. Patron: Pro + exclusive profile themes
-- **Push notifications** — episode airing reminders, watchlist movie releases, friend-activity digest and shared-watch matches, sent by a scheduled GitHub Actions job (see [Push Notifications](#push-notifications) below)
-- **English-only** — `main.dart` forces `Locale('en')`. `lib/l10n/app_tr.arb` still exists but is unused and not maintained
+<img src=".github/readme/home.jpg" width="19%" alt="Home" />
+<img src=".github/readme/movie_detail.jpg" width="19%" alt="Movie detail" />
+<img src=".github/readme/up_next.jpg" width="19%" alt="Up Next" />
+<img src=".github/readme/fits_tonight.jpg" width="19%" alt="Fits tonight" />
+<img src=".github/readme/common_ground.jpg" width="19%" alt="Common ground" />
 
-## Tech Stack
+</div>
 
-- **Flutter 3.47.6** (stable; Dart SDK constraint `^3.9.2`) — the version pinned in CI (`.github/workflows/ci.yml`) and Xcode Cloud (`ios/ci_scripts/ci_post_clone.sh`). All dependencies were upgraded to their latest major versions on 2026-10-13; iOS plugins now build via Swift Package Manager
-- **Firebase**: `firebase_core`, `firebase_auth`, `cloud_firestore`, `firebase_messaging`, `firebase_analytics`, `firebase_crashlytics`
-- **TMDB API** — movie/TV data
-- **Giphy API** — GIF search (used in comments)
-- **StoreKit** via `in_app_purchase` — Pro/Patron subscriptions
-- Other packages: `equatable`, `carousel_slider`, `cached_network_image`, `shared_preferences`, `curved_navigation_bar`, `flutter_rating_bar`, `fl_chart`, `image_picker`, `file_picker`, `archive`, `url_launcher`, `http`, `csv`, `share_plus`, `package_info_plus`, `flutter_cache_manager`, `flutter_local_notifications`, `flutter_localizations`/`intl`
+---
 
-## Supported Platforms
+## What makes it different
 
-WatchVerse ships on **iOS only** (TestFlight / App Store). The `android/` project still builds and has the notification setup, but it is not released or regularly tested, and the subscription products only exist in App Store Connect, so Pro/Patron can't be purchased there. The macOS, Windows, Linux and Web folders are unmodified Flutter scaffolding — not configured, tested or deployed (e.g. push notifications don't work on Windows/Linux, and Web has no offline persistence).
+Most trackers are a watchlist plus a log. WatchVerse uses that data to help you decide what to watch.
 
-## Project Structure
+| | |
+|---|---|
+| <img src=".github/readme/fits_tonight.jpg" width="220" alt="Fits tonight" /> | **⏱ Fits tonight**<br/>Pick a time budget (30 min – 4 h) and get the movies on your watchlist that fit, plus runs of the next unwatched episodes of your shows ("3 episodes · 2h 10m"), closest fit first. Optionally only what's on your streaming services. *Watchlist → timer icon.* |
+| <img src=".github/readme/common_ground.jpg" width="220" alt="Common ground" /> | **🤝 Common ground**<br/>On a friend's profile: the titles on *both* your watchlists (your services first), how often your ratings agree ("You agree on 13 of 15"), your closest matches and biggest splits, and one tap to start a "What should we watch?" poll with the shared titles. |
+| <img src=".github/readme/recap.jpg" width="220" alt="Where you left off" /> | **⏪ Where you left off**<br/>Shows you haven't touched for 30+ days get a *Recap* chip in Up Next: stills, synopses and watch dates of the last episodes **you** watched, and the cast from your latest episode. Spoiler-safe by construction: it never shows anything from an unwatched episode. |
+| <img src=".github/readme/games_hub.jpg" width="220" alt="Games hub" /> | **🎮 Games hub**<br/>Six free movie & TV games: Daily Movie, Frames, Title Wordle, Plot, Who's the Actor? and Higher or Lower. Daily puzzles, per-game status, and **no streaks**, so you can skip a day without being penalized. |
+| <img src=".github/readme/year_in_review.jpg" width="220" alt="Year in Review" /> | **✨ Year in Review**<br/>A yearly recap built only from dated data: films, episodes, hours, top genres, busiest month, highest-rated films. Every card can be shared as an image. |
+
+### Made for every screen
+
+WatchVerse is built with the iOS 27.1 SDK and uses the full display on **iPhone Duo**, both folded and unfolded, as well as on iPad and in landscape. Grids gain columns, lists split into 2–3 columns and reading screens stay at a comfortable width. On regular iPhones the layout is unchanged (checked pixel for pixel against the previous version), and 180 layout tests cover five window sizes.
+
+<p align="center">
+  <img src=".github/readme/duo_outer.jpg" height="360" alt="iPhone Duo outer display" />
+  &nbsp;
+  <img src=".github/readme/ipad_detail.jpg" height="360" alt="iPad" />
+</p>
+
+## Everything else
+
+- **Discover**: trending, now playing, upcoming, popular and top-rated movies and shows; "Because you watched…" rows; search across movies, shows and people
+- **Track**: watchlist, watched/ratings/favorites, a dated diary with rewatches and notes, per-episode tracking with Up Next / My Shows / Upcoming
+- **Lists**: custom lists, public lists you can follow
+- **Where to watch**: pick your region and services; "On my services" filters and badges (data by JustWatch via TMDB)
+- **Social**: follow friends, activity feed, public profiles, comments with GIFs, post-watch polls, group watch polls; blocking and reporting
+- **Stats**: time watched, movies vs. shows, genre and weekday charts
+- **Import & export**: Letterboxd (zip/CSV) and IMDb (CSV) import; free CSV export of everything
+- **Push notifications**: episodes airing, watchlist releases, a friend-activity digest and shared-watch matches
+- **WatchVerse Pro / Patron**: optional StoreKit 2 subscriptions (unlimited lists, advanced stats; Patron adds profile themes and a badge). Entitlements are re-checked against the transaction history, so expired or refunded plans are removed
+- **Privacy**: account deletion in the app, guest mode, and a [privacy policy](https://watchvers.web.app/privacy-policy.html) that's kept in sync with what the code actually stores
+
+## Architecture
+
+```mermaid
+flowchart LR
+  App["Flutter app<br/>(iOS · iPadOS · iPhone Duo)"]
+  TMDB[("TMDB API<br/>movies · shows · providers")]
+  Auth["Firebase Auth"]
+  FS[("Cloud Firestore<br/>users/{uid}/…")]
+  SK["StoreKit 2"]
+  GHA["GitHub Actions cron<br/>scripts/notify"]
+  FCM["FCM / APNs"]
+  Hosting["Firebase Hosting<br/>privacy · terms"]
+
+  App --> TMDB
+  App --> Auth
+  App <--> FS
+  App --> SK
+  GHA -->|Admin SDK| FS
+  GHA --> FCM --> App
+```
+
+- **No backend of its own.** Everything runs on Firebase's free **Spark** plan: Auth, Firestore (guarded by [`firestore.rules`](firestore.rules), with an emulator test suite) and Hosting. There is no Cloud Storage and there are no deployed Cloud Functions.
+- **Pushes without Cloud Functions.** [`scripts/notify/run.js`](scripts/notify/run.js) runs on a [GitHub Actions schedule](.github/workflows/notifications.yml) with the Admin SDK and resumes from a cursor, so a skipped run loses nothing. `functions/` holds the original Cloud Functions, kept for reference and **not** deployed.
+- **Profile photos without Storage.** They're small inline images on `users/{uid}`.
+- **Logic is kept apart from widgets.** Features like Fits tonight, Common ground, the recap, Year in Review and subscription entitlements have their rules in plain Dart files under `lib/services/`, unit-tested without Flutter or Firebase.
 
 ```
 lib/
-  models/     # Data models: Media, Movie, TvShow, Episode, etc.
-  services/   # TMDB API, Firestore, social, list, comment, episode-tracking, Pro, games, import/export, streaming, Year in Review, account-deletion services
-  screens/    # App screens (games under screens/games/)
-  widgets/    # Reusable UI components
-  theme/      # App theme
-  l10n/       # ARB files + generated AppLocalizations (run `flutter gen-l10n` after editing; only app_en.arb is used)
-docs/         # Privacy Policy + Terms of Service, served by Firebase Hosting at watchvers.web.app
-functions/    # Cloud Functions (push senders, moderation, deletion backstop) — NOT deployed (Spark plan)
-scripts/notify/  # The push sender that actually runs, on a GitHub Actions schedule
-tool/         # Game-pool generators and seeding scripts
+  models/      Media, Movie, TvShow, Episode, …
+  services/    TMDB, Firestore, social, tracking, games, import/export,
+               streaming, Pro/entitlements, Year in Review, feature logic
+  screens/     app screens (games under screens/games/)
+  widgets/     shared UI
+  utils/       responsive breakpoints (compact / medium / expanded), helpers
+  theme/       light/dark themes
+  l10n/        strings (English; run `flutter gen-l10n` after editing app_en.arb)
+docs/          privacy policy + terms (Firebase Hosting)
+scripts/notify GitHub Actions push sender
+tool/          game-pool generators, App Store screenshot + release scripts
 ```
 
-## Getting Started
+## Getting started
 
-1. Install the [Flutter SDK](https://docs.flutter.dev/get-started/install) — 3.47.6, matching CI
-2. Install dependencies:
-   ```
-   flutter pub get
-   ```
-3. Firebase is already configured in `lib/firebase_options.dart` (generated via the FlutterFire CLI). To connect your own Firebase project instead:
-   ```
-   flutterfire configure
-   ```
-4. Set up API secrets (TMDB + Giphy). Copy the template and fill in your own keys:
-   ```
-   cp secrets.example.json secrets.json
-   ```
-   Get a TMDB key at [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api) and a Giphy key at [developers.giphy.com](https://developers.giphy.com/). `secrets.json` is gitignored and must never be committed.
-5. Run the app, passing the secrets file at build/run time:
-   ```
-   flutter run --dart-define-from-file=secrets.json
-   ```
-   Use the same flag for `flutter build ...` commands — e.g. a release build for TestFlight:
-   ```
-   flutter build ipa --release --dart-define-from-file=secrets.json
-   ```
+**Requirements:** Flutter 3.47.6 (pinned in CI) and Xcode 27.1 or newer (needed for the iPhone Duo simulator and the iOS 27.1 SDK).
+
+```bash
+flutter pub get
+cp secrets.example.json secrets.json   # add your TMDB + Giphy keys (gitignored)
+flutter run --dart-define-from-file=secrets.json
+```
+
+- **TMDB key:** [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api)
+- **Giphy key:** [developers.giphy.com](https://developers.giphy.com/). It's optional; without it the GIF picker accepts a pasted link instead.
+- **Firebase:** configured in `lib/firebase_options.dart`. To use your own project, run `flutterfire configure`.
 
 ## Testing
 
+| Suite | Command | What it covers |
+|---|---|---|
+| Unit & widget | `flutter test` | ~580 tests: feature logic, services, screens, and 180 layout tests across phone, landscape and both iPhone Duo displays |
+| Firestore rules | `cd test/firestore_rules && npm install && npm test` | Security rules against the emulator. Run before every rules deploy |
+| On-device smoke | `flutter test integration_test/<file> -d <simulator> --dart-define-from-file=secrets.json` | Games, Letterboxd/IMDb import, profile photos, against real Firebase with throwaway accounts that are deleted afterwards |
+| App Store screenshots | `tool/app_store_screenshots.sh <simulator-udid> [out-dir] [display]` | Builds a realistic demo library and captures 8 screens at device resolution, including multi-display devices |
+
+CI ([`ci.yml`](.github/workflows/ci.yml)) runs `flutter analyze` and `flutter test` on every push.
+
+## Releasing
+
+```bash
+flutter build ipa --release --dart-define-from-file=secrets.json
+xcrun altool --upload-app --type ios -f build/ios/ipa/watch_verse.ipa --apiKey <key id> --apiIssuer <issuer id>
+ASC_ISSUER_ID=<issuer id> python3 tool/asc_release.py <version> <build>   # add --submit to send for review
 ```
-flutter test
-```
 
-Firestore security-rules tests run against the emulator (run them before any rules deploy):
+[`tool/asc_release.py`](tool/asc_release.py) creates the App Store version, sets What's New, attaches the build and replaces every screenshot set (6.3″, 6.9″, iPad, iPhone Duo) through the App Store Connect API.
 
-```
-cd test/firestore_rules && npm install && npm test
-```
+## Docs
 
-## Push Notifications
+- [CHANGELOG.md](CHANGELOG.md): what changed and when
+- [plan.md](plan.md): current status, maintenance notes (secrets, cron, Actions minutes) and open items
+- [CONTRIBUTING.md](CONTRIBUTING.md): conventions (English-only, Spark plan, no streak mechanics)
 
-The client is fully wired up (`lib/services/notification_service.dart`): it requests permission, stores each signed-in user's FCM token on their `users/{uid}` doc, and shows a local notification for foreground pushes. Settings has per-type toggles (episodes airing tomorrow/today, watchlist movies released today, friend activity, shared-watch matches) stored on the user doc. Sending runs in [`scripts/notify/run.js`](scripts/notify/run.js) on a GitHub Actions schedule ([`.github/workflows/notifications.yml`](.github/workflows/notifications.yml): episode reminders, movie releases and the friend-activity digest once a day each, plus an hourly activity poll for shared-watch matches; needs the `FIREBASE_SERVICE_ACCOUNT` repo secret, which is set) — a free stand-in for the Cloud Functions in `functions/`, which are **not** deployed (Spark plan). Don't deploy those notification functions as well, or users get every push twice.
+---
 
-Platform setup in this repo: iOS `Info.plist` background mode, the Push Notifications capability, and an APNs key in the Firebase console (the latter two live in the Apple Developer / Firebase accounts, not in files). The Android manifest permission + notification channel are also present, though Android isn't shipped.
-
-## Roadmap
-
-See [plan.md](plan.md) for planned changes and improvements.
+<sub>Movie and TV data from [TMDB](https://www.themoviedb.org/). This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming availability by JustWatch.</sub>
